@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom layer examples */
+@layer components {
+  .card {
+    @apply bg-white shadow rounded p-4;
+  }
+  .btn {
+    @apply inline-flex items-center px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50;
+  }
+  .input {
+    @apply border rounded px-3 py-2 w-full focus:outline-none focus:ring focus:border-blue-400;
+  }
+}

@@ -1,0 +1,72 @@
+import React from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { taskController } from "../../controllers/TaskController";
+import { calcularProximaData } from "../../utils/recurrence";
+import { Recurrence } from "../../types";
+
+export const TaskDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const tarefa = taskController.listar().find((t) => t.id === id);
+
+  if (!tarefa) {
+    return (
+      <div className="card">
+        <p className="text-sm mb-4">Tarefa não encontrada.</p>
+        <Link to="/" className="btn text-xs">
+          Voltar
+        </Link>
+      </div>
+    );
+  }
+
+  function alterarRecorrencia(r: Recurrence) {
+    if (!tarefa) return;
+    taskController.atualizar(tarefa.id, {
+      recorrencia: r,
+      proximaData: calcularProximaData(r, new Date(), tarefa.diaSemana),
+    });
+    navigate(0); // reload
+  }
+
+  return (
+    <div className="space-y-4">
+      <Link
+        to="/"
+        className="btn text-xs bg-gray-300 hover:bg-gray-400 text-gray-800"
+      >
+        Voltar
+      </Link>
+      <div className="card space-y-2">
+        <h2 className="font-semibold">{tarefa.titulo}</h2>
+        {tarefa.descricao && (
+          <p className="text-sm text-gray-600">{tarefa.descricao}</p>
+        )}
+        <p className="text-xs">Recorrência: {tarefa.recorrencia}</p>
+        <p className="text-xs">
+          Próxima data:{" "}
+          {tarefa.proximaData
+            ? new Date(tarefa.proximaData).toLocaleDateString()
+            : "—"}
+        </p>
+        <p className="text-xs">
+          Última conclusão:{" "}
+          {tarefa.ultimaConclusao
+            ? new Date(tarefa.ultimaConclusao).toLocaleDateString()
+            : "—"}
+        </p>
+        <div className="flex gap-2 flex-wrap">
+          {Object.values(Recurrence).map((r) => (
+            <button
+              key={r}
+              onClick={() => alterarRecorrencia(r)}
+              className="btn text-xs"
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
