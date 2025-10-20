@@ -1,8 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Custom layer examples */
 /* Paleta CasaCíclica
    Light: bege claro, amarelo claro, cinza neutro, ocre suave, marrom suave
    Dark: violeta profundo, azul oceano fechado, marrom Van Dyke, cinza carvão
@@ -50,49 +48,62 @@
   --cc-header-to: #d9a441; /* final */
   --cc-header-text: #fff; /* texto branco agora tem contraste adequado */
   --cc-header-overlay: rgba(255, 255, 255, 0.15);
+  /* Motivational quote (light) */
+  --cc-motive-bg: var(--cc-bg-alt);
+  --cc-motive-border: var(--cc-border);
+  --cc-motive-text: var(--cc-text);
+  --cc-motive-author: var(--cc-muted);
+  --cc-motive-accent: var(--cc-primary);
 }
 html.dark {
-  --cc-bg: #16151a; /* fundo carvão */
-  --cc-bg-alt: #201f24; /* variação */
-  --cc-accent: #5b5bd6; /* violeta moderado */
-  --cc-accent-alt: #0f4c70; /* azul oceano fechado */
-  --cc-border: #3a3842;
-  --cc-text: #e8e6e3;
-  --cc-muted: #a39fa8;
-  --cc-btn-bg: #5b5bd6; /* botão violeta */
-  --cc-btn-hover: #4949bb;
-  --cc-gradient-from: #5b5bd6;
-  --cc-gradient-via: #0f4c70;
-  --cc-gradient-to: #3a3842;
-  --cc-focus: #a37b35; /* marrom van dyke aquecido para foco */
+  /* Dark alinhado à hierarquia do light (tons ocres e marrons ajustados para contraste) */
+  --cc-bg: #1c1814; /* fundo escurecido com leve calor */
+  --cc-bg-alt: #24201b; /* primeiro nível acima */
+  --cc-accent: #8a5e00; /* ocre escurecido (equivalente do accent-alt claro) */
+  --cc-accent-alt: #b07410; /* versão intermediária para gradientes */
+  --cc-border: #3d332b; /* borda marrom carvão quente */
+  --cc-text: #e8e3dc; /* texto alto contraste suave */
+  --cc-muted: #b3a79c; /* texto secundário quente */
+  --cc-btn-bg: #8a5e00; /* botão base mantém identidade */
+  --cc-btn-hover: #704b00;
+  --cc-gradient-from: #8a5e00; /* replicar progressão quente */
+  --cc-gradient-via: #b07410;
+  --cc-gradient-to: #3d332b;
+  --cc-focus: #d9a441; /* foco mantém alto contraste */
   --cc-surface-0: var(--cc-bg);
   --cc-surface-1: var(--cc-bg-alt);
-  --cc-surface-2: #242835; /* camada elevada escura */
+  --cc-surface-2: #2f271f; /* elevação adicional */
   --cc-surface-border: var(--cc-border);
-  /* Tokens semânticos adicionais (dark) */
-  --cc-primary: #d9a441; /* mantém identidade ocre sobre fundo escuro */
+  /* Tokens semânticos adicionais (dark) alinhados */
+  --cc-primary: #d9a441; /* mesmo primário para consistência cross-theme */
   --cc-primary-hover: #c78924;
-  --cc-danger: #ff4d5d;
-  --cc-danger-hover: #e63a49;
-  --cc-success: #4dd282;
-  --cc-success-hover: #36b869;
-  --cc-warning: #e0aa3a;
+  --cc-danger: #e04835; /* ajustado para menor saturação contra fundo quente */
+  --cc-danger-hover: #c93626;
+  --cc-success: #3d9a56; /* verde moderado para contraste controlado */
+  --cc-success-hover: #2f7d42;
+  --cc-warning: #e0aa3a; /* mantém schema */
   --cc-warning-hover: #c89022;
-  --cc-link: #5b9bff;
+  --cc-link: #5b9bff; /* links permanecem frios para destaque */
   --cc-link-hover: #3d7bd6;
-  --cc-table-head-bg: #242835;
-  --cc-table-head-text: #e8e6e3;
-  --cc-surface-hover: #2a2f3b;
-  --cc-text-subtle: #b7b3bc;
+  --cc-table-head-bg: #2f271f; /* cabeçalho elevado */
+  --cc-table-head-text: var(--cc-text);
+  --cc-surface-hover: #2a221c; /* hover sutil */
+  --cc-text-subtle: #c2b7ae;
   --cc-table-row-bg: var(--cc-surface-0);
-  --cc-table-row-alt-bg: #23262c;
+  --cc-table-row-alt-bg: #27221c;
   --cc-table-group-bg: var(--cc-surface-2);
-  /* Header (dark) */
-  --cc-header-from: #5b5bd6;
-  --cc-header-via: #0f4c70;
-  --cc-header-to: #3a3842;
-  --cc-header-text: #e8e6e3;
+  /* Header (dark) seguindo gradiente quente */
+  --cc-header-from: #8a5e00;
+  --cc-header-via: #b07410;
+  --cc-header-to: #d9a441;
+  --cc-header-text: #fff;
   --cc-header-overlay: rgba(255, 255, 255, 0.12);
+  /* Motivational quote (dark) */
+  --cc-motive-bg: var(--cc-surface-1);
+  --cc-motive-border: var(--cc-border);
+  --cc-motive-text: var(--cc-text);
+  --cc-motive-author: var(--cc-text-subtle);
+  --cc-motive-accent: var(--cc-primary);
 }
 
 body {
@@ -107,6 +118,7 @@ body {
     flex-direction: column;
     background: var(--cc-bg);
     color: var(--cc-text);
+    gap: 1.25rem; /* espaçamento vertical entre blocos principais */
   }
   .surface {
     background: var(--cc-surface-1);
@@ -155,13 +167,60 @@ body {
   .navbar-overlay-btn:hover {
     background: rgba(255, 255, 255, 0.25);
   }
+  .motivation-bar {
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    border-width: 1px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 80rem; /* ~max-w-7xl */
+    background: var(--cc-motive-bg);
+    color: var(--cc-motive-text);
+    border-color: var(--cc-motive-border);
+  }
+  .motivation-bar p {
+    font-style: italic;
+    margin: 0;
+  }
+  .motivation-author {
+    color: var(--cc-motive-author);
+    font-style: normal;
+    font-size: 0.75rem;
+  }
+  .motivation-meta {
+    color: var(--cc-text-subtle);
+    font-size: 0.65rem;
+  }
   .card {
-    @apply shadow rounded p-4 border;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1),
+      0 1px 3px 1px rgba(0, 0, 0, 0.08);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 72rem; /* alinhar com container principal */
+    margin-top: 0.5rem;
     background: var(--cc-bg-alt);
-    border-color: var(--cc-border);
+    border: 1px solid var(--cc-border);
   }
   .btn {
-    @apply inline-flex items-center px-4 py-2 rounded font-medium focus:outline-none focus:ring disabled:opacity-50 transition-colors;
+    display: inline-flex;
+    align-items: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+    cursor: pointer;
     background: var(--cc-primary);
     color: #fff;
   }
@@ -205,7 +264,16 @@ body {
     color: var(--cc-link-hover);
   }
   .btn-invert {
-    @apply inline-flex items-center px-3 py-2 rounded text-xs font-semibold transition-colors;
+    display: inline-flex;
+    align-items: center;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s;
     background: var(--cc-bg-alt);
     color: var(--cc-text);
     border: 1px solid var(--cc-border);
@@ -215,9 +283,14 @@ body {
     color: #fff;
   }
   .input {
-    @apply border rounded px-3 py-2 w-full focus:outline-none focus:ring;
-    background: var(--cc-bg-alt);
+    border-width: 1px;
+    border-style: solid;
     border-color: var(--cc-border);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    width: 100%;
+    outline: none;
+    background: var(--cc-bg-alt);
     color: var(--cc-text);
   }
   .table-head {
@@ -244,5 +317,54 @@ body {
   }
   .table-group {
     background: var(--cc-table-group-bg);
+  }
+  .task-row-inactive {
+    background: rgba(0, 0, 0, 0.03);
+    opacity: 0.65;
+  }
+  html.dark .task-row-inactive {
+    background: rgba(255, 255, 255, 0.05);
+    opacity: 0.6;
+  }
+  /* Botão de reativar deve manter destaque mesmo em linha inativa */
+  .btn-reativar-emphasis {
+    opacity: 1 !important;
+    filter: none !important;
+  }
+  .task-row-inactive:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+  html.dark .task-row-inactive:hover {
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .btn:disabled,
+  .btn[disabled] {
+    filter: grayscale(0.4) brightness(0.9);
+    cursor: not-allowed;
+    opacity: 0.75;
+  }
+  /* Alturas e larguras fixas para tabelas de tarefas */
+  .task-row-fixed {
+    height: 44px; /* altura consistente */
+  }
+  .task-row-fixed td,
+  .task-row-fixed th {
+    height: 44px;
+    vertical-align: middle;
+  }
+  .task-actions-col {
+    width: 140px; /* largura fixa para botões de ação */
+  }
+  .task-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: flex-start;
+  }
+  @media (max-width: 640px) {
+    .task-actions-col {
+      width: 120px; /* ligeira redução em telas pequenas */
+    }
   }
 }

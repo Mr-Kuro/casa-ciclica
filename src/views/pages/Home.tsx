@@ -3,8 +3,8 @@ import { taskController } from "../../controllers/TaskController";
 import { Task } from "../../models/Task";
 import { TaskList } from "../components/TaskList";
 import { Filters } from "../components/Filters";
-import { Quote } from "../components/Quote";
 import { Link } from "react-router-dom";
+import { LABELS } from "../../constants/strings";
 import { useTaskCounts } from "../../hooks/useTaskCounts";
 
 export const Home: React.FC = () => {
@@ -29,13 +29,12 @@ export const Home: React.FC = () => {
   return (
     <div className="space-y-6 surface p-4 rounded">
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">Tarefas da Casa</h2>
-        <Quote />
+        <h2 className="text-2xl font-semibold">{LABELS.campos.tarefasCasa}</h2>
       </div>
       <Filters value={filtro} onChange={setFiltro} counts={counts} />
       <div className="flex justify-end">
         <Link to="/config" className="btn-link text-xs">
-          Configurações
+          {LABELS.campos.config}
         </Link>
       </div>
       <TaskList tarefas={tarefas} filtro={filtro} onChange={refresh} />

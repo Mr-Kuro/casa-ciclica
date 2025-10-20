@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { APP_NAME, APP_TAGLINE } from "../../branding";
+import { LABELS } from "../../constants/strings";
 
 const navItems = [
-  { to: "/", label: "Início" },
-  { to: "/tarefas/nova", label: "Nova" },
-  { to: "/concluidas", label: "Concluídas" },
-  { to: "/desativadas", label: "Desativadas" },
-  { to: "/config", label: "Config" },
+  { to: "/", label: LABELS.navigation.inicio },
+  { to: "/tarefas/nova", label: LABELS.navigation.nova },
+  { to: "/concluidas", label: LABELS.navigation.concluidas },
+  { to: "/desativadas", label: LABELS.navigation.desativadas },
+  { to: "/config", label: LABELS.navigation.config },
 ];
 
 export const Navbar: React.FC = () => {
@@ -105,9 +106,11 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => setOpen((o) => !o)}
             className="px-3 py-2 rounded text-sm font-medium navbar-overlay-btn"
-            aria-label="Abrir menu"
+            aria-label={
+              open ? LABELS.navigation.fechar : LABELS.navigation.menu
+            }
           >
-            {open ? "Fechar" : "Menu"}
+            {open ? LABELS.navigation.fechar : LABELS.navigation.menu}
           </button>
         </div>
       </div>

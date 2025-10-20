@@ -1,4 +1,5 @@
 import React from "react";
+import { LABELS } from "../../constants/strings";
 
 interface Props {
   value: "HOJE" | "QUINZENA" | "MES";

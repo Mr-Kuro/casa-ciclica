@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { LABELS } from "../../constants/strings";
 import phrases from "../../data/phrases.json";
 
 interface QuoteData {
@@ -65,26 +66,32 @@ export const Quote: React.FC = () => {
   }, []);
 
   return (
-    <div className="text-sm text-gray-700 bg-gray-50 border rounded p-3 flex flex-col gap-2">
+    <div
+      className="motivation-bar"
+      role="note"
+      aria-label="Mensagem de motivação diária"
+    >
       {quote && (
-        <p className="italic">
+        <p>
           “{quote.content}”{" "}
-          <span className="text-xs not-italic text-gray-500">
-            — {quote.author}
-          </span>
+          <span className="motivation-author">— {quote.author}</span>
         </p>
       )}
-      {loading && <p>Carregando inspiração...</p>}
+      {loading && <p>{LABELS.feedback.carregandoInspiracao}</p>}
       {!loading && !quote && error && <p className="italic">{error}</p>}
       <div className="flex items-center justify-between gap-2">
         <button
           onClick={() => load(true)}
-          className="btn px-2 py-1 text-xs bg-purple-600 hover:bg-purple-700"
+          className="btn-invert"
+          aria-label="Atualizar citação"
         >
-          Retry
+          {LABELS.actions.atualizarCitacao}
         </button>
-        <span className="text-[10px] text-gray-500">
-          {lastTs && `Atualizado: ${new Date(lastTs).toLocaleString()}`}
+        <span className="motivation-meta">
+          {lastTs &&
+            `${LABELS.feedback.atualizadoPrefixo} ${new Date(
+              lastTs
+            ).toLocaleString()}`}
         </span>
       </div>
     </div>

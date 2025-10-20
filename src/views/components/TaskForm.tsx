@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Recurrence } from "../../types";
 import { taskController } from "../../controllers/TaskController";
 import { Task } from "../../models/Task";
+import { LABELS } from "../../constants/strings";
 
 interface Props {
   onCreate(task: Task): void;
@@ -24,9 +25,9 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
 
   return (
     <form onSubmit={submit} className="space-y-3 card">
-      <h2 className="font-semibold text-lg">Nova Tarefa</h2>
+      <h2 className="font-semibold text-lg">{LABELS.campos.novaTarefa}</h2>
       <div>
-        <label className="block text-sm mb-1">Título</label>
+        <label className="block text-sm mb-1">{LABELS.campos.titulo}</label>
         <input
           className="input"
           value={titulo}
@@ -34,7 +35,7 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
         />
       </div>
       <div>
-        <label className="block text-sm mb-1">Descrição</label>
+        <label className="block text-sm mb-1">{LABELS.campos.descricao}</label>
         <textarea
           className="input"
           value={descricao}
@@ -42,7 +43,9 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
         />
       </div>
       <div>
-        <label className="block text-sm mb-1">Recorrência</label>
+        <label className="block text-sm mb-1">
+          {LABELS.campos.recorrencia}
+        </label>
         <select
           className="input"
           value={recorrencia}
@@ -56,7 +59,7 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
         </select>
       </div>
       <button type="submit" className="btn">
-        Adicionar
+        {LABELS.actions.adicionar}
       </button>
     </form>
   );

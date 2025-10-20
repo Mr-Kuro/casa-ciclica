@@ -7,6 +7,7 @@ import {
   mesmoDiaSemanaHoje,
   naoConcluidaHoje,
 } from "../../utils/recurrence";
+import { LABELS } from "../../constants/strings";
 
 interface Props {
   tarefas: Task[];
@@ -59,24 +60,35 @@ export const TaskList: React.FC<Props> = ({
     <div className="space-y-8">
       <div className="overflow-x-auto border rounded shadow-sm">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-50 text-xs uppercase text-gray-600">
-            <tr>
-              <th className="px-3 py-2 text-left">Título</th>
-              <th className="px-3 py-2 text-left">Recorrência</th>
+          <thead className="bg-gray-50 text-xs uppercase text-gray-600 task-row-fixed">
+            <tr className="task-row-fixed">
+              <th className="px-3 py-2 text-left">{LABELS.campos.titulo}</th>
+              <th className="px-3 py-2 text-left">
+                {LABELS.campos.recorrencia}
+              </th>
               {filtro === "HOJE" && (
-                <th className="px-3 py-2 text-left">Dia Semana</th>
+                <th className="px-3 py-2 text-left">
+                  {LABELS.campos.diaSemana}
+                </th>
               )}
-              <th className="px-3 py-2 text-left">Âncora</th>
-              <th className="px-3 py-2 text-left">Próxima</th>
-              <th className="px-3 py-2 text-left">Última</th>
-              <th className="px-3 py-2">Ações</th>
+              <th className="px-3 py-2 text-left">{LABELS.campos.ancora}</th>
+              <th className="px-3 py-2 text-left">{LABELS.campos.proxima}</th>
+              <th className="px-3 py-2 text-left">{LABELS.campos.ultima}</th>
+              <th className="px-3 py-2 task-actions-col">
+                {LABELS.actions.concluir}
+              </th>
             </tr>
           </thead>
           <tbody>
             {filtradas.map((t) => {
               const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
               return (
-                <tr key={t.id} className="border-t hover:bg-gray-50">
+                <tr
+                  key={t.id}
+                  className={`border-t task-row-fixed ${
+                    t.ativa ? "hover:bg-gray-50" : "task-row-inactive"
+                  }`}
+                >
                   <td className="px-3 py-2 font-medium">
                     <a href={`/tarefas/${t.id}`} className="hover:underline">
                       {t.titulo}
@@ -114,48 +126,59 @@ export const TaskList: React.FC<Props> = ({
                       ? new Date(t.ultimaConclusao).toLocaleDateString()
                       : "—"}
                   </td>
-                  <td className="px-3 py-2 text-xs space-x-1">
-                    <button
-                      onClick={() => {
-                        taskController.concluirHoje(t.id);
-                        onChange();
-                      }}
-                      disabled={!t.ativa}
-                      className="btn px-2 py-1 text-[11px]"
-                    >
-                      Concluir
-                    </button>
-                    <button
-                      onClick={() => {
-                        taskController.alternarAtiva(t.id);
-                        onChange();
-                      }}
-                      className="btn px-2 py-1 text-[11px] bg-yellow-600 hover:bg-yellow-700"
-                    >
-                      {t.ativa ? "Desativar" : "Ativar"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (confirm("Remover tarefa?")) {
-                          taskController.remover(t.id);
+                  <td className="px-3 py-2 text-xs task-actions-col">
+                    <div className="task-actions">
+                      <button
+                        onClick={() => {
+                          if (!t.ativa) return;
+                          taskController.concluirHoje(t.id);
                           onChange();
+                        }}
+                        disabled={!t.ativa}
+                        className="btn px-2 py-1 text-[11px]"
+                        aria-disabled={!t.ativa}
+                        title={
+                          t.ativa ? "Concluir tarefa" : "Tarefa desativada"
                         }
-                      }}
-                      className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
-                    >
-                      Remover
-                    </button>
+                      >
+                        {LABELS.actions.concluir}
+                      </button>
+                      <button
+                        onClick={() => {
+                          taskController.alternarAtiva(t.id);
+                          onChange();
+                        }}
+                        className={`btn px-2 py-1 text-[11px] bg-yellow-600 hover:bg-yellow-700 ${
+                          !t.ativa ? "btn-reativar-emphasis" : ""
+                        }`}
+                      >
+                        {t.ativa
+                          ? LABELS.actions.desativar
+                          : LABELS.actions.reativar}
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm("Remover tarefa?")) {
+                            taskController.remover(t.id);
+                            onChange();
+                          }
+                        }}
+                        className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
+                      >
+                        {LABELS.actions.remover}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
             })}
             {filtradas.length === 0 && (
-              <tr>
+              <tr className="task-row-fixed">
                 <td
                   colSpan={filtro === "HOJE" ? 7 : 6}
                   className="px-3 py-6 text-center text-gray-500"
                 >
-                  Nenhuma tarefa para este filtro.
+                  {LABELS.estados.nenhumaTarefa}
                 </td>
               </tr>
             )}
@@ -175,12 +198,16 @@ export const TaskList: React.FC<Props> = ({
                 </th>
               </tr>
               <tr>
-                <th className="px-3 py-1 text-left">Título</th>
-                <th className="px-3 py-1 text-left">Recorrência</th>
-                <th className="px-3 py-1 text-left">Dia Semana</th>
-                <th className="px-3 py-1 text-left">Âncora</th>
-                <th className="px-3 py-1 text-left">Próxima</th>
-                <th className="px-3 py-1 text-left">Última</th>
+                <th className="px-3 py-1 text-left">{LABELS.campos.titulo}</th>
+                <th className="px-3 py-1 text-left">
+                  {LABELS.campos.recorrencia}
+                </th>
+                <th className="px-3 py-1 text-left">
+                  {LABELS.campos.diaSemana}
+                </th>
+                <th className="px-3 py-1 text-left">{LABELS.campos.ancora}</th>
+                <th className="px-3 py-1 text-left">{LABELS.campos.proxima}</th>
+                <th className="px-3 py-1 text-left">{LABELS.campos.ultima}</th>
                 <th className="px-3 py-1" />
               </tr>
             </thead>
@@ -188,7 +215,7 @@ export const TaskList: React.FC<Props> = ({
               {concluidasHoje.map((t) => {
                 const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
                 return (
-                  <tr key={t.id} className="border-t">
+                  <tr key={t.id} className="border-t task-row-fixed">
                     <td className="px-3 py-1 font-medium">{t.titulo}</td>
                     <td className="px-3 py-1">{t.recorrencia}</td>
                     <td className="px-3 py-1 text-gray-600">
@@ -216,7 +243,7 @@ export const TaskList: React.FC<Props> = ({
                         : "—"}
                     </td>
                     <td className="px-3 py-1 text-[10px] text-gray-400">
-                      Já concluída
+                      {LABELS.estados.jaConcluida}
                     </td>
                   </tr>
                 );

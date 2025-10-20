@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { APP_NAME } from "../../branding";
+import { LABELS } from "../../constants/strings";
 
 export const Footer: React.FC = () => {
   return (
@@ -32,7 +33,7 @@ export const Footer: React.FC = () => {
                 className="hover:underline"
                 style={{ color: "var(--cc-text)" }}
               >
-                Início
+                {LABELS.navigation.inicio}
               </Link>
             </li>
             <li>
@@ -41,7 +42,7 @@ export const Footer: React.FC = () => {
                 className="hover:underline"
                 style={{ color: "var(--cc-text)" }}
               >
-                Nova Tarefa
+                {LABELS.navigation.novaTarefa}
               </Link>
             </li>
             <li>
@@ -50,7 +51,7 @@ export const Footer: React.FC = () => {
                 className="hover:underline"
                 style={{ color: "var(--cc-text)" }}
               >
-                Concluídas
+                {LABELS.navigation.concluidas}
               </Link>
             </li>
             <li>
@@ -59,7 +60,7 @@ export const Footer: React.FC = () => {
                 className="hover:underline"
                 style={{ color: "var(--cc-text)" }}
               >
-                Desativadas
+                {LABELS.navigation.desativadas}
               </Link>
             </li>
             <li>
@@ -68,7 +69,7 @@ export const Footer: React.FC = () => {
                 className="hover:underline"
                 style={{ color: "var(--cc-text)" }}
               >
-                Configurações
+                {LABELS.campos.config}
               </Link>
             </li>
           </ul>
@@ -78,9 +79,9 @@ export const Footer: React.FC = () => {
             Status
           </h4>
           <ul className="space-y-1 text-xs">
-            <li>LocalStorage persistência</li>
-            <li>Seeds dinâmicos</li>
-            <li>Filtros HOJE / QUINZENA / MÊS</li>
+            <li>{LABELS.feedback.persistencia}</li>
+            <li>{LABELS.feedback.seedsDinamicos}</li>
+            <li>{LABELS.feedback.filtrosResumo}</li>
           </ul>
         </div>
         <div className="space-y-2">
@@ -101,7 +102,7 @@ export const Footer: React.FC = () => {
           color: "var(--cc-muted)",
         }}
       >
-        <span>Design utilitário com paleta personalizada CasaCíclica.</span>
+        <span>{LABELS.feedback.designNota}</span>
       </div>
     </footer>
   );

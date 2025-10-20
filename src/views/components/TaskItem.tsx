@@ -3,6 +3,7 @@ import { Task } from "../../models/Task";
 import { Link } from "react-router-dom";
 import { taskController } from "../../controllers/TaskController";
 import { devidoHoje } from "../../utils/recurrence";
+import { LABELS } from "../../constants/strings";
 
 interface Props {
   task: Task;
@@ -55,19 +56,21 @@ export const TaskItem: React.FC<Props> = ({ task, onChange }) => {
           disabled={!hoje || !task.ativa}
           className="btn text-xs"
         >
-          Concluir hoje
+          {LABELS.actions.concluirHoje}
         </button>
         <button
           onClick={alternar}
-          className="btn text-xs bg-yellow-600 hover:bg-yellow-700"
+          className={`btn text-xs bg-yellow-600 hover:bg-yellow-700 ${
+            !task.ativa ? "btn-reativar-emphasis" : ""
+          }`}
         >
-          {task.ativa ? "Desativar" : "Ativar"}
+          {task.ativa ? LABELS.actions.desativar : LABELS.actions.reativar}
         </button>
         <button
           onClick={remover}
           className="btn text-xs bg-red-600 hover:bg-red-700"
         >
-          Remover
+          {LABELS.actions.remover}
         </button>
       </div>
       <div className="text-[10px] text-gray-500 flex justify-between">

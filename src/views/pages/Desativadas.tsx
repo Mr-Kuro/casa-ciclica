@@ -2,21 +2,14 @@ import React, { useEffect, useState, useMemo } from "react";
 import { taskController } from "../../controllers/TaskController";
 import { Task } from "../../models/Task";
 import { Link } from "react-router-dom";
+import { LABELS } from "../../constants/strings";
 
 interface Grupo {
   titulo: string;
   tarefas: Task[];
 }
 
-const DIAS = [
-  "Domingo",
-  "Segunda",
-  "Terça",
-  "Quarta",
-  "Quinta",
-  "Sexta",
-  "Sábado",
-];
+const DIAS = LABELS.diasSemanaLongo;
 
 export const Desativadas: React.FC = () => {
   const [tarefas, setTarefas] = useState<Task[]>(taskController.listar());
@@ -63,25 +56,35 @@ export const Desativadas: React.FC = () => {
   return (
     <div className="space-y-6 surface p-4 rounded">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-2xl font-semibold">Tarefas Desativadas</h2>
+        <h2 className="text-2xl font-semibold">
+          {LABELS.campos.tarefasDesativadas}
+        </h2>
         <Link to="/" className="btn-invert text-xs">
-          Voltar
+          {LABELS.navigation.voltar}
         </Link>
       </div>
       {grupos.length === 0 && (
-        <p className="text-sm text-gray-500">Nenhuma tarefa desativada.</p>
+        <p className="text-sm text-gray-500">
+          {LABELS.estados.nenhumaDesativada}
+        </p>
       )}
       {grupos.length > 0 && (
         <div className="overflow-x-auto surface-alt rounded border p-2">
           <table className="min-w-full text-xs">
             <thead className="table-head uppercase text-[10px]">
               <tr>
-                <th className="px-3 py-2 text-left">Título</th>
-                <th className="px-3 py-2 text-left">Recorrência</th>
-                <th className="px-3 py-2 text-left">Dia Semana</th>
-                <th className="px-3 py-2 text-left">Próxima</th>
-                <th className="px-3 py-2 text-left">Última Conclusão</th>
-                <th className="px-3 py-2">Ações</th>
+                <th className="px-3 py-2 text-left">{LABELS.campos.titulo}</th>
+                <th className="px-3 py-2 text-left">
+                  {LABELS.campos.recorrencia}
+                </th>
+                <th className="px-3 py-2 text-left">
+                  {LABELS.campos.diaSemana}
+                </th>
+                <th className="px-3 py-2 text-left">{LABELS.campos.proxima}</th>
+                <th className="px-3 py-2 text-left">
+                  {LABELS.campos.ultimaConclusao}
+                </th>
+                <th className="px-3 py-2">{LABELS.campos.acoes}</th>
               </tr>
             </thead>
             <tbody>
@@ -160,7 +163,7 @@ export const Desativadas: React.FC = () => {
                               }}
                               className="btn btn-success px-2 py-1 text-[11px]"
                             >
-                              Reativar
+                              {LABELS.actions.reativar}
                             </button>
                             <button
                               onClick={() => {
@@ -171,7 +174,7 @@ export const Desativadas: React.FC = () => {
                               }}
                               className="btn btn-danger px-2 py-1 text-[11px]"
                             >
-                              Remover
+                              {LABELS.actions.remover}
                             </button>
                           </td>
                         </tr>
@@ -183,7 +186,7 @@ export const Desativadas: React.FC = () => {
                         colSpan={6}
                         className="px-3 py-4 text-center text-subtle"
                       >
-                        Nenhuma tarefa neste grupo.
+                        {LABELS.estados.nenhumGrupo}
                       </td>
                     </tr>
                   )}

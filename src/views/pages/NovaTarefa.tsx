@@ -2,6 +2,7 @@ import React from "react";
 import { TaskForm } from "../components/TaskForm";
 import { taskController } from "../../controllers/TaskController";
 import { Link } from "react-router-dom";
+import { LABELS } from "../../constants/strings";
 
 export const NovaTarefa: React.FC = () => {
   function handleCreate() {
@@ -10,9 +11,9 @@ export const NovaTarefa: React.FC = () => {
   return (
     <div className="space-y-6 max-w-xl surface p-4 rounded">
       <Link to="/" className="btn-invert text-xs">
-        Voltar
+        {LABELS.navigation.voltar}
       </Link>
-      <h2 className="text-lg font-semibold">Nova Tarefa</h2>
+      <h2 className="text-lg font-semibold">{LABELS.campos.novaTarefa}</h2>
       <TaskForm onCreate={handleCreate} />
     </div>
   );

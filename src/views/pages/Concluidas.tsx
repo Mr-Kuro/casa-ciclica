@@ -3,6 +3,7 @@ import { taskController } from "../../controllers/TaskController";
 import { Task } from "../../models/Task";
 import { Link } from "react-router-dom";
 import { naoConcluidaHoje } from "../../utils/recurrence";
+import { LABELS } from "../../constants/strings";
 
 interface Grupo {
   titulo: string;
@@ -10,15 +11,7 @@ interface Grupo {
 }
 
 // Dias da semana para exibir sem depender de Date.getDay do navegador
-const DIAS = [
-  "Domingo",
-  "Segunda",
-  "Terça",
-  "Quarta",
-  "Quinta",
-  "Sexta",
-  "Sábado",
-]; // 0..6
+const DIAS = LABELS.diasSemanaLongo; // 0..6
 
 export const Concluidas: React.FC = () => {
   const [tarefas, setTarefas] = useState<Task[]>(taskController.listar());
@@ -87,26 +80,38 @@ export const Concluidas: React.FC = () => {
   return (
     <div className="space-y-6 surface p-4 rounded">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-2xl font-semibold">Tarefas Concluídas</h2>
+        <h2 className="text-2xl font-semibold">
+          {LABELS.campos.tarefasConcluidas}
+        </h2>
         <Link to="/" className="btn-invert text-xs">
-          Voltar
+          {LABELS.navigation.voltar}
         </Link>
       </div>
       {grupos.length === 0 && (
-        <p className="text-sm text-gray-500">Nenhuma tarefa concluída ainda.</p>
+        <p className="text-sm text-gray-500">
+          {LABELS.estados.nenhumaConcluida}
+        </p>
       )}
       {grupos.length > 0 && (
         <div className="overflow-x-auto surface-alt rounded border p-2">
           <table className="min-w-full text-xs">
             <thead className="table-head uppercase text-[10px]">
               <tr>
-                <th className="px-3 py-2 text-left">Título</th>
-                <th className="px-3 py-2 text-left">Recorrência</th>
-                <th className="px-3 py-2 text-left">Dia Semana</th>
-                <th className="px-3 py-2 text-left">Próxima</th>
-                <th className="px-3 py-2 text-left">Última Conclusão</th>
-                <th className="px-3 py-2 text-left">Status Hoje</th>
-                <th className="px-3 py-2">Ações</th>
+                <th className="px-3 py-2 text-left">{LABELS.campos.titulo}</th>
+                <th className="px-3 py-2 text-left">
+                  {LABELS.campos.recorrencia}
+                </th>
+                <th className="px-3 py-2 text-left">
+                  {LABELS.campos.diaSemana}
+                </th>
+                <th className="px-3 py-2 text-left">{LABELS.campos.proxima}</th>
+                <th className="px-3 py-2 text-left">
+                  {LABELS.campos.ultimaConclusao}
+                </th>
+                <th className="px-3 py-2 text-left">
+                  {LABELS.campos.statusHoje}
+                </th>
+                <th className="px-3 py-2">{LABELS.campos.acoes}</th>
               </tr>
             </thead>
             <tbody>
@@ -185,8 +190,8 @@ export const Concluidas: React.FC = () => {
                           </td>
                           <td className="px-3 py-1 text-[11px]">
                             {concluidaHoje
-                              ? "Concluída hoje"
-                              : "Concluída anteriormente"}
+                              ? LABELS.estados.concluidaHoje
+                              : LABELS.estados.concluidaAnteriormente}
                           </td>
                           <td className="px-3 py-1 text-xs space-x-1">
                             <button
@@ -197,7 +202,7 @@ export const Concluidas: React.FC = () => {
                               disabled={!t.ativa}
                               className="btn btn-success px-2 py-1 text-[11px]"
                             >
-                              Re-concluir
+                              {LABELS.actions.reconcluir}
                             </button>
                             <button
                               onClick={() => {
@@ -208,7 +213,9 @@ export const Concluidas: React.FC = () => {
                                 t.ativa ? "btn-warning" : "btn-success"
                               }`}
                             >
-                              {t.ativa ? "Desativar" : "Ativar"}
+                              {t.ativa
+                                ? LABELS.actions.desativar
+                                : LABELS.actions.reativar}
                             </button>
                           </td>
                         </tr>
@@ -220,7 +227,7 @@ export const Concluidas: React.FC = () => {
                         colSpan={7}
                         className="px-3 py-4 text-center text-subtle"
                       >
-                        Nenhuma tarefa neste grupo.
+                        {LABELS.estados.nenhumGrupo}
                       </td>
                     </tr>
                   )}
