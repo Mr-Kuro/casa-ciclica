@@ -30,17 +30,14 @@ export const TaskDetail: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <Link
-        to="/"
-        className="btn text-xs bg-gray-300 hover:bg-gray-400 text-gray-800"
-      >
+    <div className="space-y-4 surface p-4 rounded">
+      <Link to="/" className="btn-invert text-xs">
         Voltar
       </Link>
-      <div className="card space-y-2">
+      <div className="surface-accent rounded p-4 space-y-2">
         <h2 className="font-semibold">{tarefa.titulo}</h2>
         {tarefa.descricao && (
-          <p className="text-sm text-gray-600">{tarefa.descricao}</p>
+          <p className="text-sm text-muted">{tarefa.descricao}</p>
         )}
         <p className="text-xs">Recorrência: {tarefa.recorrencia}</p>
         <p className="text-xs">
@@ -60,7 +57,7 @@ export const TaskDetail: React.FC = () => {
             <button
               key={r}
               onClick={() => alterarRecorrencia(r)}
-              className="btn text-xs"
+              className="btn btn-primary text-xs"
             >
               {r}
             </button>

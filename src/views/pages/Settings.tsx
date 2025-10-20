@@ -19,23 +19,17 @@ export const Settings: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <Link
-        to="/"
-        className="btn text-xs bg-gray-300 hover:bg-gray-400 text-gray-800"
-      >
+    <div className="space-y-4 surface p-4 rounded">
+      <Link to="/" className="btn-invert text-xs">
         Voltar
       </Link>
-      <div className="card space-y-2">
+      <div className="surface-accent rounded p-4 space-y-2">
         <h2 className="font-semibold">Configurações</h2>
         <div className="flex flex-col gap-2">
-          <button onClick={limpar} className="btn bg-red-600 hover:bg-red-700">
+          <button onClick={limpar} className="btn btn-danger">
             Limpar LocalStorage
           </button>
-          <button
-            onClick={resetarSeeds}
-            className="btn bg-blue-600 hover:bg-blue-700"
-          >
+          <button onClick={resetarSeeds} className="btn btn-primary">
             Resetar Seeds
           </button>
         </div>

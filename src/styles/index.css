@@ -3,14 +3,246 @@
 @tailwind utilities;
 
 /* Custom layer examples */
+/* Paleta CasaCíclica
+   Light: bege claro, amarelo claro, cinza neutro, ocre suave, marrom suave
+   Dark: violeta profundo, azul oceano fechado, marrom Van Dyke, cinza carvão
+*/
+:root {
+  --cc-bg: #fdfaf6; /* bege clarinho */
+  --cc-bg-alt: #f7f1e7; /* ocre clarinho */
+  --cc-accent: #e8c766; /* amarelo claro suave */
+  --cc-accent-alt: #d9a441; /* ocre mais forte */
+  --cc-border: #d8d5cf; /* cinza/bege neutro */
+  --cc-text: #3d352e; /* marrom suave */
+  --cc-muted: #6d655c;
+  --cc-btn-bg: #d9a441; /* botão base ocre */
+  --cc-btn-hover: #c78924;
+  --cc-gradient-from: #d9a441;
+  --cc-gradient-via: #e8c766;
+  --cc-gradient-to: #f7f1e7;
+  --cc-focus: #b57415;
+  /* Níveis de surface (0 = fundo, 1 = cartão, 2 = destaque) */
+  --cc-surface-0: var(--cc-bg);
+  --cc-surface-1: var(--cc-bg-alt);
+  --cc-surface-2: #ecd489; /* leve reforço sobre accent */
+  --cc-surface-border: var(--cc-border);
+  /* Tokens semânticos adicionais (light) */
+  --cc-primary: #8a5e00; /* contraste sobre bg claro (ocre escurecido) */
+  --cc-primary-hover: #704b00;
+  --cc-danger: #b7222b;
+  --cc-danger-hover: #96171f;
+  --cc-success: #2f7d42;
+  --cc-success-hover: #256535;
+  --cc-warning: #b07500;
+  --cc-warning-hover: #8f5f00;
+  --cc-link: #0a4d8c;
+  --cc-link-hover: #063864;
+  --cc-table-head-bg: #e9ddc7; /* cabeçalho levemente mais escuro para contraste */
+  --cc-table-head-text: #3a332c; /* texto reforçado */
+  --cc-surface-hover: #e2d4bd; /* hover distinto das zebras */
+  --cc-text-subtle: #8a8075;
+  --cc-table-row-bg: var(--cc-bg-alt); /* base zebra claro */
+  --cc-table-row-alt-bg: #fbf5ec; /* variação sutil mais clara */
+  --cc-table-group-bg: var(--cc-surface-2);
+  /* Header (light) */
+  --cc-header-from: #8a5e00; /* mais escuro para contraste */
+  --cc-header-via: #b07410; /* intermediário */
+  --cc-header-to: #d9a441; /* final */
+  --cc-header-text: #fff; /* texto branco agora tem contraste adequado */
+  --cc-header-overlay: rgba(255, 255, 255, 0.15);
+}
+html.dark {
+  --cc-bg: #16151a; /* fundo carvão */
+  --cc-bg-alt: #201f24; /* variação */
+  --cc-accent: #5b5bd6; /* violeta moderado */
+  --cc-accent-alt: #0f4c70; /* azul oceano fechado */
+  --cc-border: #3a3842;
+  --cc-text: #e8e6e3;
+  --cc-muted: #a39fa8;
+  --cc-btn-bg: #5b5bd6; /* botão violeta */
+  --cc-btn-hover: #4949bb;
+  --cc-gradient-from: #5b5bd6;
+  --cc-gradient-via: #0f4c70;
+  --cc-gradient-to: #3a3842;
+  --cc-focus: #a37b35; /* marrom van dyke aquecido para foco */
+  --cc-surface-0: var(--cc-bg);
+  --cc-surface-1: var(--cc-bg-alt);
+  --cc-surface-2: #242835; /* camada elevada escura */
+  --cc-surface-border: var(--cc-border);
+  /* Tokens semânticos adicionais (dark) */
+  --cc-primary: #d9a441; /* mantém identidade ocre sobre fundo escuro */
+  --cc-primary-hover: #c78924;
+  --cc-danger: #ff4d5d;
+  --cc-danger-hover: #e63a49;
+  --cc-success: #4dd282;
+  --cc-success-hover: #36b869;
+  --cc-warning: #e0aa3a;
+  --cc-warning-hover: #c89022;
+  --cc-link: #5b9bff;
+  --cc-link-hover: #3d7bd6;
+  --cc-table-head-bg: #242835;
+  --cc-table-head-text: #e8e6e3;
+  --cc-surface-hover: #2a2f3b;
+  --cc-text-subtle: #b7b3bc;
+  --cc-table-row-bg: var(--cc-surface-0);
+  --cc-table-row-alt-bg: #23262c;
+  --cc-table-group-bg: var(--cc-surface-2);
+  /* Header (dark) */
+  --cc-header-from: #5b5bd6;
+  --cc-header-via: #0f4c70;
+  --cc-header-to: #3a3842;
+  --cc-header-text: #e8e6e3;
+  --cc-header-overlay: rgba(255, 255, 255, 0.12);
+}
+
+body {
+  background: var(--cc-bg);
+  color: var(--cc-text);
+}
+
 @layer components {
+  .page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--cc-bg);
+    color: var(--cc-text);
+  }
+  .surface {
+    background: var(--cc-surface-1);
+    border: 1px solid var(--cc-surface-border);
+  }
+  .surface-alt {
+    background: var(--cc-surface-0);
+    border: 1px solid var(--cc-surface-border);
+  }
+  .surface-accent {
+    background: var(--cc-surface-2);
+    border: 1px solid var(--cc-surface-border);
+  }
+  .gradient-bar {
+    background: linear-gradient(
+      90deg,
+      var(--cc-gradient-from),
+      var(--cc-gradient-via),
+      var(--cc-gradient-to)
+    );
+  }
+  .navbar {
+    background: linear-gradient(
+      90deg,
+      var(--cc-header-from),
+      var(--cc-header-via),
+      var(--cc-header-to)
+    );
+    color: var(--cc-header-text);
+    border-bottom: 1px solid var(--cc-border);
+  }
+  .navbar-vertical {
+    background: linear-gradient(
+      180deg,
+      var(--cc-header-from),
+      var(--cc-header-via),
+      var(--cc-header-to)
+    );
+    color: var(--cc-header-text);
+    border-top: 1px solid var(--cc-border);
+  }
+  .navbar-overlay-btn {
+    background: var(--cc-header-overlay);
+    color: var(--cc-header-text);
+  }
+  .navbar-overlay-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
   .card {
-    @apply bg-white shadow rounded p-4;
+    @apply shadow rounded p-4 border;
+    background: var(--cc-bg-alt);
+    border-color: var(--cc-border);
   }
   .btn {
-    @apply inline-flex items-center px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50;
+    @apply inline-flex items-center px-4 py-2 rounded font-medium focus:outline-none focus:ring disabled:opacity-50 transition-colors;
+    background: var(--cc-primary);
+    color: #fff;
+  }
+  .btn:hover:not(:disabled) {
+    background: var(--cc-primary-hover);
+  }
+  .btn-primary {
+    background: var(--cc-primary);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--cc-primary-hover);
+  }
+  .btn-danger {
+    background: var(--cc-danger);
+    color: #fff;
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: var(--cc-danger-hover);
+  }
+  .btn-success {
+    background: var(--cc-success);
+    color: #fff;
+  }
+  .btn-success:hover:not(:disabled) {
+    background: var(--cc-success-hover);
+  }
+  .btn-warning {
+    background: var(--cc-warning);
+    color: #fff;
+  }
+  .btn-warning:hover:not(:disabled) {
+    background: var(--cc-warning-hover);
+  }
+  .btn-link {
+    background: transparent;
+    color: var(--cc-link);
+    text-decoration: underline;
+  }
+  .btn-link:hover {
+    color: var(--cc-link-hover);
+  }
+  .btn-invert {
+    @apply inline-flex items-center px-3 py-2 rounded text-xs font-semibold transition-colors;
+    background: var(--cc-bg-alt);
+    color: var(--cc-text);
+    border: 1px solid var(--cc-border);
+  }
+  .btn-invert:hover {
+    background: var(--cc-primary);
+    color: #fff;
   }
   .input {
-    @apply border rounded px-3 py-2 w-full focus:outline-none focus:ring focus:border-blue-400;
+    @apply border rounded px-3 py-2 w-full focus:outline-none focus:ring;
+    background: var(--cc-bg-alt);
+    border-color: var(--cc-border);
+    color: var(--cc-text);
+  }
+  .table-head {
+    background: var(--cc-table-head-bg);
+    color: var(--cc-table-head-text);
+  }
+  .text-muted {
+    color: var(--cc-muted);
+  }
+  .text-subtle {
+    color: var(--cc-text-subtle);
+  }
+  .row-hover:hover {
+    background: var(--cc-surface-hover);
+  }
+  .table-row {
+    border-top: 1px solid var(--cc-surface-border);
+  }
+  .table-row-zebra:nth-child(even) {
+    background: var(--cc-table-row-alt-bg);
+  }
+  .table-row-zebra:nth-child(odd) {
+    background: var(--cc-table-row-bg);
+  }
+  .table-group {
+    background: var(--cc-table-group-bg);
   }
 }

@@ -2,7 +2,6 @@ import React from "react";
 import { taskController } from "../../controllers/TaskController";
 import { Task } from "../../models/Task";
 import {
-  devidoHoje,
   dentroDaQuinzenaAtual,
   dentroDoMesAtual,
   mesmoDiaSemanaHoje,
@@ -20,13 +19,17 @@ export const TaskList: React.FC<Props> = ({
   onChange,
   filtro = "HOJE",
 }) => {
-  const hoje = new Date();
+  // Sem uso direto de Date aqui; filtros já baseados em helpers.
   const concluidasHoje: Task[] = [];
   const filtradas = tarefas.filter((t) => {
     if (filtro === "HOJE") {
       // Semântica: tarefas semanais do dia atual + tarefas diárias não concluídas hoje
       if (t.recorrencia === "SEMANAL") {
-        return mesmoDiaSemanaHoje(t.diaSemana);
+        const mesmoDia = mesmoDiaSemanaHoje(t.diaSemana);
+        if (!mesmoDia) return false; // só interessa as semanais do dia
+        const naoConcluida = naoConcluidaHoje(t);
+        if (!naoConcluida) concluidasHoje.push(t);
+        return naoConcluida;
       }
       if (t.recorrencia === "DIARIA") {
         const naoConcluida = naoConcluidaHoje(t);
@@ -71,7 +74,6 @@ export const TaskList: React.FC<Props> = ({
           </thead>
           <tbody>
             {filtradas.map((t) => {
-              const hoje = devidoHoje(t.proximaData);
               const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
               return (
                 <tr key={t.id} className="border-t hover:bg-gray-50">
@@ -96,9 +98,11 @@ export const TaskList: React.FC<Props> = ({
                     </td>
                   )}
                   <td className="px-3 py-2 text-xs text-gray-600">
-                    {t.recorrencia === 'QUINZENAL' || t.recorrencia === 'MENSAL'
-                      ? (t.proximaData ? new Date(t.proximaData).getDate() : '—')
-                      : '—'}
+                    {t.recorrencia === "QUINZENAL" || t.recorrencia === "MENSAL"
+                      ? t.proximaData
+                        ? new Date(t.proximaData).getDate()
+                        : "—"
+                      : "—"}
                   </td>
                   <td className="px-3 py-2 text-xs">
                     {t.proximaData
@@ -116,7 +120,7 @@ export const TaskList: React.FC<Props> = ({
                         taskController.concluirHoje(t.id);
                         onChange();
                       }}
-                      disabled={!hoje || !t.ativa}
+                      disabled={!t.ativa}
                       className="btn px-2 py-1 text-[11px]"
                     >
                       Concluir
@@ -194,9 +198,12 @@ export const TaskList: React.FC<Props> = ({
                         : "Diária"}
                     </td>
                     <td className="px-3 py-1 text-gray-600">
-                      {t.recorrencia === 'QUINZENAL' || t.recorrencia === 'MENSAL'
-                        ? (t.proximaData ? new Date(t.proximaData).getDate() : '—')
-                        : '—'}
+                      {t.recorrencia === "QUINZENAL" ||
+                      t.recorrencia === "MENSAL"
+                        ? t.proximaData
+                          ? new Date(t.proximaData).getDate()
+                          : "—"
+                        : "—"}
                     </td>
                     <td className="px-3 py-1">
                       {t.proximaData

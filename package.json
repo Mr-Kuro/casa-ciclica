@@ -1,5 +1,6 @@
 {
-  "name": "gerenciador-tarefas-domesticas",
+  "name": "casa-ciclica",
+  "description": "CasaCíclica – Organização que se renova. Gerenciador de tarefas domésticas recorrentes.",
   "private": true,
   "version": "0.1.0",
   "type": "module",
