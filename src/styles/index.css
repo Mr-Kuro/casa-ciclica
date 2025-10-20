@@ -56,49 +56,49 @@
   --cc-motive-accent: var(--cc-primary);
 }
 html.dark {
-  /* Dark alinhado à hierarquia do light (tons ocres e marrons ajustados para contraste) */
-  --cc-bg: #1c1814; /* fundo escurecido com leve calor */
-  --cc-bg-alt: #24201b; /* primeiro nível acima */
-  --cc-accent: #8a5e00; /* ocre escurecido (equivalente do accent-alt claro) */
-  --cc-accent-alt: #b07410; /* versão intermediária para gradientes */
-  --cc-border: #3d332b; /* borda marrom carvão quente */
-  --cc-text: #e8e3dc; /* texto alto contraste suave */
-  --cc-muted: #b3a79c; /* texto secundário quente */
-  --cc-btn-bg: #8a5e00; /* botão base mantém identidade */
-  --cc-btn-hover: #704b00;
-  --cc-gradient-from: #8a5e00; /* replicar progressão quente */
-  --cc-gradient-via: #b07410;
-  --cc-gradient-to: #3d332b;
-  --cc-focus: #d9a441; /* foco mantém alto contraste */
+  /* Dark Cyan / Teal palette (inspirado em tons profundos de cyan) */
+  --cc-bg: #061a1d; /* base quase preta com leve matiz teal */
+  --cc-bg-alt: #0c262a; /* elevação 1 */
+  --cc-accent: #0f4c55; /* teal escuro para elementos de destaque suaves */
+  --cc-accent-alt: #126672; /* variação mais clara para gradientes */
+  --cc-border: #16424a; /* borda contrastante porém integrada */
+  --cc-text: #e1f7f9; /* texto alto contraste frio */
+  --cc-muted: #9bc2c7; /* texto secundário dessaturado */
+  --cc-btn-bg: #126672; /* botão base teal médio */
+  --cc-btn-hover: #158092; /* hover mais claro vibrante */
+  --cc-gradient-from: #0f3a40;
+  --cc-gradient-via: #126672;
+  --cc-gradient-to: #0c262a;
+  --cc-focus: #27b6ca; /* foco cyan vivo acessível */
   --cc-surface-0: var(--cc-bg);
   --cc-surface-1: var(--cc-bg-alt);
-  --cc-surface-2: #2f271f; /* elevação adicional */
+  --cc-surface-2: #104149; /* elevação adicional */
   --cc-surface-border: var(--cc-border);
-  /* Tokens semânticos adicionais (dark) alinhados */
-  --cc-primary: #d9a441; /* mesmo primário para consistência cross-theme */
-  --cc-primary-hover: #c78924;
-  --cc-danger: #e04835; /* ajustado para menor saturação contra fundo quente */
-  --cc-danger-hover: #c93626;
-  --cc-success: #3d9a56; /* verde moderado para contraste controlado */
-  --cc-success-hover: #2f7d42;
-  --cc-warning: #e0aa3a; /* mantém schema */
-  --cc-warning-hover: #c89022;
-  --cc-link: #5b9bff; /* links permanecem frios para destaque */
-  --cc-link-hover: #3d7bd6;
-  --cc-table-head-bg: #2f271f; /* cabeçalho elevado */
+  /* Tokens semânticos adicionais (dark cyan) */
+  --cc-primary: #27b6ca; /* primário cyan vibrante */
+  --cc-primary-hover: #1fa1b3;
+  --cc-danger: #e75c5c; /* vermelho suavizado contra fundo frio */
+  --cc-danger-hover: #d94848;
+  --cc-success: #2fae7a; /* verde com matiz teal */
+  --cc-success-hover: #279468;
+  --cc-warning: #d9a441; /* mantém identidade warm para diferenciar */
+  --cc-warning-hover: #c78924;
+  --cc-link: #35c5dd; /* link cyan claro */
+  --cc-link-hover: #27b6ca;
+  --cc-table-head-bg: #0f2d32; /* cabeçalho elevado distinto */
   --cc-table-head-text: var(--cc-text);
-  --cc-surface-hover: #2a221c; /* hover sutil */
-  --cc-text-subtle: #c2b7ae;
+  --cc-surface-hover: #103237; /* hover sutil */
+  --cc-text-subtle: #b7d6da;
   --cc-table-row-bg: var(--cc-surface-0);
-  --cc-table-row-alt-bg: #27221c;
+  --cc-table-row-alt-bg: #0e2226;
   --cc-table-group-bg: var(--cc-surface-2);
-  /* Header (dark) seguindo gradiente quente */
-  --cc-header-from: #8a5e00;
-  --cc-header-via: #b07410;
-  --cc-header-to: #d9a441;
-  --cc-header-text: #fff;
+  /* Header gradient (teal progression) */
+  --cc-header-from: #0f3a40;
+  --cc-header-via: #126672;
+  --cc-header-to: #27b6ca;
+  --cc-header-text: #e1f7f9;
   --cc-header-overlay: rgba(255, 255, 255, 0.12);
-  /* Motivational quote (dark) */
+  /* Motivational quote (dark cyan) */
   --cc-motive-bg: var(--cc-surface-1);
   --cc-motive-border: var(--cc-border);
   --cc-motive-text: var(--cc-text);
@@ -418,6 +418,106 @@ body {
   .tab[aria-selected="true"] .tab-badge {
     background: var(--cc-primary);
     color: #fff;
+  }
+  /* Skeleton loading component */
+  .skeleton {
+    position: relative;
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.05),
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0.05)
+    );
+    background-color: rgba(0, 0, 0, 0.04); /* base para zonas sem sweep */
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.2s ease-in-out infinite;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  html.dark .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.12),
+      rgba(255, 255, 255, 0.05)
+    );
+  }
+  /* Nubank inspired variant: combined sweep + subtle pulse */
+  .skeleton-nk {
+    background: linear-gradient(
+      100deg,
+      rgba(0, 0, 0, 0.05) 15%,
+      rgba(0, 0, 0, 0.12) 35%,
+      rgba(0, 0, 0, 0.05) 55%
+    );
+    background-color: rgba(0, 0, 0, 0.04);
+    background-size: 200% 100%;
+    animation: nk-sweep 1.3s ease-in-out infinite,
+      nk-pulse 3.2s ease-in-out infinite;
+  }
+  html.dark .skeleton-nk {
+    background: linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0.05) 20%,
+      rgba(255, 255, 255, 0.11) 40%,
+      rgba(255, 255, 255, 0.05) 60%
+    );
+  }
+  @keyframes nk-sweep {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes nk-pulse {
+    0%,
+    100% {
+      filter: brightness(1);
+    }
+    50% {
+      filter: brightness(1.12);
+    }
+  }
+  /* Accessibility: disable shimmer for users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton {
+      animation: none !important;
+      background-size: 100% 100%;
+    }
+    .skeleton-nk {
+      animation: none !important;
+      background-size: 100% 100%;
+    }
+  }
+  @keyframes skeleton-shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+  .skeleton-text {
+    height: 0.9rem;
+    width: 100%;
+  }
+  .skeleton-image {
+    width: 100%;
+    height: 10rem; /* 160px */
+  }
+  /* Cursive quote text styling */
+  .quote-text {
+    font-family: "Dancing Script", cursive;
+    font-size: 1.35rem; /* larger for emphasis */
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+  }
+  @media (min-width: 768px) {
+    .quote-text {
+      font-size: 1.55rem;
+    }
   }
   @media (max-width: 640px) {
     .task-actions-col {

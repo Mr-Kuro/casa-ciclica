@@ -66,6 +66,9 @@ export const LABELS = {
     filtrosResumo: "Filtros HOJE / QUINZENA / MÊS",
     limparAviso: "Dados apagados. Volte à página inicial para recriar.",
     seedsResetAviso: "Seeds recriadas. Vá para Início para ver as novas datas.",
+    carregandoImagem: "Carregando imagem...",
+    erroImagem: "Falha ao carregar imagem de gatos.",
+    erroImagemFallback: "Usando imagem anterior como fallback.",
   },
   diasSemanaLongo: [
     "Domingo",
