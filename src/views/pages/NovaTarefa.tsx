@@ -9,7 +9,7 @@ export const NovaTarefa: React.FC = () => {
     // após criação poderíamos redirecionar; simples refresh por enquanto
   }
   return (
-    <div className="space-y-6 max-w-xl surface p-4 rounded">
+    <div className="space-y-6 w-full  mx-auto surface p-6 rounded">
       <Link to="/" className="btn-invert text-xs">
         {LABELS.navigation.voltar}
       </Link>

@@ -3,6 +3,7 @@ import { Recurrence } from "../../types";
 import { taskController } from "../../controllers/TaskController";
 import { Task } from "../../models/Task";
 import { LABELS } from "../../constants/strings";
+import { useToast } from "./toast/ToastContext";
 
 interface Props {
   onCreate(task: Task): void;
@@ -12,6 +13,7 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [recorrencia, setRecorrencia] = useState<Recurrence>(Recurrence.DIARIA);
+  const { push } = useToast();
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,6 +23,7 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
     setTitulo("");
     setDescricao("");
     setRecorrencia(Recurrence.DIARIA);
+    push({ message: LABELS.feedback.toastTarefaCriada, type: "success" });
   }
 
   return (
@@ -29,7 +32,7 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
       <div>
         <label className="block text-sm mb-1">{LABELS.campos.titulo}</label>
         <input
-          className="input"
+          className="input max-w-[640px]"
           value={titulo}
           onChange={(e) => setTitulo(e.target.value)}
         />
@@ -47,7 +50,7 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
           {LABELS.campos.recorrencia}
         </label>
         <select
-          className="input"
+          className="input max-w-[140px]"
           value={recorrencia}
           onChange={(e) => setRecorrencia(e.target.value as Recurrence)}
         >

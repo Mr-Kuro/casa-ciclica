@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { timeAgo } from "../../utils/timeAgo";
 import { taskController } from "../../controllers/TaskController";
 import { Task } from "../../models/Task";
 import { Link } from "react-router-dom";
@@ -32,6 +33,7 @@ export const Concluidas: React.FC = () => {
     [tarefas]
   );
 
+  const [ordenarPorTitulo, setOrdenarPorTitulo] = useState(false);
   const grupos: Grupo[] = useMemo(() => {
     const diaria = concluidas.filter((t) => t.recorrencia === "DIARIA");
 
@@ -63,9 +65,13 @@ export const Concluidas: React.FC = () => {
       base.push({ titulo: "Quinzenais", tarefas: quinzenais });
     if (mensais.length) base.push({ titulo: "Mensais", tarefas: mensais });
     // Ordenar cada grupo internamente por ultimaConclusao desc
-    return base.map((g) => ({
-      titulo: g.titulo,
-      tarefas: [...g.tarefas].sort((a, b) => {
+    return base.map((g) => {
+      const tarefasOrdenadas = [...g.tarefas].sort((a, b) => {
+        if (ordenarPorTitulo) {
+          return a.titulo.localeCompare(b.titulo, "pt-BR", {
+            sensitivity: "base",
+          });
+        }
         const da = a.ultimaConclusao
           ? new Date(a.ultimaConclusao).getTime()
           : 0;
@@ -73,9 +79,10 @@ export const Concluidas: React.FC = () => {
           ? new Date(b.ultimaConclusao).getTime()
           : 0;
         return db - da; // mais recente primeiro
-      }),
-    }));
-  }, [concluidas]);
+      });
+      return { titulo: g.titulo, tarefas: tarefasOrdenadas };
+    });
+  }, [concluidas, ordenarPorTitulo]);
 
   return (
     <div className="space-y-6 surface p-4 rounded">
@@ -83,9 +90,21 @@ export const Concluidas: React.FC = () => {
         <h2 className="text-2xl font-semibold">
           {LABELS.campos.tarefasConcluidas}
         </h2>
-        <Link to="/" className="btn-invert text-xs">
-          {LABELS.navigation.voltar}
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setOrdenarPorTitulo((v) => !v)}
+            className="btn-invert text-[10px] px-2 py-1"
+            aria-pressed={ordenarPorTitulo}
+          >
+            {ordenarPorTitulo
+              ? LABELS.feedback.ordenarPorData
+              : LABELS.feedback.ordenarPorTitulo}
+          </button>
+          <Link to="/" className="btn-invert text-xs">
+            {LABELS.navigation.voltar}
+          </Link>
+        </div>
       </div>
       {grupos.length === 0 && (
         <p className="text-sm text-gray-500">
@@ -111,17 +130,13 @@ export const Concluidas: React.FC = () => {
                 <th className="px-3 py-2 text-left">
                   {LABELS.campos.statusHoje}
                 </th>
-                <th className="px-3 py-2">{LABELS.campos.acoes}</th>
               </tr>
             </thead>
             <tbody>
               {grupos.map((grupo) => (
                 <React.Fragment key={grupo.titulo}>
                   <tr className="surface-accent select-none">
-                    <td
-                      colSpan={7}
-                      className="px-3 py-2 font-semibold text-gray-700"
-                    >
+                    <td colSpan={6} className="px-3 py-2 subtitle">
                       <button
                         onClick={() =>
                           setCollapsed((c) => ({
@@ -185,7 +200,11 @@ export const Concluidas: React.FC = () => {
                           </td>
                           <td className="px-3 py-1 text-muted">
                             {t.ultimaConclusao
-                              ? new Date(t.ultimaConclusao).toLocaleDateString()
+                              ? `${new Date(
+                                  t.ultimaConclusao
+                                ).toLocaleDateString()} · ${timeAgo(
+                                  t.ultimaConclusao
+                                )}`
                               : "—"}
                           </td>
                           <td className="px-3 py-1 text-[11px]">
@@ -193,38 +212,13 @@ export const Concluidas: React.FC = () => {
                               ? LABELS.estados.concluidaHoje
                               : LABELS.estados.concluidaAnteriormente}
                           </td>
-                          <td className="px-3 py-1 text-xs space-x-1">
-                            <button
-                              onClick={() => {
-                                taskController.concluirHoje(t.id);
-                                refresh();
-                              }}
-                              disabled={!t.ativa}
-                              className="btn btn-success px-2 py-1 text-[11px]"
-                            >
-                              {LABELS.actions.reconcluir}
-                            </button>
-                            <button
-                              onClick={() => {
-                                taskController.alternarAtiva(t.id);
-                                refresh();
-                              }}
-                              className={`btn px-2 py-1 text-[11px] ${
-                                t.ativa ? "btn-warning" : "btn-success"
-                              }`}
-                            >
-                              {t.ativa
-                                ? LABELS.actions.desativar
-                                : LABELS.actions.reativar}
-                            </button>
-                          </td>
                         </tr>
                       );
                     })}
                   {!collapsed[grupo.titulo] && grupo.tarefas.length === 0 && (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={6}
                         className="px-3 py-4 text-center text-subtle"
                       >
                         {LABELS.estados.nenhumGrupo}

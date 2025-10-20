@@ -110,14 +110,6 @@ export class TaskController {
     t.ativa = !t.ativa;
     this.persistir();
   }
-
-  resetSeeds() {
-    this.tarefas = gerarSeed();
-    this.persistir();
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("tasks:reset")); // sinal para UI atualizar
-    }
-  }
 }
 
 export const taskController = new TaskController();

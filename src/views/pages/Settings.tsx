@@ -2,22 +2,19 @@ import React from "react";
 import { LocalStorageService } from "../../services/storage/LocalStorageService";
 import { Link } from "react-router-dom";
 import { LABELS } from "../../constants/strings";
-import { taskController } from "../../controllers/TaskController";
+import { useToast } from "../components/toast/ToastContext";
+// Removido reset de seeds por ser redundante com limpeza total
 
 export const Settings: React.FC = () => {
+  const { push } = useToast();
   function limpar() {
     if (confirm(LABELS.confirm.limparTudo)) {
       LocalStorageService.limpar();
-      alert(LABELS.feedback.limparAviso);
+      push({ message: LABELS.feedback.toastLimpeza, type: "info" });
     }
   }
 
-  function resetarSeeds() {
-    if (confirm(LABELS.confirm.resetSeeds)) {
-      taskController.resetSeeds();
-      alert(LABELS.feedback.seedsResetAviso);
-    }
-  }
+  // resetarSeeds removido
 
   return (
     <div className="space-y-4 surface p-4 rounded">
@@ -26,13 +23,15 @@ export const Settings: React.FC = () => {
       </Link>
       <div className="surface-accent rounded p-4 space-y-2">
         <h2 className="font-semibold">{LABELS.campos.config}</h2>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           <button onClick={limpar} className="btn btn-danger">
-            Limpar LocalStorage
+            DELETAR dados
           </button>
-          <button onClick={resetarSeeds} className="btn btn-primary">
-            Resetar Seeds
-          </button>
+          <p className="text-xs text-subtle leading-snug max-w-prose">
+            Ação irreversível: remove todas as tarefas salvas no navegador e
+            recria automaticamente o conjunto inicial padrão (seeds) quando a
+            aplicação iniciar novamente. Use somente se quiser começar do zero.
+          </p>
         </div>
       </div>
     </div>

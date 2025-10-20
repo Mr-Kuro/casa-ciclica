@@ -3,6 +3,7 @@ import { taskController } from "../../controllers/TaskController";
 import { Task } from "../../models/Task";
 import { Link } from "react-router-dom";
 import { LABELS } from "../../constants/strings";
+import { useToast } from "../components/toast/ToastContext";
 
 interface Grupo {
   titulo: string;
@@ -14,6 +15,7 @@ const DIAS = LABELS.diasSemanaLongo;
 export const Desativadas: React.FC = () => {
   const [tarefas, setTarefas] = useState<Task[]>(taskController.listar());
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const { push } = useToast();
 
   function refresh() {
     setTarefas(taskController.listar());
@@ -91,10 +93,7 @@ export const Desativadas: React.FC = () => {
               {grupos.map((grupo) => (
                 <React.Fragment key={grupo.titulo}>
                   <tr className="surface-accent select-none">
-                    <td
-                      colSpan={6}
-                      className="px-3 py-2 font-semibold text-gray-700"
-                    >
+                    <td colSpan={6} className="px-3 py-2 subtitle">
                       <button
                         onClick={() =>
                           setCollapsed((c) => ({
@@ -160,6 +159,10 @@ export const Desativadas: React.FC = () => {
                               onClick={() => {
                                 taskController.alternarAtiva(t.id);
                                 refresh();
+                                push({
+                                  message: LABELS.feedback.toastTarefaReativada,
+                                  type: "success",
+                                });
                               }}
                               className="btn btn-success px-2 py-1 text-[11px]"
                             >
@@ -170,6 +173,11 @@ export const Desativadas: React.FC = () => {
                                 if (confirm("Remover tarefa?")) {
                                   taskController.remover(t.id);
                                   refresh();
+                                  push({
+                                    message:
+                                      LABELS.feedback.toastTarefaRemovida,
+                                    type: "info",
+                                  });
                                 }
                               }}
                               className="btn btn-danger px-2 py-1 text-[11px]"

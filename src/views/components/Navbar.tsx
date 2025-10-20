@@ -51,25 +51,31 @@ export const Navbar: React.FC = () => {
             </span>
           </div>
         </div>
-        <nav className="hidden md:flex items-center gap-1">
+        <nav
+          className="hidden md:flex items-center gap-1 tabs nav-tabs-container"
+          role="tablist"
+          aria-label="Navegação principal"
+        >
           {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `px-3 py-2 rounded text-sm font-medium transition-colors ${
-                  isActive
-                    ? "navbar-overlay-btn shadow-inner"
-                    : "hover:navbar-overlay-btn"
-                }`
-              }
-            >
-              {item.label}
+            <NavLink key={item.to} to={item.to} end={item.to === "/"}>
+              {({ isActive }) => (
+                <span
+                  role="tab"
+                  aria-selected={isActive}
+                  className={`tab text-sm font-medium ${
+                    isActive
+                      ? "!bg-[var(--cc-bg-alt)] !text-[var(--cc-primary)]"
+                      : ""
+                  }`}
+                >
+                  {item.label}
+                </span>
+              )}
             </NavLink>
           ))}
           <button
             onClick={toggleTheme}
-            className="ml-2 px-3 py-2 rounded text-sm font-medium navbar-overlay-btn focus:outline-none focus:ring transition-colors duration-300"
+            className="ml-2 theme-toggle focus:outline-none focus:ring-0"
             aria-label="Alternar tema"
             aria-pressed={dark}
           >
@@ -97,7 +103,7 @@ export const Navbar: React.FC = () => {
         <div className="md:hidden flex items-center gap-2">
           <button
             onClick={toggleTheme}
-            className="px-3 py-2 rounded text-sm font-medium navbar-overlay-btn focus:outline-none focus:ring transition-colors duration-300"
+            className="theme-toggle focus:outline-none focus:ring-0"
             aria-label="Alternar tema"
             aria-pressed={dark}
           >

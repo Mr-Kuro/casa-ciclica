@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { taskController } from "../../controllers/TaskController";
 import { Task } from "../../models/Task";
 import {
@@ -8,6 +8,7 @@ import {
   naoConcluidaHoje,
 } from "../../utils/recurrence";
 import { LABELS } from "../../constants/strings";
+import { useToast } from "./toast/ToastContext";
 
 interface Props {
   tarefas: Task[];
@@ -20,9 +21,17 @@ export const TaskList: React.FC<Props> = ({
   onChange,
   filtro = "HOJE",
 }) => {
+  const { push } = useToast();
+  const [mostrarInativas, setMostrarInativas] = useState(false);
   // Sem uso direto de Date aqui; filtros já baseados em helpers.
   const concluidasHoje: Task[] = [];
+  const inactiveCount = useMemo(
+    () => tarefas.filter((t) => !t.ativa).length,
+    [tarefas]
+  );
   const filtradas = tarefas.filter((t) => {
+    // Oculta tarefas inativas das listagens normais (a menos que toggle)
+    if (!mostrarInativas && !t.ativa) return false;
     if (filtro === "HOJE") {
       // Semântica: tarefas semanais do dia atual + tarefas diárias não concluídas hoje
       if (t.recorrencia === "SEMANAL") {
@@ -53,11 +62,32 @@ export const TaskList: React.FC<Props> = ({
       }
       return false;
     }
-    return true; // fallback se filtros expandirem no futuro
+    return true; // fallback se filtros expandirem no futuro (ainda respeita ativa)
   });
+
+  const ocultadas = !mostrarInativas ? inactiveCount : 0;
 
   return (
     <div className="space-y-8">
+      <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setMostrarInativas((v) => !v)}
+            className="btn-invert px-2 py-1"
+            aria-pressed={mostrarInativas}
+          >
+            {mostrarInativas
+              ? LABELS.feedback.ocultarInativas
+              : LABELS.feedback.mostrarInativas}
+          </button>
+          {ocultadas > 0 && (
+            <span className="text-subtle text-[11px]">
+              {LABELS.feedback.ocultadasCount(ocultadas)}
+            </span>
+          )}
+        </div>
+      </div>
       <div className="overflow-x-auto border rounded shadow-sm">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-50 text-xs uppercase text-gray-600 task-row-fixed">
@@ -71,7 +101,6 @@ export const TaskList: React.FC<Props> = ({
                   {LABELS.campos.diaSemana}
                 </th>
               )}
-              <th className="px-3 py-2 text-left">{LABELS.campos.ancora}</th>
               <th className="px-3 py-2 text-left">{LABELS.campos.proxima}</th>
               <th className="px-3 py-2 text-left">{LABELS.campos.ultima}</th>
               <th className="px-3 py-2 task-actions-col">
@@ -109,13 +138,6 @@ export const TaskList: React.FC<Props> = ({
                         : "—"}
                     </td>
                   )}
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {t.recorrencia === "QUINZENAL" || t.recorrencia === "MENSAL"
-                      ? t.proximaData
-                        ? new Date(t.proximaData).getDate()
-                        : "—"
-                      : "—"}
-                  </td>
                   <td className="px-3 py-2 text-xs">
                     {t.proximaData
                       ? new Date(t.proximaData).toLocaleDateString()
@@ -133,6 +155,10 @@ export const TaskList: React.FC<Props> = ({
                           if (!t.ativa) return;
                           taskController.concluirHoje(t.id);
                           onChange();
+                          push({
+                            message: LABELS.feedback.toastTarefaConcluida,
+                            type: "success",
+                          });
                         }}
                         disabled={!t.ativa}
                         className="btn-success btn px-2 py-1 text-[11px]"
@@ -147,6 +173,12 @@ export const TaskList: React.FC<Props> = ({
                         onClick={() => {
                           taskController.alternarAtiva(t.id);
                           onChange();
+                          push({
+                            message: t.ativa
+                              ? LABELS.feedback.toastTarefaReativada
+                              : LABELS.feedback.toastTarefaDesativada,
+                            type: t.ativa ? "warning" : "success",
+                          });
                         }}
                         className={`px-2 py-1 text-[11px] btn ${
                           t.ativa
@@ -163,6 +195,10 @@ export const TaskList: React.FC<Props> = ({
                           if (confirm("Remover tarefa?")) {
                             taskController.remover(t.id);
                             onChange();
+                            push({
+                              message: LABELS.feedback.toastTarefaRemovida,
+                              type: "info",
+                            });
                           }
                         }}
                         className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
@@ -177,7 +213,7 @@ export const TaskList: React.FC<Props> = ({
             {filtradas.length === 0 && (
               <tr className="task-row-fixed">
                 <td
-                  colSpan={filtro === "HOJE" ? 7 : 6}
+                  colSpan={filtro === "HOJE" ? 6 : 5}
                   className="px-3 py-6 text-center text-gray-500"
                 >
                   {LABELS.estados.nenhumaTarefa}
@@ -207,7 +243,6 @@ export const TaskList: React.FC<Props> = ({
                 <th className="px-3 py-1 text-left">
                   {LABELS.campos.diaSemana}
                 </th>
-                <th className="px-3 py-1 text-left">{LABELS.campos.ancora}</th>
                 <th className="px-3 py-1 text-left">{LABELS.campos.proxima}</th>
                 <th className="px-3 py-1 text-left">{LABELS.campos.ultima}</th>
                 <th className="px-3 py-1" />
@@ -225,14 +260,6 @@ export const TaskList: React.FC<Props> = ({
                       typeof t.diaSemana === "number"
                         ? dias[t.diaSemana]
                         : "Diária"}
-                    </td>
-                    <td className="px-3 py-1 text-gray-600">
-                      {t.recorrencia === "QUINZENAL" ||
-                      t.recorrencia === "MENSAL"
-                        ? t.proximaData
-                          ? new Date(t.proximaData).getDate()
-                          : "—"
-                        : "—"}
                     </td>
                     <td className="px-3 py-1">
                       {t.proximaData
