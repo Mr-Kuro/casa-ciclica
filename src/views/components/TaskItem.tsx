@@ -54,14 +54,14 @@ export const TaskItem: React.FC<Props> = ({ task, onChange }) => {
         <button
           onClick={concluir}
           disabled={!hoje || !task.ativa}
-          className="btn text-xs"
+          className="btn-success btn text-xs"
         >
           {LABELS.actions.concluirHoje}
         </button>
         <button
           onClick={alternar}
-          className={`btn text-xs bg-yellow-600 hover:bg-yellow-700 ${
-            !task.ativa ? "btn-reativar-emphasis" : ""
+          className={`btn text-xs ${
+            task.ativa ? "btn-warning" : "btn-success btn-reativar-emphasis"
           }`}
         >
           {task.ativa ? LABELS.actions.desativar : LABELS.actions.reativar}

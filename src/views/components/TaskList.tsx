@@ -135,7 +135,7 @@ export const TaskList: React.FC<Props> = ({
                           onChange();
                         }}
                         disabled={!t.ativa}
-                        className="btn px-2 py-1 text-[11px]"
+                        className="btn-success btn px-2 py-1 text-[11px]"
                         aria-disabled={!t.ativa}
                         title={
                           t.ativa ? "Concluir tarefa" : "Tarefa desativada"
@@ -148,8 +148,10 @@ export const TaskList: React.FC<Props> = ({
                           taskController.alternarAtiva(t.id);
                           onChange();
                         }}
-                        className={`btn px-2 py-1 text-[11px] bg-yellow-600 hover:bg-yellow-700 ${
-                          !t.ativa ? "btn-reativar-emphasis" : ""
+                        className={`px-2 py-1 text-[11px] btn ${
+                          t.ativa
+                            ? "btn-warning"
+                            : "btn-success btn-reativar-emphasis"
                         }`}
                       >
                         {t.ativa

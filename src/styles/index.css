@@ -362,6 +362,63 @@ body {
     gap: 0.5rem;
     justify-content: flex-start;
   }
+  /* Tabs (Design System) */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--cc-border);
+    gap: 0.25rem;
+  }
+  .tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem; /* ~13px */
+    font-weight: 500;
+    color: var(--cc-text-subtle);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 0.5rem 0.5rem 0 0;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .tab:hover:not([aria-selected="true"]) {
+    color: var(--cc-text);
+    background: var(--cc-bg-alt);
+  }
+  .tab[aria-selected="true"] {
+    color: var(--cc-primary);
+    background: var(--cc-bg-alt);
+    font-weight: 600;
+  }
+  .tab[aria-selected="true"]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 3px;
+    background: var(--cc-primary);
+    border-radius: 2px 2px 0 0;
+  }
+  .tab-badge {
+    margin-left: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.625rem; /* 10px */
+    font-weight: 600;
+    border-radius: 9999px;
+    background: var(--cc-border);
+    color: var(--cc-text);
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .tab[aria-selected="true"] .tab-badge {
+    background: var(--cc-primary);
+    color: #fff;
+  }
   @media (max-width: 640px) {
     .task-actions-col {
       width: 120px; /* ligeira redução em telas pequenas */
