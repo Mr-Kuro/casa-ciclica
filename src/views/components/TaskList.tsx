@@ -86,7 +86,7 @@ export const TaskList: React.FC<Props> = ({
                 <tr
                   key={t.id}
                   className={`border-t task-row-fixed ${
-                    t.ativa ? "hover:bg-gray-50" : "task-row-inactive"
+                    t.ativa ? "row-hover" : "task-row-inactive"
                   }`}
                 >
                   <td className="px-3 py-2 font-medium">

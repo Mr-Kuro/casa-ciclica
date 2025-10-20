@@ -6,49 +6,47 @@
    Dark: violeta profundo, azul oceano fechado, marrom Van Dyke, cinza carvão
 */
 :root {
-  --cc-bg: #fdfaf6; /* bege clarinho */
-  --cc-bg-alt: #f7f1e7; /* ocre clarinho */
-  --cc-accent: #e8c766; /* amarelo claro suave */
-  --cc-accent-alt: #d9a441; /* ocre mais forte */
-  --cc-border: #d8d5cf; /* cinza/bege neutro */
-  --cc-text: #3d352e; /* marrom suave */
-  --cc-muted: #6d655c;
-  --cc-btn-bg: #d9a441; /* botão base ocre */
-  --cc-btn-hover: #c78924;
-  --cc-gradient-from: #d9a441;
-  --cc-gradient-via: #e8c766;
-  --cc-gradient-to: #f7f1e7;
-  --cc-focus: #b57415;
-  /* Níveis de surface (0 = fundo, 1 = cartão, 2 = destaque) */
+  /* Light Mode – Bege puxado para marrom + Ocre clarinho */
+  --cc-bg: #f9f4ec; /* fundo bege mais neutro */
+  --cc-bg-alt: #f3e9db; /* bloco elevacao 1 (ocre claro) */
+  --cc-accent: #e2c290; /* destaque suave ocre/bege */
+  --cc-accent-alt: #d6a869; /* ocre médio para gradientes */
+  --cc-border: #dbcdbd; /* borda bege acinzentada */
+  --cc-text: #4a3b30; /* marrom mais marcado */
+  --cc-muted: #7c6a5b; /* texto secundário */
+  --cc-btn-bg: #d6a869;
+  --cc-btn-hover: #c08d49;
+  --cc-gradient-from: #c08d49;
+  --cc-gradient-via: #d6a869;
+  --cc-gradient-to: #f3e9db;
+  --cc-focus: #a86e30;
   --cc-surface-0: var(--cc-bg);
   --cc-surface-1: var(--cc-bg-alt);
-  --cc-surface-2: #ecd489; /* leve reforço sobre accent */
+  --cc-surface-2: #ead7c2; /* elevação extra */
   --cc-surface-border: var(--cc-border);
-  /* Tokens semânticos adicionais (light) */
-  --cc-primary: #8a5e00; /* contraste sobre bg claro (ocre escurecido) */
-  --cc-primary-hover: #704b00;
-  --cc-danger: #b7222b;
-  --cc-danger-hover: #96171f;
+  --cc-primary: #915f24; /* marrom/ocre escurecido */
+  --cc-primary-hover: #774e1d;
+  --cc-danger: #b23734;
+  --cc-danger-hover: #952c29;
   --cc-success: #2f7d42;
   --cc-success-hover: #256535;
   --cc-warning: #b07500;
   --cc-warning-hover: #8f5f00;
-  --cc-link: #0a4d8c;
-  --cc-link-hover: #063864;
-  --cc-table-head-bg: #e9ddc7; /* cabeçalho levemente mais escuro para contraste */
-  --cc-table-head-text: #3a332c; /* texto reforçado */
-  --cc-surface-hover: #e2d4bd; /* hover distinto das zebras */
-  --cc-text-subtle: #8a8075;
-  --cc-table-row-bg: var(--cc-bg-alt); /* base zebra claro */
-  --cc-table-row-alt-bg: #fbf5ec; /* variação sutil mais clara */
+  --cc-link: #1f4d7a; /* azul discreto para links */
+  --cc-link-hover: #163a5c;
+  --cc-table-head-bg: #ead7c2;
+  --cc-table-head-text: #4a3b30;
+  --cc-surface-hover: #e7d3bc;
+  --cc-row-hover: #dfa45c; /* hover clarinho para linhas (light) */
+  --cc-text-subtle: #8d7c6d;
+  --cc-table-row-bg: var(--cc-bg-alt);
+  --cc-table-row-alt-bg: #f9f4ec;
   --cc-table-group-bg: var(--cc-surface-2);
-  /* Header (light) */
-  --cc-header-from: #8a5e00; /* mais escuro para contraste */
-  --cc-header-via: #b07410; /* intermediário */
-  --cc-header-to: #d9a441; /* final */
-  --cc-header-text: #fff; /* texto branco agora tem contraste adequado */
-  --cc-header-overlay: rgba(255, 255, 255, 0.15);
-  /* Motivational quote (light) */
+  --cc-header-from: #774e1d;
+  --cc-header-via: #915f24;
+  --cc-header-to: #d6a869;
+  --cc-header-text: #fff;
+  --cc-header-overlay: rgba(255, 255, 255, 0.18);
   --cc-motive-bg: var(--cc-bg-alt);
   --cc-motive-border: var(--cc-border);
   --cc-motive-text: var(--cc-text);
@@ -56,49 +54,47 @@
   --cc-motive-accent: var(--cc-primary);
 }
 html.dark {
-  /* Dark Cyan / Teal palette (inspirado em tons profundos de cyan) */
-  --cc-bg: #061a1d; /* base quase preta com leve matiz teal */
-  --cc-bg-alt: #0c262a; /* elevação 1 */
-  --cc-accent: #0f4c55; /* teal escuro para elementos de destaque suaves */
-  --cc-accent-alt: #126672; /* variação mais clara para gradientes */
-  --cc-border: #16424a; /* borda contrastante porém integrada */
-  --cc-text: #e1f7f9; /* texto alto contraste frio */
-  --cc-muted: #9bc2c7; /* texto secundário dessaturado */
-  --cc-btn-bg: #126672; /* botão base teal médio */
-  --cc-btn-hover: #158092; /* hover mais claro vibrante */
-  --cc-gradient-from: #0f3a40;
-  --cc-gradient-via: #126672;
-  --cc-gradient-to: #0c262a;
-  --cc-focus: #27b6ca; /* foco cyan vivo acessível */
+  /* Dark Mode – Azul oceano fechado + Van Dyck Brown */
+  --cc-bg: #0a1419; /* azul petróleo muito escuro */
+  --cc-bg-alt: #112027; /* elevação 1 */
+  --cc-accent: #1c3f4b; /* azul oceano fechado */
+  --cc-accent-alt: #285868; /* variação mais clara */
+  --cc-border: #2c4a54; /* borda discreta integrada */
+  --cc-text: #f2efe9; /* texto quente claro */
+  --cc-muted: #b4b0aa; /* secundário suave */
+  --cc-btn-bg: #285868; /* botão azul oceano médio */
+  --cc-btn-hover: #327089; /* hover mais claro */
+  --cc-gradient-from: #1c3f4b;
+  --cc-gradient-via: #285868;
+  --cc-gradient-to: #112027;
+  --cc-focus: #66b7d1; /* foco acessível contrastante */
   --cc-surface-0: var(--cc-bg);
   --cc-surface-1: var(--cc-bg-alt);
-  --cc-surface-2: #104149; /* elevação adicional */
+  --cc-surface-2: #1b333d; /* elevação 2 */
   --cc-surface-border: var(--cc-border);
-  /* Tokens semânticos adicionais (dark cyan) */
-  --cc-primary: #27b6ca; /* primário cyan vibrante */
-  --cc-primary-hover: #1fa1b3;
-  --cc-danger: #e75c5c; /* vermelho suavizado contra fundo frio */
-  --cc-danger-hover: #d94848;
-  --cc-success: #2fae7a; /* verde com matiz teal */
+  --cc-primary: #a57442; /* Van Dyck Brown iluminado */
+  --cc-primary-hover: #8c6136;
+  --cc-danger: #e3645f; /* vermelho quente contra fundo frio */
+  --cc-danger-hover: #c9534f;
+  --cc-success: #2fae7a;
   --cc-success-hover: #279468;
-  --cc-warning: #d9a441; /* mantém identidade warm para diferenciar */
-  --cc-warning-hover: #c78924;
-  --cc-link: #35c5dd; /* link cyan claro */
-  --cc-link-hover: #27b6ca;
-  --cc-table-head-bg: #0f2d32; /* cabeçalho elevado distinto */
+  --cc-warning: #d6a869;
+  --cc-warning-hover: #c08d49;
+  --cc-link: #66b7d1; /* links azul claro oceano */
+  --cc-link-hover: #56a1ba;
+  --cc-table-head-bg: #1b333d;
   --cc-table-head-text: var(--cc-text);
-  --cc-surface-hover: #103237; /* hover sutil */
-  --cc-text-subtle: #b7d6da;
+  --cc-surface-hover: #17313a;
+  --cc-row-hover: #dfa45c84; /* tom mais claro coerente com fundo escuro */
+  --cc-text-subtle: #d3d0cb;
   --cc-table-row-bg: var(--cc-surface-0);
-  --cc-table-row-alt-bg: #0e2226;
+  --cc-table-row-alt-bg: #142229;
   --cc-table-group-bg: var(--cc-surface-2);
-  /* Header gradient (teal progression) */
-  --cc-header-from: #0f3a40;
-  --cc-header-via: #126672;
-  --cc-header-to: #27b6ca;
-  --cc-header-text: #e1f7f9;
-  --cc-header-overlay: rgba(255, 255, 255, 0.12);
-  /* Motivational quote (dark cyan) */
+  --cc-header-from: #1c3f4b;
+  --cc-header-via: #285868;
+  --cc-header-to: #a57442; /* leve toque de marrom no final */
+  --cc-header-text: #f2efe9;
+  --cc-header-overlay: rgba(255, 255, 255, 0.1);
   --cc-motive-bg: var(--cc-surface-1);
   --cc-motive-border: var(--cc-border);
   --cc-motive-text: var(--cc-text);
@@ -303,8 +299,19 @@ body {
   .text-subtle {
     color: var(--cc-text-subtle);
   }
+  .row-hover {
+    transition: background-color 0.22s ease, color 0.22s ease;
+  }
   .row-hover:hover {
-    background: var(--cc-surface-hover);
+    background: var(--cc-row-hover);
+  }
+  html.dark .row-hover:hover {
+    background: var(--cc-row-hover);
+    color: var(--cc-text);
+  }
+  html.dark .row-hover:hover .text-muted,
+  html.dark .row-hover:hover .text-subtle {
+    color: var(--cc-text);
   }
   .table-row {
     border-top: 1px solid var(--cc-surface-border);

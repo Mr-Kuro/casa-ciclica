@@ -226,38 +226,97 @@ Assim, somente tarefas diárias "renovam" automaticamente no dia seguinte; as de
 
 ## Tema & Paleta CasaCíclica
 
-A aplicação utiliza um sistema de tema claro/escuro controlado via classe `dark` aplicada ao elemento `html` e persistida em `localStorage` na chave `prefTheme`. A paleta foi convertida em variáveis CSS definidas em `src/styles/index.css` permitindo evolução futura sem buscar e substituir cores espalhadas.
+A aplicação utiliza um sistema de tema claro/escuro controlado via classe `dark` aplicada ao elemento `html` e persistida em `localStorage` na chave `prefTheme`. As cores são centralizadas em variáveis CSS em `src/styles/index.css`.
 
-### Variáveis Principais
+### Tokens de Cor
 
-`--cc-bg` (fundo principal), `--cc-bg-alt` (fundo de cartões / seções), `--cc-accent` (cor de destaque primária), `--cc-accent-alt` (destaque alternativo), `--cc-border` (bordas suaves), `--cc-text` (texto principal), `--cc-muted` (texto secundário), além das específicas de botão e gradiente:
+Principais superfícies e semântica:
 
-- `--cc-btn-bg`, `--cc-btn-hover`
-- `--cc-gradient-from`, `--cc-gradient-via`, `--cc-gradient-to`
-- `--cc-focus` (realce de foco/acessibilidade)
+| Variável | Uso |
+|----------|-----|
+| `--cc-bg` | Fundo da página |
+| `--cc-bg-alt` | Cartões básicos / seções elevadas |
+| `--cc-surface-2` | Destaques / agrupamentos |
+| `--cc-border` | Bordas neutras |
+| `--cc-text` | Texto principal |
+| `--cc-muted` | Texto secundário |
+| `--cc-text-subtle` | Texto menor / rotulagem discreta |
+| `--cc-primary` | Ação primária / ênfases |
+| `--cc-success`, `--cc-danger`, `--cc-warning` | Estados semânticos |
+| `--cc-link` | Links inline |
+| `--cc-focus` | Contorno de acessibilidade |
+| `--cc-gradient-*` | Barras e backgrounds decorativos |
+| `--cc-motive-*` | Área da citação motivacional |
 
-### Paleta Light (Hex)
+### Paleta Light (Atualizada)
 
-- Fundo: `#fdfaf6`
-- Fundo alternativo: `#f7f1e7`
-- Acento: `#e8c766`
-- Acento alternativo / Ocre: `#d9a441`
-- Borda neutra: `#d8d5cf`
-- Texto principal: `#3d352e`
-- Texto secundário: `#6d655c`
-- Botão hover: `#c78924`
+Bege puxado ao marrom + ocre clarinho para calor e legibilidade.
 
-### Paleta Dark (Hex)
+| Papel | Hex |
+|-------|-----|
+| Fundo (`--cc-bg`) | `#f9f4ec` |
+| Fundo alt (`--cc-bg-alt`) | `#f3e9db` |
+| Superfície 2 (`--cc-surface-2`) | `#ead7c2` |
+| Acento (`--cc-accent`) | `#e2c290` |
+| Acento alt (`--cc-accent-alt`) | `#d6a869` |
+| Borda (`--cc-border`) | `#dbcdbd` |
+| Texto principal (`--cc-text`) | `#4a3b30` |
+| Texto secundário (`--cc-muted`) | `#7c6a5b` |
+| Texto sutil (`--cc-text-subtle`) | `#8d7c6d` |
+| Primário (`--cc-primary`) | `#915f24` |
+| Primário hover (`--cc-primary-hover`) | `#774e1d` |
+| Botão base (`--cc-btn-bg`) | `#d6a869` |
+| Botão hover (`--cc-btn-hover`) | `#c08d49` |
+| Link (`--cc-link`) | `#1f4d7a` |
+| Link hover (`--cc-link-hover`) | `#163a5c` |
+| Foco (`--cc-focus`) | `#a86e30` |
+| Warning (`--cc-warning`) | `#b07500` |
+| Warning hover | `#8f5f00` |
+| Success (`--cc-success`) | `#2f7d42` |
+| Danger (`--cc-danger`) | `#b23734` |
 
-- Fundo: `#16151a`
-- Fundo alternativo: `#201f24`
-- Violeta acento: `#5b5bd6`
-- Azul oceano: `#0f4c70`
-- Borda: `#3a3842`
-- Texto principal: `#e8e6e3`
-- Texto secundário: `#a39fa8`
-- Botão hover: `#4949bb`
-- Foco (marrom aquecido): `#a37b35`
+### Paleta Dark (Atualizada)
+
+Azul oceano fechado + Van Dyck Brown para profundidade aconchegante.
+
+| Papel | Hex |
+|-------|-----|
+| Fundo (`--cc-bg`) | `#0a1419` |
+| Fundo alt (`--cc-bg-alt`) | `#112027` |
+| Superfície 2 (`--cc-surface-2`) | `#1b333d` |
+| Acento (`--cc-accent`) | `#1c3f4b` |
+| Acento alt (`--cc-accent-alt`) | `#285868` |
+| Borda (`--cc-border`) | `#2c4a54` |
+| Texto principal (`--cc-text`) | `#f2efe9` |
+| Texto secundário (`--cc-muted`) | `#b4b0aa` |
+| Texto sutil (`--cc-text-subtle`) | `#d3d0cb` |
+| Primário (`--cc-primary`) | `#a57442` |
+| Primário hover (`--cc-primary-hover`) | `#8c6136` |
+| Botão base (`--cc-btn-bg`) | `#285868` |
+| Botão hover (`--cc-btn-hover`) | `#327089` |
+| Link (`--cc-link`) | `#66b7d1` |
+| Link hover (`--cc-link-hover`) | `#56a1ba` |
+| Foco (`--cc-focus`) | `#66b7d1` |
+| Warning (`--cc-warning`) | `#d6a869` |
+| Warning hover | `#c08d49` |
+| Success (`--cc-success`) | `#2fae7a` |
+| Danger (`--cc-danger`) | `#e3645f` |
+
+### Hover & Foco
+
+Botões aplicam leve `filter: brightness(0.95~0.96)` no hover para preservar saturação. Foco usa `outline: 2px solid var(--cc-focus)` garantindo contraste AA.
+
+### Customização Rápida
+
+- Ajuste somente variáveis em `:root` e `html.dark` para trocar tema sem tocar em componentes.
+- Para um tema adicional (ex: alto contraste), crie uma classe `html.high-contrast` duplicando o bloco escuro e elevando brilho/contraste.
+- Evite substituir cores diretamente em componentes; mantenha a indireção pelas variáveis para consistência.
+
+### Extensões Futuras
+
+- Gerador de tema via UI salvando JSON em `localStorage`.
+- Modo monocromático para contexto de impressão.
+- Tokens para estados de arrasto (`--cc-drag-bg`) e seleção (`--cc-selection-bg`).
 
 ### Gradientes
 
