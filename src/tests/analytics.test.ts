@@ -25,7 +25,7 @@ function make(base: Partial<Task>): Task {
 
 describe("analytics helpers", () => {
   it("computes diasDesdeCriacao", () => {
-    const yesterday = new Date(Date.now() - 24*60*60*1000).toISOString();
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const task = make({ criadaEm: yesterday });
     const dias = diasDesdeCriacao(task);
     expect(dias === 0 || dias === 1).toBe(true); // tolerância para horário
@@ -40,7 +40,9 @@ describe("analytics helpers", () => {
     expect(statusRecorrencia(task)).toBe("Devida hoje");
   });
   it("diasAteProxima negative when past date", () => {
-    const pastIso = new Date(Date.now() - 2*24*60*60*1000).toISOString();
+    const pastIso = new Date(
+      Date.now() - 2 * 24 * 60 * 60 * 1000
+    ).toISOString();
     const task = make({ proximaData: pastIso });
     const dias = diasAteProxima(task);
     expect(dias).toBeLessThan(0);

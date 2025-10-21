@@ -398,6 +398,66 @@ Incluídas: `description`, `keywords`, `author`, `canonical`, Open Graph (`og:ti
 
 - Teste automatizado de contraste WCAG (fórmula luminância relativa)
 - Skip link e regiões ARIA (`role="main"`)
+
+## Métricas e Análises de Tarefas
+
+Para enriquecer a visão de detalhe de cada tarefa foram adicionadas métricas calculadas dinamicamente em `src/utils/analytics.ts`. O objetivo é oferecer contexto temporal (quando foi criada, quando foi concluída, quando volta) e um rótulo descritivo da recorrência.
+
+### Campo `criadaEm`
+
+Cada tarefa possui agora o timestamp ISO (`criadaEm`) de sua criação. Seeds antigos passam por hidratação no `TaskController` garantindo preenchimento retroativo (fallback para o momento de hidratação). Esse campo nunca é atualizado após criação.
+
+### Funções Disponíveis
+
+- `diasDesdeCriacao(task)`: Número de dias completos desde `criadaEm` até agora.
+- `diasDesdeUltimaConclusao(task)`: Dias desde `ultimaConclusao` (se ausente, retorna `undefined`).
+- `diasAteProxima(task)`: Dias restantes até `proximaData` (valor negativo indica data já passada/atrasada).
+- `descricaoRecorrencia(task)`: String amigável (ex: "Diária", "Semanal (Segunda)").
+- `statusRecorrencia(task)`: Estado sintético (ex: `DEVIDA_HOJE`, `ATRASADA`, `AGENDADA`, `SEM_PROXIMA`). Usado para colorir badges.
+
+### Exibição na Tela `TaskDetail`
+
+A página de detalhes (`src/views/pages/TaskDetail.tsx`) mostra cartões com:
+
+1. Recorrência (tag + descrição)  
+2. Criada há X dias  
+3. Última conclusão (X dias) ou mensagem de nunca concluída  
+4. Próxima ocorrência em X dias (ou atrasada há Y dias)  
+5. Status textual e cor semântica (verde para hoje, amarelo para futuro, vermelho para atraso).
+
+### Casos Limite
+
+- Tarefas sem `ultimaConclusao`: métricas de conclusão omitidas / mensagem de ausência.
+- `proximaData` passada: `diasAteProxima` negativo → status `ATRASADA`.
+- Falta de `proximaData` (deveria ser raro) gera status `SEM_PROXIMA`.
+
+### Ordenação Avançada Persistente
+
+O componente de listagem (`TaskList`) suporta ordenação por múltiplas colunas (Título, Recorrência, Dia da Semana, Próxima Data, Última Conclusão). A escolha (chave + direção) é persistida em `localStorage` na chave `sortPrefs` por meio de helpers em `src/utils/sortStorage.ts`:
+
+- `loadSortPrefs()`: Lê e valida `{ key, dir }` retornando defaults se inválido.
+- `saveSortPrefs(prefs)`: Serializa preferência atual.
+
+Isso garante consistência da visualização ao recarregar a aplicação.
+
+### Testes Relacionados
+
+Novos testes foram adicionados em:
+
+- `analytics.test.ts`: Cobertura das funções de métricas e status.
+- `createWeeklyTask.test.ts`: Verifica criação semanal e cálculo da próxima ocorrência (ambiente `jsdom`).
+- `sortTasks.test.ts`: Garante ordenação determinística por diferentes chaves e direções.
+
+### Próximas Melhorias
+
+- Teste específico para persistência de preferências (mock de `localStorage` e verificação da restauracão automática).
+- Internacionalização das descrições (Português → outros idiomas) mantendo chaves semânticas.
+- Indicador de "ciclo" (quantas vezes já foi concluída) incrementando contador persistido.
+
+## Manutenção da Documentação
+
+Após qualquer mudança em recorrência, cálculos de datas ou novos estados em `statusRecorrencia`, lembre de atualizar esta seção para evitar descompasso entre comportamento e descrição.
+
 - Legendas (`<caption>`) para tabelas Concluídas/Desativadas
 - Preferência de redução de movimento (`prefers-reduced-motion`)
 

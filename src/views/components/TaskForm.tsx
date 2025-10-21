@@ -75,7 +75,9 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
       </div>
       {recorrencia === Recurrence.SEMANAL && (
         <div>
-          <label className="block text-sm mb-1">{LABELS.campos.diaSemana}</label>
+          <label className="block text-sm mb-1">
+            {LABELS.campos.diaSemana}
+          </label>
           <select
             className="input max-w-[200px]"
             value={diaSemana === undefined ? "" : diaSemana}
@@ -98,7 +100,9 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
         type="submit"
         className="btn"
         disabled={recorrencia === Recurrence.SEMANAL && diaSemana === undefined}
-        aria-disabled={recorrencia === Recurrence.SEMANAL && diaSemana === undefined}
+        aria-disabled={
+          recorrencia === Recurrence.SEMANAL && diaSemana === undefined
+        }
       >
         {LABELS.actions.adicionar}
       </button>

@@ -60,9 +60,12 @@ export const TaskDetail: React.FC = () => {
             <div className="flex gap-2 flex-wrap text-[11px]">
               <span className="inline-flex items-center gap-1 rounded px-2 py-1 bg-gray-200 dark:bg-gray-700">
                 {tarefa.recorrencia}
-                {tarefa.recorrencia === Recurrence.SEMANAL && typeof tarefa.diaSemana === "number" && (
-                  <span className="opacity-70">· {LABELS.diasSemanaCurto[tarefa.diaSemana]}</span>
-                )}
+                {tarefa.recorrencia === Recurrence.SEMANAL &&
+                  typeof tarefa.diaSemana === "number" && (
+                    <span className="opacity-70">
+                      · {LABELS.diasSemanaCurto[tarefa.diaSemana]}
+                    </span>
+                  )}
               </span>
               <span className="inline-flex items-center gap-1 rounded px-2 py-1 bg-gray-200 dark:bg-gray-700">
                 {descRec}
@@ -111,18 +114,24 @@ export const TaskDetail: React.FC = () => {
                 : "Nunca concluída"}
             </p>
           </div>
-            <div className="p-2 rounded border bg-white/50 dark:bg-gray-900/30">
-              <p className="font-medium">Criada</p>
-              <p>{tarefa.criadaEm ? new Date(tarefa.criadaEm).toLocaleDateString() : "—"}</p>
-              <p className="text-[11px] text-muted">
-                {diasCriacao !== null ? `${diasCriacao} dia(s) atrás` : "—"}
-              </p>
-            </div>
+          <div className="p-2 rounded border bg-white/50 dark:bg-gray-900/30">
+            <p className="font-medium">Criada</p>
+            <p>
+              {tarefa.criadaEm
+                ? new Date(tarefa.criadaEm).toLocaleDateString()
+                : "—"}
+            </p>
+            <p className="text-[11px] text-muted">
+              {diasCriacao !== null ? `${diasCriacao} dia(s) atrás` : "—"}
+            </p>
+          </div>
         </div>
         {tarefa.recorrencia !== Recurrence.DIARIA && (
           <div className="text-[11px] text-muted">
             {diasProxima !== null && diasProxima < 0 && (
-              <span className="text-red-600">Atrasada {Math.abs(diasProxima)} dia(s).</span>
+              <span className="text-red-600">
+                Atrasada {Math.abs(diasProxima)} dia(s).
+              </span>
             )}
           </div>
         )}
