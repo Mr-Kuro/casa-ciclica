@@ -1,5 +1,9 @@
 # CasaCíclica
 
+[![Uso acadêmico permitido](https://img.shields.io/badge/Uso%20acad%C3%AAmico-permitido-blueviolet)](./LICENSE)
+
+> Nota: Este projeto foi desenvolvido em modo **"vibe coding"** – evolução incremental, foco em fluidez criativa e ajustes rápidos conforme as ideias surgiam, priorizando clareza funcional antes de otimizações estruturais profundas. Refatorações pontuais podem ter sido adiadas em favor de manter o ritmo de descoberta de features.
+
 Organização que se renova.
 
 Aplicação para controle de tarefas recorrentes (diárias, semanais, quinzenais e mensais) acessada pela empregada.
@@ -68,7 +72,7 @@ Entretanto existe uma concessão limitada para uso **acadêmico não comercial**
 - Pesquisa acadêmica (prototipagem / papers) sem publicar o código modificado publicamente.
 - Forks privados para estudo mantendo avisos de copyright.
 
-Condições: manter atribuição ao autor ("Baseado em CasaCíclica de Anderson Queiroz"), preservar avisos e não hospedar versão de produção acessível ao público. Leia o arquivo `LICENSE` para detalhes completos (incluindo restrições adicionais e cláusulas em inglês).
+Condições: manter atribuição ao autor ("Baseado em CasaCíclica de Anderson Queiroz - Mr. Kuro"), preservar avisos e não hospedar versão de produção acessível ao público. Leia o arquivo `LICENSE` para detalhes completos (incluindo restrições adicionais e cláusulas em inglês).
 
 Para casos limítrofes (ex: demo remota pública para banca), solicite autorização prévia via contato no `LICENSE`.
 
