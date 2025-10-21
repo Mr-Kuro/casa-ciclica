@@ -73,6 +73,7 @@ Os filtros ativos na aplicação seguem regras específicas:
 - **QUINZENA**: Exibe apenas tarefas quinzenais cuja `proximaData` cai na quinzena corrente e que não foram concluídas hoje.
   - A quinzena corrente é determinada em `dentroDaQuinzenaAtual` (dias 1–15 ou 16–final do mês).
 - **MES**: Exibe apenas tarefas mensais cuja `proximaData` está dentro do mês atual e não foram concluídas hoje.
+- **SEMANA** (nova aba): Lista todas as tarefas diárias e semanais não concluídas hoje, agrupadas em "Diárias" e pelos dias da semana (Domingo ... Sábado). Permite alternar ordenação interna por título.
 
 Helpers principais em `src/utils/recurrence.ts`:
 

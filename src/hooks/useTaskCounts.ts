@@ -7,6 +7,7 @@ import {
 
 export interface TaskCounts {
   HOJE: number;
+  SEMANA: number; // novas abas agrupadas
   QUINZENA: number;
   MES: number;
 }
@@ -17,7 +18,17 @@ export function computeCounts(
 ): TaskCounts {
   const countHoje = tarefas.filter((t) => {
     if (t.recorrencia === "SEMANAL")
-      return t.diaSemana !== undefined && t.diaSemana === today.getDay();
+      return (
+        t.diaSemana !== undefined &&
+        t.diaSemana === today.getDay() &&
+        naoConcluidaHoje(t as any)
+      );
+    if (t.recorrencia === "DIARIA") return naoConcluidaHoje(t as any);
+    return false;
+  }).length;
+  // Semana: todas semanais (não concluidas hoje) + diárias não concluídas hoje
+  const countSemana = tarefas.filter((t) => {
+    if (t.recorrencia === "SEMANAL") return naoConcluidaHoje(t as any);
     if (t.recorrencia === "DIARIA") return naoConcluidaHoje(t as any);
     return false;
   }).length;
@@ -33,7 +44,12 @@ export function computeCounts(
       dentroDoMesAtual(t.proximaData) &&
       naoConcluidaHoje(t as any)
   ).length;
-  return { HOJE: countHoje, QUINZENA: countQuinzena, MES: countMes };
+  return {
+    HOJE: countHoje,
+    SEMANA: countSemana,
+    QUINZENA: countQuinzena,
+    MES: countMes,
+  };
 }
 
 import { useMemo } from "react";

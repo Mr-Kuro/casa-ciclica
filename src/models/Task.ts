@@ -9,4 +9,5 @@ export interface Task {
   ultimaConclusao?: string; // ISO date
   proximaData?: string; // ISO date calculada
   diaSemana?: number; // 0=Domingo ... 6=Sabado (para tarefas semanais específicas)
+  criadaEm?: string; // ISO date de criação
 }

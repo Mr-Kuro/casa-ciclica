@@ -13,16 +13,28 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [recorrencia, setRecorrencia] = useState<Recurrence>(Recurrence.DIARIA);
+  const [diaSemana, setDiaSemana] = useState<number | undefined>(undefined);
   const { push } = useToast();
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!titulo.trim()) return;
-    const task = taskController.criar({ titulo, descricao, recorrencia });
+    if (recorrencia === Recurrence.SEMANAL && typeof diaSemana !== "number") {
+      // validação simples: exige seleção de dia
+      push({ message: "Selecione o dia da semana.", type: "warning" });
+      return;
+    }
+    const task = taskController.criar({
+      titulo,
+      descricao,
+      recorrencia,
+      diaSemana: recorrencia === Recurrence.SEMANAL ? diaSemana : undefined,
+    });
     onCreate(task);
     setTitulo("");
     setDescricao("");
     setRecorrencia(Recurrence.DIARIA);
+    setDiaSemana(undefined);
     push({ message: LABELS.feedback.toastTarefaCriada, type: "success" });
   }
 
@@ -61,7 +73,33 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
           ))}
         </select>
       </div>
-      <button type="submit" className="btn">
+      {recorrencia === Recurrence.SEMANAL && (
+        <div>
+          <label className="block text-sm mb-1">{LABELS.campos.diaSemana}</label>
+          <select
+            className="input max-w-[200px]"
+            value={diaSemana === undefined ? "" : diaSemana}
+            onChange={(e) =>
+              setDiaSemana(
+                e.target.value === "" ? undefined : Number(e.target.value)
+              )
+            }
+          >
+            <option value="">Selecione...</option>
+            {LABELS.diasSemanaLongo.map((d, idx) => (
+              <option key={idx} value={idx}>
+                {d}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      <button
+        type="submit"
+        className="btn"
+        disabled={recorrencia === Recurrence.SEMANAL && diaSemana === undefined}
+        aria-disabled={recorrencia === Recurrence.SEMANAL && diaSemana === undefined}
+      >
         {LABELS.actions.adicionar}
       </button>
     </form>

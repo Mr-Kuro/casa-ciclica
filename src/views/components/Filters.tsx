@@ -2,18 +2,23 @@ import React from "react";
 import { LABELS } from "../../constants/strings";
 
 interface Props {
-  value: "HOJE" | "QUINZENA" | "MES";
-  onChange(val: "HOJE" | "QUINZENA" | "MES"): void;
-  counts?: { HOJE: number; QUINZENA: number; MES: number };
+  value: "HOJE" | "SEMANA" | "QUINZENA" | "MES";
+  onChange(val: "HOJE" | "SEMANA" | "QUINZENA" | "MES"): void;
+  counts?: { HOJE: number; SEMANA: number; QUINZENA: number; MES: number };
 }
 
 export const Filters: React.FC<Props> = ({ value, onChange, counts }) => {
   const opts: Array<{
-    v: "HOJE" | "QUINZENA" | "MES";
+    v: "HOJE" | "SEMANA" | "QUINZENA" | "MES";
     label: string;
     hint: string;
   }> = [
     { v: "HOJE", label: "Hoje", hint: "Diárias abertas + semanais do dia" },
+    {
+      v: "SEMANA",
+      label: "Semana",
+      hint: "Todas as diárias e semanais não concluídas",
+    },
     { v: "QUINZENA", label: "Quinzena", hint: "Quinzenais pendentes" },
     { v: "MES", label: "Mês", hint: "Mensais pendentes" },
   ];

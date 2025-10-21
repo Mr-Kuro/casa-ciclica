@@ -29,9 +29,10 @@ export class TaskController {
             new Date(),
             t.diaSemana
           ),
+          criadaEm: t.criadaEm || new Date().toISOString(),
         };
       }
-      return { ...t };
+      return { ...t, criadaEm: t.criadaEm || new Date().toISOString() };
     });
     if (alterado) this.persistir();
   }
@@ -58,6 +59,7 @@ export class TaskController {
         new Date(),
         data.diaSemana
       ),
+      criadaEm: new Date().toISOString(),
     };
     this.tarefas.push(nova);
     this.persistir();

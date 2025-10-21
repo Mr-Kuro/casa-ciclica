@@ -9,7 +9,9 @@ import { useTaskCounts } from "../../hooks/useTaskCounts";
 
 export const Home: React.FC = () => {
   const [tarefas, setTarefas] = useState<Task[]>(taskController.listar());
-  const [filtro, setFiltro] = useState<"HOJE" | "QUINZENA" | "MES">("HOJE");
+  const [filtro, setFiltro] = useState<"HOJE" | "SEMANA" | "QUINZENA" | "MES">(
+    "HOJE"
+  );
 
   function refresh() {
     setTarefas(taskController.listar());

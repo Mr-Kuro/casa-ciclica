@@ -66,6 +66,7 @@ function seedDiarias(hoje: Date): Task[] {
     recorrencia: Recurrence.DIARIA,
     ativa: true,
     proximaData: calcularProximaData(Recurrence.DIARIA, hoje),
+    criadaEm: hoje.toISOString(),
   }));
 }
 
@@ -77,6 +78,7 @@ function semanal(hoje: Date, diaSemana: number, tarefas: string[]): Task[] {
     diaSemana,
     ativa: true,
     proximaData: calcularProximaData(Recurrence.SEMANAL, hoje, diaSemana),
+    criadaEm: hoje.toISOString(),
   }));
 }
 
@@ -147,6 +149,7 @@ function seedQuinzenais(hoje: Date, anchors: SeedAnchors): Task[] {
       recorrencia: Recurrence.QUINZENAL,
       ativa: true,
       proximaData: prox,
+      criadaEm: hoje.toISOString(),
     };
   });
 }
@@ -175,6 +178,7 @@ function seedMensais(hoje: Date, anchors: SeedAnchors): Task[] {
       hoje.getMonth(),
       anchorDay
     ).toISOString(),
+    criadaEm: hoje.toISOString(),
   }));
 }
 
