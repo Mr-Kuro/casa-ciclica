@@ -58,6 +58,20 @@ src/
   tests/
 ```
 
+## Licença & Uso Acadêmico
+
+Este projeto é distribuído sob uma licença proprietária. Uso comercial, distribuição pública e demonstrações hospedadas não são permitidos sem autorização escrita.
+
+Entretanto existe uma concessão limitada para uso **acadêmico não comercial**:
+
+- Tarefas de cursos, TCCs, trabalhos universitários.
+- Pesquisa acadêmica (prototipagem / papers) sem publicar o código modificado publicamente.
+- Forks privados para estudo mantendo avisos de copyright.
+
+Condições: manter atribuição ao autor ("Baseado em CasaCíclica de Anderson Queiroz"), preservar avisos e não hospedar versão de produção acessível ao público. Leia o arquivo `LICENSE` para detalhes completos (incluindo restrições adicionais e cláusulas em inglês).
+
+Para casos limítrofes (ex: demo remota pública para banca), solicite autorização prévia via contato no `LICENSE`.
+
 ## Assunção
 
 O prompt repete "semanalmente" duas vezes; considerei que a quarta recorrência seria **mensalmente**. Ajuste facilmente em `src/types/index.ts` se necessário.
