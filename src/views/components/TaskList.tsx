@@ -28,17 +28,26 @@ interface Props {
   tarefas: Task[];
   onChange(): void;
   filtro?: "HOJE" | "SEMANA" | "QUINZENA" | "MES";
+  /** Se verdadeiro, mostra skeleton da tabela enquanto dados externos chegam */
+  loading?: boolean;
 }
 
 export const TaskList: React.FC<Props> = ({
   tarefas,
   onChange,
   filtro = "HOJE",
+  loading = false,
 }) => {
   const { push } = useToast();
   const [mostrarInativas, setMostrarInativas] = useState(false);
   const [sortKey, setSortKey] = useState<TaskSortKey>("titulo");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  // Carregamento inicial curto para evitar flash de layout enquanto calcula memos
+  const [initialLoading, setInitialLoading] = useState(true);
+  useEffect(() => {
+    const id = setTimeout(() => setInitialLoading(false), 120);
+    return () => clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     const prefs = loadSortPrefs();
@@ -337,6 +346,8 @@ export const TaskList: React.FC<Props> = ({
   }, [filtradas, filtro, sortKey, sortDir]);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
+  const tabelaCarregando = loading || initialLoading;
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
@@ -612,192 +623,217 @@ export const TaskList: React.FC<Props> = ({
               </tr>
             </thead>
             <tbody>
-              {gruposSemana.map((g) => (
-                <React.Fragment key={g.titulo}>
-                  <tr className="surface-accent select-none">
-                    <td colSpan={6} className="px-3 py-2 subtitle">
-                      <button
-                        onClick={() =>
-                          setCollapsed((c) => ({
-                            ...c,
-                            [g.titulo]: !c[g.titulo],
-                          }))
-                        }
-                        className="mr-2 inline-flex items-center justify-center rounded border px-2 py-0.5 text-[10px] btn-invert"
-                        aria-label={
-                          collapsed[g.titulo]
-                            ? "Expandir grupo"
-                            : "Colapsar grupo"
-                        }
-                      >
-                        {collapsed[g.titulo] ? "+" : "−"}
-                      </button>
-                      {g.titulo}{" "}
-                      <span className="ml-2 text-[10px] text-subtle">
-                        {g.tarefas.length} itens
-                      </span>
+              {tabelaCarregando &&
+                [...Array(5)].map((_, i) => (
+                  <tr key={`sk-week-${i}`} className="task-row-fixed border-t">
+                    <td className="px-3 py-3" colSpan={6}>
+                      <div className="flex flex-col gap-2">
+                        <div className="skeleton h-4 w-1/3" />
+                        <div className="flex gap-4">
+                          <div className="flex-1">
+                            <div className="skeleton h-3 w-2/3 mb-1" />
+                            <div className="skeleton h-3 w-1/2" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="skeleton h-3 w-1/2 mb-1" />
+                            <div className="skeleton h-3 w-2/3" />
+                          </div>
+                        </div>
+                      </div>
                     </td>
                   </tr>
-                  {!collapsed[g.titulo] &&
-                    g.tarefas.map((t) => {
-                      const dias = LABELS.diasSemanaCurto;
-                      const isAtrasadaSemana =
-                        mostrarAtrasadas && semanalAtrasadaHoje(t, hojeRef);
-                      const atrasoDias = isAtrasadaSemana
-                        ? diasAtraso(t.proximaData, hojeRef)
-                        : 0;
-                      const concluida = !naoConcluidaHoje(t);
-                      return (
-                        <tr
-                          key={t.id}
-                          className={`border-t task-row-fixed ${
-                            concluida
-                              ? "task-row-completed"
-                              : t.ativa
-                              ? "row-hover"
-                              : "task-row-inactive"
-                          }`}
+                ))}
+              {!tabelaCarregando &&
+                gruposSemana.map((g) => (
+                  <React.Fragment key={g.titulo}>
+                    <tr className="surface-accent select-none">
+                      <td colSpan={6} className="px-3 py-2 subtitle">
+                        <button
+                          onClick={() =>
+                            setCollapsed((c) => ({
+                              ...c,
+                              [g.titulo]: !c[g.titulo],
+                            }))
+                          }
+                          className="mr-2 inline-flex items-center justify-center rounded border px-2 py-0.5 text-[10px] btn-invert"
+                          aria-label={
+                            collapsed[g.titulo]
+                              ? "Expandir grupo"
+                              : "Colapsar grupo"
+                          }
                         >
-                          <td className="px-3 py-2 font-medium">
-                            <a
-                              href={`/tarefas/${t.id}`}
-                              className="hover:underline"
-                            >
-                              {t.titulo}
-                            </a>
-                            {isAtrasadaSemana && (
-                              <span
-                                className="badge-overdue ml-2 align-middle"
-                                title="Tarefa atrasada"
+                          {collapsed[g.titulo] ? "+" : "−"}
+                        </button>
+                        {g.titulo}{" "}
+                        <span className="ml-2 text-[10px] text-subtle">
+                          {g.tarefas.length} itens
+                        </span>
+                      </td>
+                    </tr>
+                    {!collapsed[g.titulo] &&
+                      g.tarefas.map((t) => {
+                        const dias = LABELS.diasSemanaCurto;
+                        const isAtrasadaSemana =
+                          mostrarAtrasadas && semanalAtrasadaHoje(t, hojeRef);
+                        const atrasoDias = isAtrasadaSemana
+                          ? diasAtraso(t.proximaData, hojeRef)
+                          : 0;
+                        const concluida = !naoConcluidaHoje(t);
+                        return (
+                          <tr
+                            key={t.id}
+                            className={`border-t task-row-fixed ${
+                              concluida
+                                ? "task-row-completed"
+                                : t.ativa
+                                ? "row-hover"
+                                : "task-row-inactive"
+                            }`}
+                          >
+                            <td className="px-3 py-2 font-medium">
+                              <a
+                                href={`/tarefas/${t.id}`}
+                                className="hover:underline"
                               >
-                                {LABELS.estados.atrasada}
-                                {atrasoDias > 0 &&
-                                  ` (${LABELS.feedback.unidadeDia(
-                                    atrasoDias
-                                  )})`}
-                              </span>
-                            )}
-                            {concluida && (
-                              <span
-                                className="badge-completed ml-2 align-middle"
-                                title="Tarefa concluída"
-                              >
-                                {LABELS.estados.jaConcluida}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-3 py-2">{t.recorrencia}</td>
-                          <td className="px-3 py-2 text-xs text-gray-600">
-                            {t.recorrencia === "SEMANAL" &&
-                            typeof t.diaSemana === "number"
-                              ? dias[t.diaSemana]
-                              : "Diária"}
-                          </td>
-                          <td className="px-3 py-2 text-xs">
-                            {t.proximaData
-                              ? new Date(t.proximaData).toLocaleDateString()
-                              : "—"}
-                          </td>
-                          <td className="px-3 py-2 text-xs">
-                            {t.ultimaConclusao
-                              ? new Date(t.ultimaConclusao).toLocaleDateString()
-                              : "—"}
-                          </td>
-                          <td className="px-3 py-2 text-xs task-actions-col">
-                            <div className="task-actions">
-                              <button
-                                onClick={() => {
-                                  if (!t.ativa || concluida) return;
-                                  taskController.concluirHoje(t.id);
-                                  onChange();
-                                  push({
-                                    message:
-                                      LABELS.feedback.toastTarefaConcluida,
-                                    type: "success",
-                                  });
-                                }}
-                                disabled={!t.ativa || concluida}
-                                className="btn-success btn px-2 py-1 text-[11px]"
-                                aria-disabled={!t.ativa || concluida}
-                                title={
-                                  !t.ativa
-                                    ? "Tarefa desativada"
-                                    : concluida
-                                    ? "Já concluída"
-                                    : "Concluir tarefa"
-                                }
-                              >
-                                {LABELS.actions.concluir}
-                              </button>
-                              <button
-                                onClick={() => {
-                                  if (concluida) return;
-                                  taskController.alternarAtiva(t.id);
-                                  onChange();
-                                  push({
-                                    message: t.ativa
-                                      ? LABELS.feedback.toastTarefaDesativada
-                                      : LABELS.feedback.toastTarefaReativada,
-                                    type: t.ativa ? "warning" : "success",
-                                  });
-                                }}
-                                disabled={concluida}
-                                className={`px-2 py-1 text-[11px] btn ${
-                                  t.ativa
-                                    ? "btn-warning"
-                                    : "btn-success btn-reativar-emphasis"
-                                }`}
-                                aria-disabled={concluida}
-                                title={
-                                  concluida
-                                    ? "Já concluída"
-                                    : t.ativa
-                                    ? "Desativar"
-                                    : "Reativar"
-                                }
-                              >
-                                {t.ativa
-                                  ? LABELS.actions.desativar
-                                  : LABELS.actions.reativar}
-                              </button>
-                              <button
-                                onClick={() => {
-                                  if (concluida) return;
-                                  if (confirm("Remover tarefa?")) {
-                                    taskController.remover(t.id);
+                                {t.titulo}
+                              </a>
+                              {isAtrasadaSemana && (
+                                <span
+                                  className="badge-overdue ml-2 align-middle"
+                                  title="Tarefa atrasada"
+                                >
+                                  {LABELS.estados.atrasada}
+                                  {atrasoDias > 0 &&
+                                    ` (${LABELS.feedback.unidadeDia(
+                                      atrasoDias
+                                    )})`}
+                                </span>
+                              )}
+                              {concluida && (
+                                <span
+                                  className="badge-completed ml-2 align-middle"
+                                  title="Tarefa concluída"
+                                >
+                                  {LABELS.estados.jaConcluida}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2">{t.recorrencia}</td>
+                            <td className="px-3 py-2 text-xs text-gray-600">
+                              {t.recorrencia === "SEMANAL" &&
+                              typeof t.diaSemana === "number"
+                                ? dias[t.diaSemana]
+                                : "Diária"}
+                            </td>
+                            <td className="px-3 py-2 text-xs">
+                              {t.proximaData
+                                ? new Date(t.proximaData).toLocaleDateString()
+                                : "—"}
+                            </td>
+                            <td className="px-3 py-2 text-xs">
+                              {t.ultimaConclusao
+                                ? new Date(
+                                    t.ultimaConclusao
+                                  ).toLocaleDateString()
+                                : "—"}
+                            </td>
+                            <td className="px-3 py-2 text-xs task-actions-col">
+                              <div className="task-actions">
+                                <button
+                                  onClick={() => {
+                                    if (!t.ativa || concluida) return;
+                                    taskController.concluirHoje(t.id);
                                     onChange();
                                     push({
                                       message:
-                                        LABELS.feedback.toastTarefaRemovida,
-                                      type: "info",
+                                        LABELS.feedback.toastTarefaConcluida,
+                                      type: "success",
                                     });
+                                  }}
+                                  disabled={!t.ativa || concluida}
+                                  className="btn-success btn px-2 py-1 text-[11px]"
+                                  aria-disabled={!t.ativa || concluida}
+                                  title={
+                                    !t.ativa
+                                      ? "Tarefa desativada"
+                                      : concluida
+                                      ? "Já concluída"
+                                      : "Concluir tarefa"
                                   }
-                                }}
-                                disabled={concluida}
-                                className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
-                                aria-disabled={concluida}
-                                title={concluida ? "Já concluída" : "Remover"}
-                              >
-                                {LABELS.actions.remover}
-                              </button>
-                            </div>
+                                >
+                                  {LABELS.actions.concluir}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (concluida) return;
+                                    taskController.alternarAtiva(t.id);
+                                    onChange();
+                                    push({
+                                      message: t.ativa
+                                        ? LABELS.feedback.toastTarefaDesativada
+                                        : LABELS.feedback.toastTarefaReativada,
+                                      type: t.ativa ? "warning" : "success",
+                                    });
+                                  }}
+                                  disabled={concluida}
+                                  className={`px-2 py-1 text-[11px] btn ${
+                                    t.ativa
+                                      ? "btn-warning"
+                                      : "btn-success btn-reativar-emphasis"
+                                  }`}
+                                  aria-disabled={concluida}
+                                  title={
+                                    concluida
+                                      ? "Já concluída"
+                                      : t.ativa
+                                      ? "Desativar"
+                                      : "Reativar"
+                                  }
+                                >
+                                  {t.ativa
+                                    ? LABELS.actions.desativar
+                                    : LABELS.actions.reativar}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (concluida) return;
+                                    if (confirm("Remover tarefa?")) {
+                                      taskController.remover(t.id);
+                                      onChange();
+                                      push({
+                                        message:
+                                          LABELS.feedback.toastTarefaRemovida,
+                                        type: "info",
+                                      });
+                                    }
+                                  }}
+                                  disabled={concluida}
+                                  className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
+                                  aria-disabled={concluida}
+                                  title={concluida ? "Já concluída" : "Remover"}
+                                >
+                                  {LABELS.actions.remover}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    {!collapsed[g.titulo] &&
+                      g.tarefas.length === 0 &&
+                      !tabelaCarregando && (
+                        <tr className="task-row-fixed">
+                          <td
+                            colSpan={6}
+                            className="px-3 py-6 text-center text-gray-500"
+                          >
+                            {LABELS.estados.nenhumaTarefa}
                           </td>
                         </tr>
-                      );
-                    })}
-                  {!collapsed[g.titulo] && g.tarefas.length === 0 && (
-                    <tr className="task-row-fixed">
-                      <td
-                        colSpan={6}
-                        className="px-3 py-6 text-center text-gray-500"
-                      >
-                        {LABELS.estados.nenhumaTarefa}
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-              {gruposSemana.length === 0 && (
+                      )}
+                  </React.Fragment>
+                ))}
+              {!tabelaCarregando && gruposSemana.length === 0 && (
                 <tr className="task-row-fixed">
                   <td
                     colSpan={6}
@@ -988,175 +1024,218 @@ export const TaskList: React.FC<Props> = ({
               </tr>
             </thead>
             <tbody>
-              {filtradas.map((t) => {
-                const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-                let isAtrasada = false;
-                let atrasoDias = 0;
-                const concluida = !naoConcluidaHoje(t);
-                if (mostrarAtrasadas && t.proximaData && naoConcluidaHoje(t)) {
-                  if (
-                    filtro === "HOJE" &&
-                    ((t.recorrencia === "SEMANAL" &&
-                      semanalAtrasadaHoje(t, hojeRef)) ||
-                      (t.recorrencia === "DIARIA" &&
-                        new Date(t.proximaData).setHours(0, 0, 0, 0) <
-                          hojeMid.getTime()))
-                  ) {
-                    isAtrasada = true;
-                  } else if (
-                    filtro === "QUINZENA" &&
-                    quinzenalAtrasadaAtual(t, hojeRef)
-                  ) {
-                    isAtrasada = true;
-                  } else if (
-                    filtro === "MES" &&
-                    mensalAtrasadaAtual(t, hojeRef)
-                  ) {
-                    isAtrasada = true;
-                  }
-                  if (isAtrasada)
-                    atrasoDias = diasAtraso(t.proximaData, hojeRef);
-                }
-                return (
-                  <tr
-                    key={t.id}
-                    className={`border-t task-row-fixed ${
-                      concluida
-                        ? "task-row-completed"
-                        : t.ativa
-                        ? "row-hover"
-                        : "task-row-inactive"
-                    }`}
-                  >
-                    <td className="px-3 py-2 font-medium">
-                      <a href={`/tarefas/${t.id}`} className="hover:underline">
-                        {t.titulo}
-                      </a>
-                      {isAtrasada && (
-                        <span
-                          className="badge-overdue ml-2 align-middle"
-                          title="Tarefa atrasada"
-                        >
-                          {LABELS.estados.atrasada}
-                          {atrasoDias > 0 &&
-                            ` (${LABELS.feedback.unidadeDia(atrasoDias)})`}
-                        </span>
-                      )}
-                      {concluida && (
-                        <span
-                          className="badge-completed ml-2 align-middle"
-                          title="Tarefa concluída"
-                        >
-                          {LABELS.estados.jaConcluida}
-                        </span>
-                      )}
+              {tabelaCarregando &&
+                [...Array(6)].map((_, i) => (
+                  <tr key={`sk-flat-${i}`} className="task-row-fixed border-t">
+                    <td className="px-3 py-3">
+                      {" "}
+                      <div className="skeleton h-4 w-2/3 mb-2" />
+                      <div className="skeleton h-3 w-1/4" />
                     </td>
-                    <td className="px-3 py-2">
-                      <span className="inline-flex items-center gap-1">
-                        {t.recorrencia}
-                      </span>
+                    <td className="px-3 py-3">
+                      <div className="skeleton h-3 w-14" />
                     </td>
                     {filtro === "HOJE" && (
-                      <td className="px-3 py-2 text-xs text-gray-600">
-                        {t.recorrencia === "SEMANAL" &&
-                        typeof t.diaSemana === "number"
-                          ? dias[t.diaSemana]
-                          : t.recorrencia === "DIARIA"
-                          ? "Diária"
-                          : "—"}
+                      <td className="px-3 py-3">
+                        <div className="skeleton h-3 w-10" />
                       </td>
                     )}
-                    <td className="px-3 py-2 text-xs">
-                      {t.proximaData
-                        ? new Date(t.proximaData).toLocaleDateString()
-                        : "—"}
+                    <td className="px-3 py-3">
+                      <div className="skeleton h-3 w-16" />
                     </td>
-                    <td className="px-3 py-2 text-xs">
-                      {t.ultimaConclusao
-                        ? new Date(t.ultimaConclusao).toLocaleDateString()
-                        : "—"}
+                    <td className="px-3 py-3">
+                      <div className="skeleton h-3 w-16" />
                     </td>
-                    <td className="px-3 py-2 text-xs task-actions-col">
-                      <div className="task-actions">
-                        <button
-                          onClick={() => {
-                            if (!t.ativa || concluida) return;
-                            taskController.concluirHoje(t.id);
-                            onChange();
-                            push({
-                              message: LABELS.feedback.toastTarefaConcluida,
-                              type: "success",
-                            });
-                          }}
-                          disabled={!t.ativa || concluida}
-                          className="btn-success btn px-2 py-1 text-[11px]"
-                          aria-disabled={!t.ativa || concluida}
-                          title={
-                            !t.ativa
-                              ? "Tarefa desativada"
-                              : concluida
-                              ? "Já concluída"
-                              : "Concluir tarefa"
-                          }
-                        >
-                          {LABELS.actions.concluir}
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (concluida) return;
-                            taskController.alternarAtiva(t.id);
-                            onChange();
-                            push({
-                              message: t.ativa
-                                ? LABELS.feedback.toastTarefaDesativada
-                                : LABELS.feedback.toastTarefaReativada,
-                              type: t.ativa ? "warning" : "success",
-                            });
-                          }}
-                          disabled={concluida}
-                          className={`px-2 py-1 text-[11px] btn ${
-                            t.ativa
-                              ? "btn-warning"
-                              : "btn-success btn-reativar-emphasis"
-                          }`}
-                          aria-disabled={concluida}
-                          title={
-                            concluida
-                              ? "Já concluída"
-                              : t.ativa
-                              ? "Desativar"
-                              : "Reativar"
-                          }
-                        >
-                          {t.ativa
-                            ? LABELS.actions.desativar
-                            : LABELS.actions.reativar}
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (concluida) return;
-                            if (confirm("Remover tarefa?")) {
-                              taskController.remover(t.id);
-                              onChange();
-                              push({
-                                message: LABELS.feedback.toastTarefaRemovida,
-                                type: "info",
-                              });
-                            }
-                          }}
-                          disabled={concluida}
-                          className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
-                          aria-disabled={concluida}
-                          title={concluida ? "Já concluída" : "Remover"}
-                        >
-                          {LABELS.actions.remover}
-                        </button>
-                      </div>
+                    <td className="px-3 py-3">
+                      <div className="skeleton h-6 w-20" />
                     </td>
                   </tr>
-                );
-              })}
-              {filtradas.length === 0 && (
+                ))}
+              {!tabelaCarregando &&
+                filtradas.map((t) => {
+                  const dias = [
+                    "Dom",
+                    "Seg",
+                    "Ter",
+                    "Qua",
+                    "Qui",
+                    "Sex",
+                    "Sáb",
+                  ];
+                  let isAtrasada = false;
+                  let atrasoDias = 0;
+                  const concluida = !naoConcluidaHoje(t);
+                  if (
+                    mostrarAtrasadas &&
+                    t.proximaData &&
+                    naoConcluidaHoje(t)
+                  ) {
+                    if (
+                      filtro === "HOJE" &&
+                      ((t.recorrencia === "SEMANAL" &&
+                        semanalAtrasadaHoje(t, hojeRef)) ||
+                        (t.recorrencia === "DIARIA" &&
+                          new Date(t.proximaData).setHours(0, 0, 0, 0) <
+                            hojeMid.getTime()))
+                    ) {
+                      isAtrasada = true;
+                    } else if (
+                      filtro === "QUINZENA" &&
+                      quinzenalAtrasadaAtual(t, hojeRef)
+                    ) {
+                      isAtrasada = true;
+                    } else if (
+                      filtro === "MES" &&
+                      mensalAtrasadaAtual(t, hojeRef)
+                    ) {
+                      isAtrasada = true;
+                    }
+                    if (isAtrasada)
+                      atrasoDias = diasAtraso(t.proximaData, hojeRef);
+                  }
+                  return (
+                    <tr
+                      key={t.id}
+                      className={`border-t task-row-fixed ${
+                        concluida
+                          ? "task-row-completed"
+                          : t.ativa
+                          ? "row-hover"
+                          : "task-row-inactive"
+                      }`}
+                    >
+                      <td className="px-3 py-2 font-medium">
+                        <a
+                          href={`/tarefas/${t.id}`}
+                          className="hover:underline"
+                        >
+                          {t.titulo}
+                        </a>
+                        {isAtrasada && (
+                          <span
+                            className="badge-overdue ml-2 align-middle"
+                            title="Tarefa atrasada"
+                          >
+                            {LABELS.estados.atrasada}
+                            {atrasoDias > 0 &&
+                              ` (${LABELS.feedback.unidadeDia(atrasoDias)})`}
+                          </span>
+                        )}
+                        {concluida && (
+                          <span
+                            className="badge-completed ml-2 align-middle"
+                            title="Tarefa concluída"
+                          >
+                            {LABELS.estados.jaConcluida}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        <span className="inline-flex items-center gap-1">
+                          {t.recorrencia}
+                        </span>
+                      </td>
+                      {filtro === "HOJE" && (
+                        <td className="px-3 py-2 text-xs text-gray-600">
+                          {t.recorrencia === "SEMANAL" &&
+                          typeof t.diaSemana === "number"
+                            ? dias[t.diaSemana]
+                            : t.recorrencia === "DIARIA"
+                            ? "Diária"
+                            : "—"}
+                        </td>
+                      )}
+                      <td className="px-3 py-2 text-xs">
+                        {t.proximaData
+                          ? new Date(t.proximaData).toLocaleDateString()
+                          : "—"}
+                      </td>
+                      <td className="px-3 py-2 text-xs">
+                        {t.ultimaConclusao
+                          ? new Date(t.ultimaConclusao).toLocaleDateString()
+                          : "—"}
+                      </td>
+                      <td className="px-3 py-2 text-xs task-actions-col">
+                        <div className="task-actions">
+                          <button
+                            onClick={() => {
+                              if (!t.ativa || concluida) return;
+                              taskController.concluirHoje(t.id);
+                              onChange();
+                              push({
+                                message: LABELS.feedback.toastTarefaConcluida,
+                                type: "success",
+                              });
+                            }}
+                            disabled={!t.ativa || concluida}
+                            className="btn-success btn px-2 py-1 text-[11px]"
+                            aria-disabled={!t.ativa || concluida}
+                            title={
+                              !t.ativa
+                                ? "Tarefa desativada"
+                                : concluida
+                                ? "Já concluída"
+                                : "Concluir tarefa"
+                            }
+                          >
+                            {LABELS.actions.concluir}
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (concluida) return;
+                              taskController.alternarAtiva(t.id);
+                              onChange();
+                              push({
+                                message: t.ativa
+                                  ? LABELS.feedback.toastTarefaDesativada
+                                  : LABELS.feedback.toastTarefaReativada,
+                                type: t.ativa ? "warning" : "success",
+                              });
+                            }}
+                            disabled={concluida}
+                            className={`px-2 py-1 text-[11px] btn ${
+                              t.ativa
+                                ? "btn-warning"
+                                : "btn-success btn-reativar-emphasis"
+                            }`}
+                            aria-disabled={concluida}
+                            title={
+                              concluida
+                                ? "Já concluída"
+                                : t.ativa
+                                ? "Desativar"
+                                : "Reativar"
+                            }
+                          >
+                            {t.ativa
+                              ? LABELS.actions.desativar
+                              : LABELS.actions.reativar}
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (concluida) return;
+                              if (confirm("Remover tarefa?")) {
+                                taskController.remover(t.id);
+                                onChange();
+                                push({
+                                  message: LABELS.feedback.toastTarefaRemovida,
+                                  type: "info",
+                                });
+                              }
+                            }}
+                            disabled={concluida}
+                            className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
+                            aria-disabled={concluida}
+                            title={concluida ? "Já concluída" : "Remover"}
+                          >
+                            {LABELS.actions.remover}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              {!tabelaCarregando && filtradas.length === 0 && (
                 <tr className="task-row-fixed">
                   <td
                     colSpan={filtro === "HOJE" ? 6 : 5}
