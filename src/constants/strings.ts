@@ -80,6 +80,8 @@ export const LABELS = {
     ocultarInativas: "Ocultar inativas",
     mostrarAtrasadas: "Mostrar atrasadas",
     ocultarAtrasadas: "Ocultar atrasadas",
+    mostrarConcluidas: "Mostrar concluídas",
+    ocultarConcluidas: "Ocultar concluídas",
     ocultadasCount: (n: number) => `${n} ocultada${n === 1 ? "" : "s"}`,
     ordenarPorData: "Ordenar por data",
     ordenarPorTitulo: "Ordenar por título",

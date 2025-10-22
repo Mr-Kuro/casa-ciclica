@@ -73,8 +73,8 @@ export const TaskList: React.FC<Props> = ({
     });
   }
   // Sem uso direto de Date aqui; filtros já baseados em helpers.
-  const concluidasHoje: Task[] = [];
   const [mostrarAtrasadas, setMostrarAtrasadas] = useState(false);
+  const [mostrarConcluidas, setMostrarConcluidas] = useState(false);
   const hojeRef = useMemo(() => new Date(), []);
   // Carregar preferências persistidas de UI
   useEffect(() => {
@@ -85,6 +85,9 @@ export const TaskList: React.FC<Props> = ({
     if (typeof prefs.mostrarAtrasadas === "boolean") {
       setMostrarAtrasadas(prefs.mostrarAtrasadas);
     }
+    if (typeof prefs.mostrarConcluidas === "boolean") {
+      setMostrarConcluidas(prefs.mostrarConcluidas);
+    }
   }, []);
   useEffect(() => {
     saveUIPrefs({ mostrarInativas });
@@ -92,6 +95,9 @@ export const TaskList: React.FC<Props> = ({
   useEffect(() => {
     saveUIPrefs({ mostrarAtrasadas });
   }, [mostrarAtrasadas]);
+  useEffect(() => {
+    saveUIPrefs({ mostrarConcluidas });
+  }, [mostrarConcluidas]);
   // Datas normalizadas para comparação (início do dia / período)
   const hojeMid = useMemo(() => {
     const d = new Date();
@@ -188,6 +194,9 @@ export const TaskList: React.FC<Props> = ({
   const filtradasBase = tarefas.filter((t) => {
     // Oculta tarefas inativas das listagens normais (a menos que toggle)
     if (!mostrarInativas && !t.ativa) return false;
+    // Concluídas são mantidas somente se toggle ativo
+    const estaConcluida = !naoConcluidaHoje(t);
+    if (!mostrarConcluidas && estaConcluida) return false;
     if (filtro === "HOJE") {
       // Base: semanais do dia e diárias não concluídas hoje.
       // Extra: semanais atrasadas de dias anteriores quando toggle ativo.
@@ -195,8 +204,7 @@ export const TaskList: React.FC<Props> = ({
         const mesmoDia = mesmoDiaSemanaHoje(t.diaSemana);
         const naoConcluida = naoConcluidaHoje(t);
         if (mesmoDia) {
-          if (!naoConcluida) concluidasHoje.push(t);
-          return naoConcluida;
+          return naoConcluida || (mostrarConcluidas && !naoConcluida);
         }
         if (
           mostrarAtrasadas &&
@@ -209,21 +217,24 @@ export const TaskList: React.FC<Props> = ({
       }
       if (t.recorrencia === "DIARIA") {
         const naoConcluida = naoConcluidaHoje(t);
-        if (!naoConcluida) concluidasHoje.push(t);
-        return naoConcluida; // diária atrasada também aparece (proximaData < hoje)
+        return naoConcluida || (mostrarConcluidas && !naoConcluida);
       }
       return false; // manter exclusão de outras recorrências
     }
     if (filtro === "SEMANA") {
       if (t.recorrencia === "SEMANAL" || t.recorrencia === "DIARIA") {
-        return naoConcluidaHoje(t);
+        const naoConcluida = naoConcluidaHoje(t);
+        return naoConcluida || (mostrarConcluidas && !naoConcluida);
       }
       return false;
     }
     if (filtro === "QUINZENA") {
       // Somente tarefas quinzenais não concluídas desta quinzena
       if (t.recorrencia === "QUINZENAL") {
-        if (!naoConcluidaHoje(t)) return false;
+        const naoConcluida = naoConcluidaHoje(t);
+        if (!naoConcluida && !mostrarConcluidas) return false;
+        // Se estiver concluída hoje e toggle ativo, inclui independentemente da próxima data
+        if (!naoConcluida && mostrarConcluidas) return true;
         // Se toggle ativo incluir também atrasadas de quinzenas anteriores
         if (mostrarAtrasadas) {
           if (dentroDaQuinzenaAtual(t.proximaData)) return true;
@@ -242,7 +253,9 @@ export const TaskList: React.FC<Props> = ({
     if (filtro === "MES") {
       // Somente tarefas mensais não concluídas deste mês
       if (t.recorrencia === "MENSAL") {
-        if (!naoConcluidaHoje(t)) return false;
+        const naoConcluida = naoConcluidaHoje(t);
+        if (!naoConcluida && !mostrarConcluidas) return false;
+        if (!naoConcluida && mostrarConcluidas) return true; // inclui concluída independente da próxima data
         if (mostrarAtrasadas) {
           if (dentroDoMesAtual(t.proximaData)) return true;
           if (t.proximaData) {
@@ -258,6 +271,31 @@ export const TaskList: React.FC<Props> = ({
     }
     return true; // fallback se filtros expandirem no futuro (ainda respeita ativa)
   });
+
+  // Contagem contextual de tarefas concluídas hoje conforme filtro ativo e outros toggles.
+  const concluidasCount = useMemo(() => {
+    return tarefas.filter((t) => {
+      const concluida = !naoConcluidaHoje(t);
+      if (!concluida) return false;
+      // Respeita ocultação de inativas se não estiver mostrando inativas
+      if (!mostrarInativas && !t.ativa) return false;
+      if (filtro === "HOJE") {
+        if (t.recorrencia === "SEMANAL") return mesmoDiaSemanaHoje(t.diaSemana);
+        if (t.recorrencia === "DIARIA") return true;
+        return false;
+      }
+      if (filtro === "SEMANA") {
+        return t.recorrencia === "SEMANAL" || t.recorrencia === "DIARIA";
+      }
+      if (filtro === "QUINZENA") {
+        return t.recorrencia === "QUINZENAL";
+      }
+      if (filtro === "MES") {
+        return t.recorrencia === "MENSAL";
+      }
+      return false;
+    }).length;
+  }, [tarefas, filtro, mostrarInativas]);
 
   const ocultadas = !mostrarInativas ? inactiveCount : 0;
 
@@ -381,6 +419,20 @@ export const TaskList: React.FC<Props> = ({
               </span>
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => setMostrarConcluidas((v) => !v)}
+            className="btn-invert px-2 py-1"
+            aria-pressed={mostrarConcluidas}
+            disabled={concluidasCount === 0}
+          >
+            {mostrarConcluidas
+              ? LABELS.feedback.ocultarConcluidas
+              : LABELS.feedback.mostrarConcluidas}
+            <span className="ml-1 text-[10px] opacity-70">
+              ({concluidasCount})
+            </span>
+          </button>
         </div>
         {/* Sem botão dedicado; ordenação agora por cabeçalhos */}
       </div>
@@ -594,11 +646,16 @@ export const TaskList: React.FC<Props> = ({
                       const atrasoDias = isAtrasadaSemana
                         ? diasAtraso(t.proximaData, hojeRef)
                         : 0;
+                      const concluida = !naoConcluidaHoje(t);
                       return (
                         <tr
                           key={t.id}
                           className={`border-t task-row-fixed ${
-                            t.ativa ? "row-hover" : "task-row-inactive"
+                            concluida
+                              ? "task-row-completed"
+                              : t.ativa
+                              ? "row-hover"
+                              : "task-row-inactive"
                           }`}
                         >
                           <td className="px-3 py-2 font-medium">
@@ -618,6 +675,14 @@ export const TaskList: React.FC<Props> = ({
                                   ` (${LABELS.feedback.unidadeDia(
                                     atrasoDias
                                   )})`}
+                              </span>
+                            )}
+                            {concluida && (
+                              <span
+                                className="badge-completed ml-2 align-middle"
+                                title="Tarefa concluída"
+                              >
+                                {LABELS.estados.jaConcluida}
                               </span>
                             )}
                           </td>
@@ -642,7 +707,7 @@ export const TaskList: React.FC<Props> = ({
                             <div className="task-actions">
                               <button
                                 onClick={() => {
-                                  if (!t.ativa) return;
+                                  if (!t.ativa || concluida) return;
                                   taskController.concluirHoje(t.id);
                                   onChange();
                                   push({
@@ -651,33 +716,45 @@ export const TaskList: React.FC<Props> = ({
                                     type: "success",
                                   });
                                 }}
-                                disabled={!t.ativa}
+                                disabled={!t.ativa || concluida}
                                 className="btn-success btn px-2 py-1 text-[11px]"
-                                aria-disabled={!t.ativa}
+                                aria-disabled={!t.ativa || concluida}
                                 title={
-                                  t.ativa
-                                    ? "Concluir tarefa"
-                                    : "Tarefa desativada"
+                                  !t.ativa
+                                    ? "Tarefa desativada"
+                                    : concluida
+                                    ? "Já concluída"
+                                    : "Concluir tarefa"
                                 }
                               >
                                 {LABELS.actions.concluir}
                               </button>
                               <button
                                 onClick={() => {
+                                  if (concluida) return;
                                   taskController.alternarAtiva(t.id);
                                   onChange();
                                   push({
                                     message: t.ativa
-                                      ? LABELS.feedback.toastTarefaReativada
-                                      : LABELS.feedback.toastTarefaDesativada,
+                                      ? LABELS.feedback.toastTarefaDesativada
+                                      : LABELS.feedback.toastTarefaReativada,
                                     type: t.ativa ? "warning" : "success",
                                   });
                                 }}
+                                disabled={concluida}
                                 className={`px-2 py-1 text-[11px] btn ${
                                   t.ativa
                                     ? "btn-warning"
                                     : "btn-success btn-reativar-emphasis"
                                 }`}
+                                aria-disabled={concluida}
+                                title={
+                                  concluida
+                                    ? "Já concluída"
+                                    : t.ativa
+                                    ? "Desativar"
+                                    : "Reativar"
+                                }
                               >
                                 {t.ativa
                                   ? LABELS.actions.desativar
@@ -685,6 +762,7 @@ export const TaskList: React.FC<Props> = ({
                               </button>
                               <button
                                 onClick={() => {
+                                  if (concluida) return;
                                   if (confirm("Remover tarefa?")) {
                                     taskController.remover(t.id);
                                     onChange();
@@ -695,7 +773,10 @@ export const TaskList: React.FC<Props> = ({
                                     });
                                   }
                                 }}
+                                disabled={concluida}
                                 className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
+                                aria-disabled={concluida}
+                                title={concluida ? "Já concluída" : "Remover"}
                               >
                                 {LABELS.actions.remover}
                               </button>
@@ -911,6 +992,7 @@ export const TaskList: React.FC<Props> = ({
                 const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
                 let isAtrasada = false;
                 let atrasoDias = 0;
+                const concluida = !naoConcluidaHoje(t);
                 if (mostrarAtrasadas && t.proximaData && naoConcluidaHoje(t)) {
                   if (
                     filtro === "HOJE" &&
@@ -939,7 +1021,11 @@ export const TaskList: React.FC<Props> = ({
                   <tr
                     key={t.id}
                     className={`border-t task-row-fixed ${
-                      t.ativa ? "row-hover" : "task-row-inactive"
+                      concluida
+                        ? "task-row-completed"
+                        : t.ativa
+                        ? "row-hover"
+                        : "task-row-inactive"
                     }`}
                   >
                     <td className="px-3 py-2 font-medium">
@@ -954,6 +1040,14 @@ export const TaskList: React.FC<Props> = ({
                           {LABELS.estados.atrasada}
                           {atrasoDias > 0 &&
                             ` (${LABELS.feedback.unidadeDia(atrasoDias)})`}
+                        </span>
+                      )}
+                      {concluida && (
+                        <span
+                          className="badge-completed ml-2 align-middle"
+                          title="Tarefa concluída"
+                        >
+                          {LABELS.estados.jaConcluida}
                         </span>
                       )}
                     </td>
@@ -986,7 +1080,7 @@ export const TaskList: React.FC<Props> = ({
                       <div className="task-actions">
                         <button
                           onClick={() => {
-                            if (!t.ativa) return;
+                            if (!t.ativa || concluida) return;
                             taskController.concluirHoje(t.id);
                             onChange();
                             push({
@@ -994,31 +1088,45 @@ export const TaskList: React.FC<Props> = ({
                               type: "success",
                             });
                           }}
-                          disabled={!t.ativa}
+                          disabled={!t.ativa || concluida}
                           className="btn-success btn px-2 py-1 text-[11px]"
-                          aria-disabled={!t.ativa}
+                          aria-disabled={!t.ativa || concluida}
                           title={
-                            t.ativa ? "Concluir tarefa" : "Tarefa desativada"
+                            !t.ativa
+                              ? "Tarefa desativada"
+                              : concluida
+                              ? "Já concluída"
+                              : "Concluir tarefa"
                           }
                         >
                           {LABELS.actions.concluir}
                         </button>
                         <button
                           onClick={() => {
+                            if (concluida) return;
                             taskController.alternarAtiva(t.id);
                             onChange();
                             push({
                               message: t.ativa
-                                ? LABELS.feedback.toastTarefaReativada
-                                : LABELS.feedback.toastTarefaDesativada,
+                                ? LABELS.feedback.toastTarefaDesativada
+                                : LABELS.feedback.toastTarefaReativada,
                               type: t.ativa ? "warning" : "success",
                             });
                           }}
+                          disabled={concluida}
                           className={`px-2 py-1 text-[11px] btn ${
                             t.ativa
                               ? "btn-warning"
                               : "btn-success btn-reativar-emphasis"
                           }`}
+                          aria-disabled={concluida}
+                          title={
+                            concluida
+                              ? "Já concluída"
+                              : t.ativa
+                              ? "Desativar"
+                              : "Reativar"
+                          }
                         >
                           {t.ativa
                             ? LABELS.actions.desativar
@@ -1026,6 +1134,7 @@ export const TaskList: React.FC<Props> = ({
                         </button>
                         <button
                           onClick={() => {
+                            if (concluida) return;
                             if (confirm("Remover tarefa?")) {
                               taskController.remover(t.id);
                               onChange();
@@ -1035,7 +1144,10 @@ export const TaskList: React.FC<Props> = ({
                               });
                             }
                           }}
+                          disabled={concluida}
                           className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
+                          aria-disabled={concluida}
+                          title={concluida ? "Já concluída" : "Remover"}
                         >
                           {LABELS.actions.remover}
                         </button>
@@ -1058,64 +1170,7 @@ export const TaskList: React.FC<Props> = ({
           </table>
         </div>
       )}
-      {filtro === "HOJE" && concluidasHoje.length > 0 && (
-        <div className="overflow-x-auto border rounded">
-          <table className="min-w-full text-xs opacity-70">
-            <thead className="bg-gray-50 uppercase text-[10px] text-gray-600">
-              <tr>
-                <th
-                  colSpan={filtro === "HOJE" ? 7 : 6}
-                  className="px-3 py-2 text-left"
-                >
-                  Concluídas hoje
-                </th>
-              </tr>
-              <tr>
-                <th className="px-3 py-1 text-left">{LABELS.campos.titulo}</th>
-                <th className="px-3 py-1 text-left">
-                  {LABELS.campos.recorrencia}
-                </th>
-                <th className="px-3 py-1 text-left">
-                  {LABELS.campos.diaSemana}
-                </th>
-                <th className="px-3 py-1 text-left">{LABELS.campos.proxima}</th>
-                <th className="px-3 py-1 text-left">{LABELS.campos.ultima}</th>
-                <th className="px-3 py-1" />
-              </tr>
-            </thead>
-            <tbody>
-              {concluidasHoje.map((t) => {
-                const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-                return (
-                  <tr key={t.id} className="border-t task-row-fixed">
-                    <td className="px-3 py-1 font-medium">{t.titulo}</td>
-                    <td className="px-3 py-1">{t.recorrencia}</td>
-                    <td className="px-3 py-1 text-gray-600">
-                      {t.recorrencia === "SEMANAL" &&
-                      typeof t.diaSemana === "number"
-                        ? dias[t.diaSemana]
-                        : "Diária"}
-                    </td>
-                    <td className="px-3 py-1">
-                      {t.proximaData
-                        ? new Date(t.proximaData).toLocaleDateString()
-                        : "—"}
-                    </td>
-                    <td className="px-3 py-1">
-                      {t.ultimaConclusao
-                        ? new Date(t.ultimaConclusao).toLocaleDateString()
-                        : "—"}
-                    </td>
-                    <td className="px-3 py-1 text-[10px] text-gray-400">
-                      {LABELS.estados.jaConcluida}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* Lista secundária de concluídas removida: concluídas aparecem integradas */}
     </div>
   );
 };

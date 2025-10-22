@@ -563,6 +563,43 @@ body {
     opacity: 0.35;
     pointer-events: none;
   }
+  /* Completed badge */
+  .badge-completed {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.58rem;
+    font-weight: 600;
+    line-height: 1;
+    border-radius: 9999px;
+    letter-spacing: 0.3px;
+    background: linear-gradient(
+      135deg,
+      var(--cc-success) 0%,
+      var(--cc-accent) 90%
+    );
+    color: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 2px 3px -1px rgba(0, 0, 0, 0.2);
+  }
+  html.dark .badge-completed {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 2px 4px -1px rgba(0, 0, 0, 0.55);
+  }
+  .task-row-completed {
+    opacity: 0.72;
+    position: relative;
+  }
+  .task-row-completed:hover {
+    opacity: 0.82;
+  }
+  .task-row-completed td,
+  .task-row-completed a {
+    text-decoration: none;
+  }
+  .task-row-completed .task-actions-col {
+    text-align: center;
+  }
   /* Mobile (<640px): tighter horizontal scroll, hide scrollbar, ensure touch targets */
   @media (max-width: 639px) {
     .tabs {

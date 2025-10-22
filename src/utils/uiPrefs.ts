@@ -1,6 +1,7 @@
 export interface UIPrefs {
   mostrarInativas?: boolean;
   mostrarAtrasadas?: boolean;
+  mostrarConcluidas?: boolean;
 }
 
 const KEY = "uiPrefs";

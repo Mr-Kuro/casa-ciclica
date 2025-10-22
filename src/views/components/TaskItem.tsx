@@ -2,7 +2,7 @@ import React from "react";
 import { Task } from "../../models/Task";
 import { Link } from "react-router-dom";
 import { taskController } from "../../controllers/TaskController";
-import { devidoHoje } from "../../utils/recurrence";
+import { devidoHoje, naoConcluidaHoje } from "../../utils/recurrence";
 import { LABELS } from "../../constants/strings";
 
 interface Props {
@@ -27,6 +27,7 @@ export const TaskItem: React.FC<Props> = ({ task, onChange }) => {
   }
 
   const hoje = devidoHoje(task.proximaData);
+  const jaConcluidaHoje = !naoConcluidaHoje(task);
 
   const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
   return (
@@ -37,15 +38,22 @@ export const TaskItem: React.FC<Props> = ({ task, onChange }) => {
             {task.titulo}
           </Link>
         </h3>
-        <span className="text-xs px-2 py-1 rounded bg-gray-100 flex gap-1 items-center">
-          <span>{task.recorrencia}</span>
-          {typeof task.diaSemana === "number" &&
-            task.recorrencia === "SEMANAL" && (
-              <span className="text-[10px] text-gray-600">
-                ({dias[task.diaSemana]})
-              </span>
-            )}
-        </span>
+        <div className="flex items-center gap-1">
+          <span className="text-xs px-2 py-1 rounded bg-gray-100 flex gap-1 items-center">
+            <span>{task.recorrencia}</span>
+            {typeof task.diaSemana === "number" &&
+              task.recorrencia === "SEMANAL" && (
+                <span className="text-[10px] text-gray-600">
+                  ({dias[task.diaSemana]})
+                </span>
+              )}
+          </span>
+          {jaConcluidaHoje && (
+            <span className="text-[10px] px-2 py-1 rounded bg-green-100 text-green-700 font-semibold">
+              {LABELS.estados.jaConcluida}
+            </span>
+          )}
+        </div>
       </div>
       {task.descricao && (
         <p className="text-xs text-gray-600">{task.descricao}</p>
@@ -53,22 +61,26 @@ export const TaskItem: React.FC<Props> = ({ task, onChange }) => {
       <div className="flex gap-2 flex-wrap">
         <button
           onClick={concluir}
-          disabled={!hoje || !task.ativa}
+          disabled={!hoje || !task.ativa || jaConcluidaHoje}
           className="btn-success btn text-xs"
         >
           {LABELS.actions.concluirHoje}
         </button>
         <button
           onClick={alternar}
+          disabled={jaConcluidaHoje}
           className={`btn text-xs ${
             task.ativa ? "btn-warning" : "btn-success btn-reativar-emphasis"
-          }`}
+          } ${jaConcluidaHoje ? "opacity-60 cursor-not-allowed" : ""}`}
         >
           {task.ativa ? LABELS.actions.desativar : LABELS.actions.reativar}
         </button>
         <button
           onClick={remover}
-          className="btn text-xs bg-red-600 hover:bg-red-700"
+          disabled={jaConcluidaHoje}
+          className={`btn text-xs bg-red-600 hover:bg-red-700 ${
+            jaConcluidaHoje ? "opacity-60 cursor-not-allowed" : ""
+          }`}
         >
           {LABELS.actions.remover}
         </button>

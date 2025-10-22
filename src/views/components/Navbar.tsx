@@ -6,7 +6,6 @@ import { LABELS } from "../../constants/strings";
 const navItems = [
   { to: "/", label: LABELS.navigation.inicio },
   { to: "/tarefas/nova", label: LABELS.navigation.nova },
-  { to: "/concluidas", label: LABELS.navigation.concluidas },
   { to: "/desativadas", label: LABELS.navigation.desativadas },
   { to: "/config", label: LABELS.navigation.config },
 ];

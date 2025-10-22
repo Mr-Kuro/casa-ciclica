@@ -87,7 +87,7 @@ Os filtros ativos na aplicação seguem regras específicas:
 - **HOJE**: Exibe somente
   - Tarefas semanais cujo `diaSemana` coincide com o dia atual (`mesmoDiaSemanaHoje`).
   - Tarefas diárias que ainda NÃO foram concluídas hoje (`naoConcluidaHoje`).
-  - Além disso, um bloco secundário mostra as tarefas diárias já concluídas hoje (estilizadas com menor destaque).
+  - Opcionalmente é possível exibir também as tarefas já concluídas do dia através de um toggle "Mostrar concluídas" na listagem principal.
 - **QUINZENA**: Exibe apenas tarefas quinzenais cuja `proximaData` cai na quinzena corrente e que não foram concluídas hoje.
   - A quinzena corrente é determinada em `dentroDaQuinzenaAtual` (dias 1–15 ou 16–final do mês).
 - **MES**: Exibe apenas tarefas mensais cuja `proximaData` está dentro do mês atual e não foram concluídas hoje.
@@ -100,18 +100,9 @@ Helpers principais em `src/utils/recurrence.ts`:
 - `dentroDaQuinzenaAtual(proximaData?: string)` — determina se data está na quinzena atual.
 - `dentroDoMesAtual(proximaData?: string)` — determina se data está no mês atual.
 
-## Aba Concluídas
+## Tarefas Concluídas Integradas
 
-Nova aba acessível em `/concluidas` (link "Concluídas" no topo) exibe todas as tarefas que possuem `ultimaConclusao` definida, agrupadas por categoria:
-
-- Diárias
-- Semanais (subgrupos por dia da semana: Segunda, Terça, ...)
-- Quinzenais
-- Mensais
-
-Colunas mostradas: título, recorrência, dia da semana (quando aplicável), próxima data, última conclusão, status relativo ao dia atual ("Concluída hoje" ou "Concluída anteriormente") e ações rápidas (Re‑concluir, Ativar/Desativar).
-
-O botão "Re-concluir" força atualização de `ultimaConclusao` para hoje e recalcula `proximaData`, útil para corrigir marcações atrasadas. A aba não altera a lógica dos filtros principais; serve como histórico condensado de execução.
+As tarefas concluídas deixam de ter uma aba própria e podem ser exibidas embutidas nas listagens através de um toggle. Quando visíveis, aparecem misturadas às demais mantendo ordenação aplicada e com um badge "Já concluída". As ações de concluir, desativar ou remover ficam desabilitadas nesse estado para evitar modificações acidentais.
 
 ## Aba Desativadas
 
