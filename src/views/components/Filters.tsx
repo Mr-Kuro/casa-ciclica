@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { LABELS } from "../../constants/strings";
 
 interface Props {
@@ -23,9 +23,33 @@ export const Filters: React.FC<Props> = ({ value, onChange, counts }) => {
     { v: "MES", label: "Mês", hint: "Mensais pendentes" },
   ];
 
+  // Refs para auto-scroll
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const btn = tabRefs.current[value];
+    if (!container || !btn) return;
+
+    // Se não há overflow horizontal, não fazer scroll
+    if (container.scrollWidth <= container.clientWidth) return;
+
+    const left = btn.offsetLeft;
+    const right = left + btn.offsetWidth;
+    const visibleStart = container.scrollLeft;
+    const visibleEnd = visibleStart + container.clientWidth;
+
+    // Apenas scroll se o botão não estiver totalmente visível
+    if (left < visibleStart || right > visibleEnd) {
+      const target = left - (container.clientWidth - btn.offsetWidth) / 2;
+      container.scrollTo({ left: target, behavior: "smooth" });
+    }
+  }, [value]);
+
   return (
     <div className="mb-4" role="tablist" aria-label="Filtros de tarefas">
-      <div className="tabs">
+      <div className="tabs" ref={containerRef}>
         {opts.map((o) => {
           const active = value === o.v;
           return (
@@ -36,6 +60,7 @@ export const Filters: React.FC<Props> = ({ value, onChange, counts }) => {
               aria-controls={`panel-${o.v}`}
               id={`tab-${o.v}`}
               onClick={() => onChange(o.v)}
+              ref={(el) => (tabRefs.current[o.v] = el)}
               className="tab"
             >
               <span>{o.label}</span>

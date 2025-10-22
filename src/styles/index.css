@@ -453,6 +453,23 @@ body {
     border-radius: 0.75rem 0.75rem 0 0;
     box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
       0 1px 2px rgba(0, 0, 0, 0.15);
+    /* Responsive behavior */
+    flex-wrap: nowrap; /* default: single row */
+    overflow-x: auto; /* allow horizontal scroll on small screens */
+    overflow-y: hidden; /* hide any accidental vertical scrollbar */
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scroll-behavior: smooth; /* smooth scroll for auto-focus */
+  }
+  .tabs::-webkit-scrollbar {
+    height: 6px;
+  }
+  .tabs::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .tabs::-webkit-scrollbar-thumb {
+    background: var(--cc-border);
+    border-radius: 9999px;
   }
   .tab {
     position: relative;
@@ -468,6 +485,8 @@ body {
     cursor: pointer;
     border-radius: 0.5rem 0.5rem 0 0;
     transition: background-color 0.2s, color 0.2s;
+    scroll-snap-align: start;
+    flex: 0 0 auto; /* base: size to content for horizontal scroll */
   }
   .tab:hover:not([aria-selected="true"]) {
     color: var(--cc-text);
@@ -505,6 +524,46 @@ body {
   .tab[aria-selected="true"] .tab-badge {
     background: var(--cc-primary);
     color: #fff;
+  }
+  /* Mobile (<640px): tighter horizontal scroll, hide scrollbar, ensure touch targets */
+  @media (max-width: 639px) {
+    .tabs {
+      margin: 0 -0.5rem; /* stretch to screen edges */
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+      scrollbar-width: thin; /* Firefox: show but slim */
+    }
+    .tab {
+      min-width: 88px; /* minimum touch width */
+      font-size: 0.75rem;
+      padding: 0.5rem 0.75rem;
+    }
+    .tab-badge {
+      font-size: 0.5625rem; /* slightly smaller */
+    }
+  }
+  /* Tablet (640px–1023px): allow wrapping into two lines if needed */
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .tabs {
+      flex-wrap: wrap;
+      overflow: visible; /* no scroll */
+      justify-content: flex-start;
+      row-gap: 0.35rem;
+    }
+    .tab {
+      flex: 1 1 calc(25% - 0.25rem); /* approximate equal distribution */
+      min-width: 120px;
+    }
+  }
+  /* Desktop (>=1024px): single line, centered optional */
+  @media (min-width: 1024px) {
+    .tabs {
+      flex-wrap: nowrap;
+      overflow: visible;
+    }
+    .tab {
+      flex: 0 0 auto;
+    }
   }
   /* Skeleton loading component */
   .skeleton {
