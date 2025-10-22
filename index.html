@@ -42,6 +42,29 @@
       href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      // Preload theme before React mounts to avoid flash
+      (function () {
+        try {
+          var stored = localStorage.getItem("cc_theme");
+          if (!stored) {
+            // definir default baseado em prefers-color-scheme, fallback 'light'
+            var prefersDark = window.matchMedia(
+              "(prefers-color-scheme: dark)"
+            ).matches;
+            stored = prefersDark ? "dark" : "light";
+            localStorage.setItem("cc_theme", stored);
+          }
+          if (stored === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        } catch (e) {
+          /* silencioso */
+        }
+      })();
+    </script>
   </head>
   <body
     class="text-gray-900"

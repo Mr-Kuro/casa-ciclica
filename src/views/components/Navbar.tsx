@@ -12,28 +12,23 @@ const navItems = [
 
 export const Navbar: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const [dark, setDark] = useState(false);
-
+  const [dark, setDark] = useState<boolean>(
+    () =>
+      document.documentElement.classList.contains("dark") ||
+      localStorage.getItem("cc_theme") === "dark"
+  );
   useEffect(() => {
-    const stored = localStorage.getItem("prefTheme");
-    if (stored === "dark") {
-      setDark(true);
-      document.documentElement.classList.add("dark");
-    }
+    // Caso classe tenha sido aplicada pelo script inline antes do React
+    const isDark = document.documentElement.classList.contains("dark");
+    setDark(isDark);
   }, []);
-
   function toggleTheme() {
-    setDark((d) => {
-      const next = !d;
-      if (next) {
-        document.documentElement.classList.add("dark");
-        localStorage.setItem("prefTheme", "dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        localStorage.setItem("prefTheme", "light");
-      }
-      return next;
-    });
+    const next = !dark;
+    const theme = next ? "dark" : "light";
+    localStorage.setItem("cc_theme", theme);
+    if (next) document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
+    setDark(next);
   }
 
   return (
