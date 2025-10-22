@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { LABELS } from "../../constants/strings";
 import phrases from "../../data/phrases.json";
 import { Skeleton } from "./Skeleton";
+import { useFontReady } from "../../hooks/useFontReady";
 
 interface QuoteData {
   content: string;
@@ -15,12 +16,15 @@ interface PhraseJson {
 
 export const Quote: React.FC = () => {
   const [quote, setQuote] = useState<QuoteData | null>(null);
+  const fontReady = useFontReady();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [lastTs, setLastTs] = useState<number | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
+  const showQuote = fontReady && !!quote && !loading;
+  const showQuoteSkeleton = !showQuote && (loading || !fontReady);
 
   function load(force = false) {
     const KEY = "quoteCacheLocal";
@@ -144,46 +148,50 @@ export const Quote: React.FC = () => {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="sm:w-2/3 w-full order-2 sm:order-1">
-            {loading && !quote && (
+            {showQuoteSkeleton && (
               <Skeleton
                 lines={2}
                 ariaLabel={LABELS.feedback.carregandoInspiracao}
                 className="w-full"
+                variant="nk"
               />
             )}
-            {quote && !loading && (
+            {showQuote && (
               <p className="quote-text leading-relaxed text-center">
                 “{quote.content}”{" "}
                 <span className="motivation-author">— {quote.author}</span>
               </p>
             )}
-            {!loading && !quote && error && <p className="italic">{error}</p>}
+            {!loading && quote == null && error && fontReady && (
+              <p className="italic">{error}</p>
+            )}
           </div>
           <div className="sm:w-1/3 w-full order-1 sm:order-2">
-            {(imageLoading || (imageError && !imageUrl)) && (
+            {(imageLoading || (imageError && !imageUrl) || !fontReady) && (
               <Skeleton
                 height="10rem"
                 ariaLabel={LABELS.feedback.carregandoImagem}
                 className="w-full"
+                variant="nk"
               />
             )}
-            {imageUrl && !imageLoading && (
+            {imageUrl && !imageLoading && fontReady && (
               <img
                 src={imageUrl}
                 alt="Gato motivacional"
                 loading="lazy"
-                className="w-full h-40 object-cover rounded border"
+                className="w-full h-40 object-cover rounded border img-fade loaded"
                 style={{ borderColor: "var(--cc-motive-border)" }}
               />
             )}
-            {imageError && !imageLoading && imageUrl && (
+            {imageError && !imageLoading && imageUrl && fontReady && (
               <div className="text-[11px] text-red-600 mt-1" role="alert">
                 {imageError}
               </div>
             )}
           </div>
         </div>
-        {loading && (
+        {(loading || !fontReady) && (
           <p className="sr-only">{LABELS.feedback.carregandoInspiracao}</p>
         )}
         <div className="flex items-center justify-between gap-2">
