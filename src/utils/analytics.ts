@@ -1,4 +1,5 @@
 import { Task } from "../models/Task";
+import { LABELS } from "../constants/strings";
 
 function daysBetween(a: Date, b: Date): number {
   return Math.floor((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
@@ -57,9 +58,10 @@ export function statusRecorrencia(task: Task): string {
   if (sameDay) return "Devida hoje";
   const diff = diasAteProxima(task);
   if (diff !== null) {
-    if (diff < 0) return `Atrasada há ${Math.abs(diff)} dia(s)`;
+    if (diff < 0)
+      return `Atrasada há ${LABELS.feedback.unidadeDia(Math.abs(diff))}`;
     if (diff === 1) return "Devida amanhã";
-    return `Faltam ${diff} dias`;
+    return `Faltam ${LABELS.feedback.unidadeDia(diff)}`;
   }
   return "Status desconhecido";
 }

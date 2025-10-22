@@ -110,7 +110,7 @@ export const TaskDetail: React.FC = () => {
               {diasUltima !== null
                 ? diasUltima === 0
                   ? "Hoje"
-                  : `${diasUltima} dia(s) atrás`
+                  : `${LABELS.feedback.unidadeDia(diasUltima)} atrás`
                 : "Nunca concluída"}
             </p>
           </div>
@@ -122,7 +122,9 @@ export const TaskDetail: React.FC = () => {
                 : "—"}
             </p>
             <p className="text-[11px] text-muted">
-              {diasCriacao !== null ? `${diasCriacao} dia(s) atrás` : "—"}
+              {diasCriacao !== null
+                ? `${LABELS.feedback.unidadeDia(diasCriacao)} atrás`
+                : "—"}
             </p>
           </div>
         </div>
@@ -130,7 +132,7 @@ export const TaskDetail: React.FC = () => {
           <div className="text-[11px] text-muted">
             {diasProxima !== null && diasProxima < 0 && (
               <span className="text-red-600">
-                Atrasada {Math.abs(diasProxima)} dia(s).
+                Atrasada {LABELS.feedback.unidadeDia(Math.abs(diasProxima))}.
               </span>
             )}
           </div>

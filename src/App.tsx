@@ -4,8 +4,25 @@ import { BrowserRouter } from "react-router-dom";
 import { Navbar } from "./views/components/Navbar";
 import { Footer } from "./views/components/Footer";
 import { Quote } from "./views/components/Quote";
+import { injectTestMassGlobal } from "./data/testMass";
+
+declare global {
+  interface Window {
+    injectTestMass: (options: {
+      dailyCount: number;
+      weeklyPerDay: number;
+      includeInactive: boolean;
+    }) => void;
+  }
+}
 
 export const App: React.FC = () => {
+  React.useEffect(() => {
+    //    injectTestMass(); // injeta tudo com valores padrão
+
+    injectTestMassGlobal();
+  }, []);
+
   return (
     <BrowserRouter>
       <div className="page">

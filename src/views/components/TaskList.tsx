@@ -8,6 +8,13 @@ import {
   naoConcluidaHoje,
 } from "../../utils/recurrence";
 import { LABELS } from "../../constants/strings";
+import {
+  semanalAtrasadaHoje,
+  quinzenalAtrasadaAtual,
+  mensalAtrasadaAtual,
+  diasAtraso,
+} from "../../utils/overdue";
+import { loadUIPrefs, saveUIPrefs } from "../../utils/uiPrefs";
 import { sortTasks, TaskSortKey } from "../../utils/sort";
 import { loadSortPrefs, saveSortPrefs } from "../../utils/sortStorage";
 import { useToast } from "./toast/ToastContext";
@@ -67,28 +74,145 @@ export const TaskList: React.FC<Props> = ({
   }
   // Sem uso direto de Date aqui; filtros já baseados em helpers.
   const concluidasHoje: Task[] = [];
-  const inactiveCount = useMemo(
-    () => tarefas.filter((t) => !t.ativa).length,
-    [tarefas]
+  const [mostrarAtrasadas, setMostrarAtrasadas] = useState(false);
+  const hojeRef = useMemo(() => new Date(), []);
+  // Carregar preferências persistidas de UI
+  useEffect(() => {
+    const prefs = loadUIPrefs();
+    if (typeof prefs.mostrarInativas === "boolean") {
+      setMostrarInativas(prefs.mostrarInativas);
+    }
+    if (typeof prefs.mostrarAtrasadas === "boolean") {
+      setMostrarAtrasadas(prefs.mostrarAtrasadas);
+    }
+  }, []);
+  useEffect(() => {
+    saveUIPrefs({ mostrarInativas });
+  }, [mostrarInativas]);
+  useEffect(() => {
+    saveUIPrefs({ mostrarAtrasadas });
+  }, [mostrarAtrasadas]);
+  // Datas normalizadas para comparação (início do dia / período)
+  const hojeMid = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+  const inicioMes = useMemo(
+    () => new Date(hojeMid.getFullYear(), hojeMid.getMonth(), 1),
+    [hojeMid]
   );
+  const inicioQuinzena = useMemo(() => {
+    return hojeMid.getDate() <= 15
+      ? new Date(hojeMid.getFullYear(), hojeMid.getMonth(), 1)
+      : new Date(hojeMid.getFullYear(), hojeMid.getMonth(), 16);
+  }, [hojeMid]);
+  const atrasadasSemana = useMemo(
+    () =>
+      tarefas.filter(
+        (t) =>
+          t.recorrencia === "SEMANAL" &&
+          !mesmoDiaSemanaHoje(t.diaSemana) &&
+          semanalAtrasadaHoje(t, hojeRef) &&
+          naoConcluidaHoje(t)
+      ),
+    [tarefas, hojeRef]
+  );
+  const atrasadasQuinzena = useMemo(
+    () => tarefas.filter((t) => quinzenalAtrasadaAtual(t, hojeRef)),
+    [tarefas, hojeRef]
+  );
+  const atrasadasMes = useMemo(
+    () => tarefas.filter((t) => mensalAtrasadaAtual(t, hojeRef)),
+    [tarefas, hojeRef]
+  );
+  const inactiveCount = useMemo(() => {
+    return tarefas.filter((t) => {
+      if (t.ativa) return false;
+
+      if (filtro === "HOJE") {
+        if (t.recorrencia === "SEMANAL") {
+          const mesmoDia = mesmoDiaSemanaHoje(t.diaSemana);
+          const naoConcluida = naoConcluidaHoje(t);
+          if (mesmoDia) return naoConcluida;
+          return (
+            mostrarAtrasadas && semanalAtrasadaHoje(t, hojeRef) && naoConcluida
+          );
+        }
+        if (t.recorrencia === "DIARIA") {
+          return naoConcluidaHoje(t);
+        }
+        return false;
+      }
+
+      if (filtro === "SEMANA") {
+        if (t.recorrencia === "SEMANAL" || t.recorrencia === "DIARIA") {
+          return naoConcluidaHoje(t);
+        }
+        return false;
+      }
+
+      if (filtro === "QUINZENA") {
+        if (t.recorrencia !== "QUINZENAL") return false;
+        if (!naoConcluidaHoje(t)) return false;
+        if (mostrarAtrasadas) {
+          if (dentroDaQuinzenaAtual(t.proximaData)) return true;
+          if (t.proximaData) {
+            const d = new Date(t.proximaData);
+            d.setHours(0, 0, 0, 0);
+            if (d < inicioQuinzena) return true;
+          }
+          return false;
+        }
+        return dentroDaQuinzenaAtual(t.proximaData);
+      }
+
+      if (filtro === "MES") {
+        if (t.recorrencia !== "MENSAL") return false;
+        if (!naoConcluidaHoje(t)) return false;
+        if (mostrarAtrasadas) {
+          if (dentroDoMesAtual(t.proximaData)) return true;
+          if (t.proximaData) {
+            const d = new Date(t.proximaData);
+            d.setHours(0, 0, 0, 0);
+            if (d < inicioMes) return true;
+          }
+          return false;
+        }
+        return dentroDoMesAtual(t.proximaData);
+      }
+
+      return true;
+    }).length;
+  }, [tarefas, filtro, mostrarAtrasadas, hojeRef, inicioQuinzena, inicioMes]);
   const filtradasBase = tarefas.filter((t) => {
     // Oculta tarefas inativas das listagens normais (a menos que toggle)
     if (!mostrarInativas && !t.ativa) return false;
     if (filtro === "HOJE") {
-      // Semântica: tarefas semanais do dia atual + tarefas diárias não concluídas hoje
+      // Base: semanais do dia e diárias não concluídas hoje.
+      // Extra: semanais atrasadas de dias anteriores quando toggle ativo.
       if (t.recorrencia === "SEMANAL") {
         const mesmoDia = mesmoDiaSemanaHoje(t.diaSemana);
-        if (!mesmoDia) return false; // só interessa as semanais do dia
         const naoConcluida = naoConcluidaHoje(t);
-        if (!naoConcluida) concluidasHoje.push(t);
-        return naoConcluida;
+        if (mesmoDia) {
+          if (!naoConcluida) concluidasHoje.push(t);
+          return naoConcluida;
+        }
+        if (
+          mostrarAtrasadas &&
+          semanalAtrasadaHoje(t, hojeRef) &&
+          naoConcluida
+        ) {
+          return true;
+        }
+        return false;
       }
       if (t.recorrencia === "DIARIA") {
         const naoConcluida = naoConcluidaHoje(t);
         if (!naoConcluida) concluidasHoje.push(t);
-        return naoConcluida;
+        return naoConcluida; // diária atrasada também aparece (proximaData < hoje)
       }
-      return false; // excluir outras recorrências em HOJE
+      return false; // manter exclusão de outras recorrências
     }
     if (filtro === "SEMANA") {
       if (t.recorrencia === "SEMANAL" || t.recorrencia === "DIARIA") {
@@ -99,14 +223,36 @@ export const TaskList: React.FC<Props> = ({
     if (filtro === "QUINZENA") {
       // Somente tarefas quinzenais não concluídas desta quinzena
       if (t.recorrencia === "QUINZENAL") {
-        return dentroDaQuinzenaAtual(t.proximaData) && naoConcluidaHoje(t);
+        if (!naoConcluidaHoje(t)) return false;
+        // Se toggle ativo incluir também atrasadas de quinzenas anteriores
+        if (mostrarAtrasadas) {
+          if (dentroDaQuinzenaAtual(t.proximaData)) return true;
+          if (t.proximaData) {
+            const d = new Date(t.proximaData);
+            d.setHours(0, 0, 0, 0);
+            // atrasada se antes do início da quinzena atual
+            if (d < inicioQuinzena) return true;
+          }
+          return false;
+        }
+        return dentroDaQuinzenaAtual(t.proximaData);
       }
       return false;
     }
     if (filtro === "MES") {
       // Somente tarefas mensais não concluídas deste mês
       if (t.recorrencia === "MENSAL") {
-        return dentroDoMesAtual(t.proximaData) && naoConcluidaHoje(t);
+        if (!naoConcluidaHoje(t)) return false;
+        if (mostrarAtrasadas) {
+          if (dentroDoMesAtual(t.proximaData)) return true;
+          if (t.proximaData) {
+            const d = new Date(t.proximaData);
+            d.setHours(0, 0, 0, 0);
+            if (d < inicioMes) return true; // mês anterior pendente
+          }
+          return false;
+        }
+        return dentroDoMesAtual(t.proximaData);
       }
       return false;
     }
@@ -162,15 +308,78 @@ export const TaskList: React.FC<Props> = ({
             onClick={() => setMostrarInativas((v) => !v)}
             className="btn-invert px-2 py-1"
             aria-pressed={mostrarInativas}
+            disabled={inactiveCount === 0}
           >
             {mostrarInativas
               ? LABELS.feedback.ocultarInativas
               : LABELS.feedback.mostrarInativas}
-          </button>
-          {ocultadas > 0 && (
-            <span className="text-subtle text-[11px]">
-              {LABELS.feedback.ocultadasCount(ocultadas)}
+            <span className="ml-1 text-[10px] opacity-70">
+              ({inactiveCount})
             </span>
+          </button>
+          {filtro === "HOJE" && (
+            <button
+              type="button"
+              onClick={() => setMostrarAtrasadas((v) => !v)}
+              className="btn-invert px-2 py-1"
+              aria-pressed={mostrarAtrasadas}
+              disabled={atrasadasSemana.length === 0}
+            >
+              {mostrarAtrasadas
+                ? LABELS.feedback.ocultarAtrasadas
+                : LABELS.feedback.mostrarAtrasadas}
+              <span className="ml-1 text-[10px] opacity-70">
+                ({atrasadasSemana.length})
+              </span>
+            </button>
+          )}
+          {filtro === "SEMANA" && (
+            <button
+              type="button"
+              onClick={() => setMostrarAtrasadas((v) => !v)}
+              className="btn-invert px-2 py-1"
+              aria-pressed={mostrarAtrasadas}
+              disabled={atrasadasSemana.length === 0}
+            >
+              {mostrarAtrasadas
+                ? LABELS.feedback.ocultarAtrasadas
+                : LABELS.feedback.mostrarAtrasadas}
+              <span className="ml-1 text-[10px] opacity-70">
+                ({atrasadasSemana.length})
+              </span>
+            </button>
+          )}
+          {filtro === "QUINZENA" && (
+            <button
+              type="button"
+              onClick={() => setMostrarAtrasadas((v) => !v)}
+              className="btn-invert px-2 py-1"
+              aria-pressed={mostrarAtrasadas}
+              disabled={atrasadasQuinzena.length === 0}
+            >
+              {mostrarAtrasadas
+                ? LABELS.feedback.ocultarAtrasadas
+                : LABELS.feedback.mostrarAtrasadas}
+              <span className="ml-1 text-[10px] opacity-70">
+                ({atrasadasQuinzena.length})
+              </span>
+            </button>
+          )}
+          {filtro === "MES" && (
+            <button
+              type="button"
+              onClick={() => setMostrarAtrasadas((v) => !v)}
+              className="btn-invert px-2 py-1"
+              aria-pressed={mostrarAtrasadas}
+              disabled={atrasadasMes.length === 0}
+            >
+              {mostrarAtrasadas
+                ? LABELS.feedback.ocultarAtrasadas
+                : LABELS.feedback.mostrarAtrasadas}
+              <span className="ml-1 text-[10px] opacity-70">
+                ({atrasadasMes.length})
+              </span>
+            </button>
           )}
         </div>
         {/* Sem botão dedicado; ordenação agora por cabeçalhos */}
@@ -380,6 +589,11 @@ export const TaskList: React.FC<Props> = ({
                   {!collapsed[g.titulo] &&
                     g.tarefas.map((t) => {
                       const dias = LABELS.diasSemanaCurto;
+                      const isAtrasadaSemana =
+                        mostrarAtrasadas && semanalAtrasadaHoje(t, hojeRef);
+                      const atrasoDias = isAtrasadaSemana
+                        ? diasAtraso(t.proximaData, hojeRef)
+                        : 0;
                       return (
                         <tr
                           key={t.id}
@@ -394,6 +608,18 @@ export const TaskList: React.FC<Props> = ({
                             >
                               {t.titulo}
                             </a>
+                            {isAtrasadaSemana && (
+                              <span
+                                className="badge-overdue ml-2 align-middle"
+                                title="Tarefa atrasada"
+                              >
+                                {LABELS.estados.atrasada}
+                                {atrasoDias > 0 &&
+                                  ` (${LABELS.feedback.unidadeDia(
+                                    atrasoDias
+                                  )})`}
+                              </span>
+                            )}
                           </td>
                           <td className="px-3 py-2">{t.recorrencia}</td>
                           <td className="px-3 py-2 text-xs text-gray-600">
@@ -683,6 +909,32 @@ export const TaskList: React.FC<Props> = ({
             <tbody>
               {filtradas.map((t) => {
                 const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+                let isAtrasada = false;
+                let atrasoDias = 0;
+                if (mostrarAtrasadas && t.proximaData && naoConcluidaHoje(t)) {
+                  if (
+                    filtro === "HOJE" &&
+                    ((t.recorrencia === "SEMANAL" &&
+                      semanalAtrasadaHoje(t, hojeRef)) ||
+                      (t.recorrencia === "DIARIA" &&
+                        new Date(t.proximaData).setHours(0, 0, 0, 0) <
+                          hojeMid.getTime()))
+                  ) {
+                    isAtrasada = true;
+                  } else if (
+                    filtro === "QUINZENA" &&
+                    quinzenalAtrasadaAtual(t, hojeRef)
+                  ) {
+                    isAtrasada = true;
+                  } else if (
+                    filtro === "MES" &&
+                    mensalAtrasadaAtual(t, hojeRef)
+                  ) {
+                    isAtrasada = true;
+                  }
+                  if (isAtrasada)
+                    atrasoDias = diasAtraso(t.proximaData, hojeRef);
+                }
                 return (
                   <tr
                     key={t.id}
@@ -694,6 +946,16 @@ export const TaskList: React.FC<Props> = ({
                       <a href={`/tarefas/${t.id}`} className="hover:underline">
                         {t.titulo}
                       </a>
+                      {isAtrasada && (
+                        <span
+                          className="badge-overdue ml-2 align-middle"
+                          title="Tarefa atrasada"
+                        >
+                          {LABELS.estados.atrasada}
+                          {atrasoDias > 0 &&
+                            ` (${LABELS.feedback.unidadeDia(atrasoDias)})`}
+                        </span>
+                      )}
                     </td>
                     <td className="px-3 py-2">
                       <span className="inline-flex items-center gap-1">

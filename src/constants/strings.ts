@@ -25,6 +25,8 @@ export const LABELS = {
     nenhumGrupo: "Nenhuma tarefa neste grupo.",
     concluidaHoje: "Concluída hoje",
     concluidaAnteriormente: "Concluída anteriormente",
+    atrasada: "Atrasada",
+    pendentesAnteriores: "Pendentes de dias anteriores",
   },
   campos: {
     titulo: "Título",
@@ -76,6 +78,8 @@ export const LABELS = {
     toastLimpeza: "LocalStorage limpo",
     mostrarInativas: "Mostrar inativas",
     ocultarInativas: "Ocultar inativas",
+    mostrarAtrasadas: "Mostrar atrasadas",
+    ocultarAtrasadas: "Ocultar atrasadas",
     ocultadasCount: (n: number) => `${n} ocultada${n === 1 ? "" : "s"}`,
     ordenarPorData: "Ordenar por data",
     ordenarPorTitulo: "Ordenar por título",
