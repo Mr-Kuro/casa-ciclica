@@ -151,14 +151,17 @@ export const TaskDetail: React.FC = () => {
                 {tarefa.titulo}
                 {!tarefa.ativa && (
                   <span
-                    className="badge-overdue opacity-80"
+                    className="badge-status badge-inactive opacity-80"
                     title="Tarefa desativada"
                   >
                     Inativa
                   </span>
                 )}
                 {tarefa.ultimaConclusao && diasUltima === 0 && (
-                  <span className="badge-completed" title="Concluída hoje">
+                  <span
+                    className="badge-status badge-completed"
+                    title="Concluída hoje"
+                  >
                     Concluída hoje
                   </span>
                 )}

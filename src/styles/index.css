@@ -638,6 +638,35 @@ body {
       0 2px 4px -1px rgba(0, 0, 0, 0.25);
     position: relative;
   }
+  /* Generic status badge base */
+  .badge-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.58rem;
+    font-weight: 600;
+    line-height: 1;
+    border-radius: 9999px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .badge-pending {
+    background: var(--cc-border);
+    color: var(--cc-text);
+  }
+  html.dark .badge-pending {
+    background: var(--cc-surface-2);
+    color: var(--cc-text);
+  }
+  .badge-inactive {
+    background: linear-gradient(
+      135deg,
+      var(--cc-muted) 0%,
+      var(--cc-border) 90%
+    );
+    color: #fff;
+  }
   html.dark .badge-overdue {
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08),
       0 2px 5px -1px rgba(0, 0, 0, 0.6);
@@ -691,6 +720,10 @@ body {
   }
   .task-row-completed .task-actions-col {
     text-align: center;
+  }
+  /* Table header nowrap to allow horizontal scroll for long titles */
+  .table-head th {
+    white-space: nowrap;
   }
   /* Mobile (<640px): tighter horizontal scroll, hide scrollbar, ensure touch targets */
   @media (max-width: 639px) {

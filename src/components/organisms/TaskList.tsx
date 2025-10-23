@@ -428,6 +428,46 @@ export const TaskList: React.FC<Props> = ({
       sortable: true,
       render: (t: Task) => t.recorrencia,
     },
+    {
+      key: "status",
+      header: "Status",
+      sortable: true,
+      render: (t: Task) => {
+        const concluida = !naoConcluidaHoje(t);
+        const isAtrasada = (() => {
+          if (!t.proximaData || concluida) return false;
+          if (t.recorrencia === "SEMANAL")
+            return semanalAtrasadaHoje(t, hojeRef);
+          if (t.recorrencia === "DIARIA")
+            return (
+              new Date(t.proximaData).setHours(0, 0, 0, 0) < hojeMid.getTime()
+            );
+          if (t.recorrencia === "QUINZENAL")
+            return quinzenalAtrasadaAtual(t, hojeRef);
+          if (t.recorrencia === "MENSAL")
+            return mensalAtrasadaAtual(t, hojeRef);
+          return false;
+        })();
+        let label = "A concluir";
+        let cls = "badge-status badge-pending";
+        if (!t.ativa) {
+          label = "Inativa";
+          cls = "badge-status badge-inactive";
+        } else if (concluida) {
+          label = LABELS.estados.jaConcluida;
+          cls = "badge-status badge-completed";
+        } else if (isAtrasada) {
+          label = LABELS.estados.atrasada;
+          cls = "badge-status badge-overdue";
+        }
+        return (
+          <span className={`${cls} inline-flex whitespace-nowrap`}>
+            {label}
+          </span>
+        );
+      },
+      className: "whitespace-nowrap",
+    },
   ];
   if (filtro === "SEMANA" || filtro === "HOJE") {
     baseColumns.push({
@@ -483,41 +523,8 @@ export const TaskList: React.FC<Props> = ({
   }
   function rowActions(t: Task) {
     const concluida = !naoConcluidaHoje(t);
-    const isAtrasada = (() => {
-      if (!mostrarAtrasadas || !t.proximaData || !naoConcluidaHoje(t))
-        return false;
-      if (filtro === "HOJE") {
-        if (
-          (t.recorrencia === "SEMANAL" && semanalAtrasadaHoje(t, hojeRef)) ||
-          (t.recorrencia === "DIARIA" &&
-            new Date(t.proximaData).setHours(0, 0, 0, 0) < hojeMid.getTime())
-        )
-          return true;
-      } else if (filtro === "QUINZENA" && quinzenalAtrasadaAtual(t, hojeRef))
-        return true;
-      else if (filtro === "MES" && mensalAtrasadaAtual(t, hojeRef)) return true;
-      return false;
-    })();
-    const atrasoDias = isAtrasada ? diasAtraso(t.proximaData, hojeRef) : 0;
     return (
       <div className="task-actions">
-        {isAtrasada && (
-          <span
-            className="badge-overdue ml-0 mr-2 align-middle"
-            title="Tarefa atrasada"
-          >
-            {LABELS.estados.atrasada}
-            {atrasoDias > 0 && ` (${LABELS.feedback.unidadeDia(atrasoDias)})`}
-          </span>
-        )}
-        {concluida && (
-          <span
-            className="badge-completed ml-0 mr-2 align-middle"
-            title="Tarefa concluída"
-          >
-            {LABELS.estados.jaConcluida}
-          </span>
-        )}
         <button
           onClick={() => {
             if (!t.ativa || concluida) return;
