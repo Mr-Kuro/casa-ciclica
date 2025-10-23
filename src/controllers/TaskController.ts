@@ -112,6 +112,17 @@ export class TaskController {
     t.ativa = !t.ativa;
     this.persistir();
   }
+
+  /**
+   * Reinicializa lista de tarefas sem recarregar a página.
+   * Limpa armazenamento, gera novo seed e dispara evento para UI reagir.
+   */
+  resetSeeds() {
+    this.tarefas = gerarSeed();
+    this.persistir();
+    // Dispara evento custom para componentes ouvintes (ex: TaskList) se quiserem atualizar
+    document.dispatchEvent(new CustomEvent("tasks:reset"));
+  }
 }
 
 export const taskController = new TaskController();

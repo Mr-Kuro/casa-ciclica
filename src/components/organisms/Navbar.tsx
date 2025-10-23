@@ -3,7 +3,8 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { APP_NAME, APP_TAGLINE } from "../../branding";
 import { LABELS } from "@constants/strings";
 
-const navItems = [
+// Itens antes do dropdown Histórico (Histórico deve vir antes de Config)
+const navItemsAntesHistorico = [
   {
     to: "/tarefas/nova",
     label: LABELS.navigation.nova,
@@ -11,8 +12,8 @@ const navItems = [
     first: true,
   },
   { to: "/", label: LABELS.navigation.inicio },
-  { to: "/config", label: LABELS.navigation.config },
 ];
+const navItemConfig = { to: "/config", label: LABELS.navigation.config };
 
 export const Navbar: React.FC = () => {
   // Logical open state (for ARIA / button label)
@@ -79,13 +80,67 @@ export const Navbar: React.FC = () => {
     : location.pathname.startsWith("/historico/concluidas")
     ? "concluidas"
     : "";
+  const isHistoryActive = historyValue !== "";
 
-  function onHistoryChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const v = e.target.value;
-    if (v === "concluidas") navigate("/historico/concluidas");
-    else if (v === "desativadas") navigate("/historico/desativadas");
-    else if (v === "") navigate("/");
+  // Dropdown custom para histórico
+  // Estados separados para dropdown desktop e mobile (evita interferência)
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyOpenMobile, setHistoryOpenMobile] = useState(false);
+  const historyBtnRef = useRef<HTMLButtonElement | null>(null);
+  const historyMenuRef = useRef<HTMLUListElement | null>(null);
+  function goHistory(value: string) {
+    if (value === "concluidas") navigate("/historico/concluidas");
+    else if (value === "desativadas") navigate("/historico/desativadas");
+    else navigate("/");
+    setHistoryOpen(false);
   }
+  function toggleHistory() {
+    setHistoryOpen((o) => !o);
+  }
+  function toggleHistoryMobile() {
+    setHistoryOpenMobile((o) => !o);
+  }
+  useEffect(() => {
+    function onDocKey(e: KeyboardEvent) {
+      if (!historyOpen && !historyOpenMobile) return;
+      if (e.key === "Escape") {
+        if (historyOpen) {
+          setHistoryOpen(false);
+          historyBtnRef.current?.focus();
+        }
+        if (historyOpenMobile) {
+          setHistoryOpenMobile(false);
+        }
+      }
+    }
+    function onDocClick(e: MouseEvent) {
+      if (!historyOpen && !historyOpenMobile) return;
+      const target = e.target as Node;
+      if (historyOpen) {
+        if (
+          historyMenuRef.current &&
+          historyBtnRef.current &&
+          !historyMenuRef.current.contains(target) &&
+          !historyBtnRef.current.contains(target)
+        ) {
+          setHistoryOpen(false);
+        }
+      }
+      // Mobile: fecha se click fora da área expandida (ex: abaixo do dropdown)
+      if (historyOpenMobile) {
+        const mobileArea = document.getElementById("history-mobile-area");
+        if (mobileArea && !mobileArea.contains(target)) {
+          setHistoryOpenMobile(false);
+        }
+      }
+    }
+    document.addEventListener("keydown", onDocKey);
+    document.addEventListener("mousedown", onDocClick);
+    return () => {
+      document.removeEventListener("keydown", onDocKey);
+      document.removeEventListener("mousedown", onDocClick);
+    };
+  }, [historyOpen, historyOpenMobile]);
 
   return (
     // Tornar a navbar sticky para permanecer visível durante scroll
@@ -107,7 +162,7 @@ export const Navbar: React.FC = () => {
           role="tablist"
           aria-label="Navegação principal"
         >
-          {navItems.map((item) => (
+          {navItemsAntesHistorico.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.to === "/"}>
               {({ isActive }) => (
                 <span
@@ -128,38 +183,98 @@ export const Navbar: React.FC = () => {
               )}
             </NavLink>
           ))}
-          {/* Select de histórico */}
-          <div className="ml-2 relative">
-            <label className="sr-only" htmlFor="history-select">
-              Histórico
-            </label>
-            <div
-              className={`tab tab-select-wrapper text-sm font-medium flex items-center px-3 py-2 rounded cursor-pointer ${
-                historyValue
-                  ? "!bg-[var(--cc-bg-alt)] !text-[var(--cc-primary)]"
+          {/* Dropdown Histórico (agora antes de Config) */}
+          <div className="ml-2 relative" role="presentation">
+            <button
+              ref={historyBtnRef}
+              type="button"
+              className={`tab text-sm font-medium px-3 py-2 rounded flex items-center gap-1 ${
+                isHistoryActive
+                  ? "tab-active !bg-[var(--cc-bg-alt)] !text-[var(--cc-primary)]"
                   : ""
-              }`}
+              } ${historyOpen ? "ring-1 ring-[var(--cc-focus)]" : ""}`}
+              aria-haspopup="listbox"
+              aria-expanded={historyOpen}
+              aria-controls="history-menu"
+              onClick={toggleHistory}
             >
-              <select
-                id="history-select"
-                value={historyValue}
-                onChange={onHistoryChange}
-                className="history-select appearance-none bg-transparent pr-4 focus:outline-none text-sm font-medium"
-                aria-label="Histórico de tarefas"
-              >
-                <option value="">Histórico</option>
-                <option value="concluidas">
-                  {LABELS.navigation.concluidas}
-                </option>
-                <option value="desativadas">
-                  {LABELS.navigation.desativadas}
-                </option>
-              </select>
-              <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs opacity-70">
-                ▾
+              <span>
+                {historyValue === "concluidas"
+                  ? LABELS.navigation.concluidas
+                  : historyValue === "desativadas"
+                  ? LABELS.navigation.desativadas
+                  : "Histórico"}
               </span>
-            </div>
+              <span className="text-[10px] opacity-70" aria-hidden="true">
+                {historyOpen ? "▴" : "▾"}
+              </span>
+            </button>
+            {historyOpen && (
+              <ul
+                id="history-menu"
+                ref={historyMenuRef}
+                role="listbox"
+                aria-label="Histórico de tarefas"
+                className="absolute mt-1 min-w-[160px] z-50 rounded shadow bg-[var(--cc-bg-alt)] border border-[var(--cc-border)] focus:outline-none divide-y divide-[var(--cc-border)] dropdown-anim-enter"
+              >
+                <li>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={historyValue === ""}
+                    className={`dropdown-item w-full text-left px-3 py-2 text-xs hover:bg-[var(--cc-surface-2)] ${
+                      historyValue === "" ? "active-option" : ""
+                    }`}
+                    onClick={() => goHistory("")}
+                  >
+                    Início
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={historyValue === "concluidas"}
+                    className={`dropdown-item w-full text-left px-3 py-2 text-xs hover:bg-[var(--cc-surface-2)] ${
+                      historyValue === "concluidas" ? "active-option" : ""
+                    }`}
+                    onClick={() => goHistory("concluidas")}
+                  >
+                    {LABELS.navigation.concluidas}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={historyValue === "desativadas"}
+                    className={`dropdown-item w-full text-left px-3 py-2 text-xs hover:bg-[var(--cc-surface-2)] ${
+                      historyValue === "desativadas" ? "active-option" : ""
+                    }`}
+                    onClick={() => goHistory("desativadas")}
+                  >
+                    {LABELS.navigation.desativadas}
+                  </button>
+                </li>
+              </ul>
+            )}
           </div>
+          {/* Link Config após Histórico */}
+          <NavLink key={navItemConfig.to} to={navItemConfig.to} end={false}>
+            {({ isActive }) => (
+              <span
+                role="tab"
+                aria-selected={isActive}
+                className={`tab text-sm font-medium ${
+                  isActive
+                    ? "!bg-[var(--cc-bg-alt)] !text-[var(--cc-primary)]"
+                    : ""
+                }`}
+              >
+                {navItemConfig.label}
+              </span>
+            )}
+          </NavLink>
           <button
             onClick={toggleTheme}
             className="ml-2 theme-toggle focus:outline-none focus:ring-0"
@@ -242,7 +357,7 @@ export const Navbar: React.FC = () => {
           }
           aria-hidden={!open}
         >
-          {navItems.map((item) => (
+          {[...navItemsAntesHistorico, navItemConfig].map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -250,49 +365,110 @@ export const Navbar: React.FC = () => {
               className={({ isActive }) =>
                 `block px-3 py-2 rounded text-sm font-medium ${
                   isActive ? "navbar-overlay-btn" : "hover:navbar-overlay-btn"
-                } ${item.first ? "nav-mobile-after-first" : ""}`
+                } ${
+                  "first" in item && (item as any).first
+                    ? "nav-mobile-after-first"
+                    : ""
+                }`
               }
             >
-              {item.highlight ? (
+              {"highlight" in item && (item as any).highlight ? (
                 <span className="cc-anim-add-task-text">{item.label}</span>
               ) : (
                 item.label
               )}
             </NavLink>
           ))}
-          {/* Select histórico versão mobile */}
-          <div className="pt-2">
+          {/* Dropdown histórico versão mobile */}
+          <div className="pt-2" id="history-mobile-area">
             <label
               htmlFor="history-select-mobile"
               className="text-[10px] uppercase tracking-wide opacity-80 block mb-1"
             >
               Histórico
             </label>
-            <div
-              className={`tab text-sm font-medium px-3 py-2 rounded ${
-                historyValue
-                  ? "!bg-[var(--cc-bg-alt)] !text-[var(--cc-primary)]"
-                  : ""
-              }`}
-            >
-              <select
-                id="history-select-mobile"
-                value={historyValue}
-                onChange={(e) => {
-                  onHistoryChange(e);
-                  closeMobileNav();
-                }}
-                className="history-select-mobile w-fit bg-transparent w-full"
-                aria-label="Histórico de tarefas"
+            <div className="relative">
+              <button
+                type="button"
+                className={`w-full text-left tab text-sm font-medium px-3 py-3 rounded flex items-center justify-between ${
+                  isHistoryActive
+                    ? "tab-active !bg-[var(--cc-bg-alt)] !text-[var(--cc-primary)]"
+                    : ""
+                }`}
+                aria-haspopup="listbox"
+                aria-expanded={historyOpenMobile}
+                onClick={toggleHistoryMobile}
               >
-                <option value="">Selecionar...</option>
-                <option value="concluidas">
-                  {LABELS.navigation.concluidas}
-                </option>
-                <option value="desativadas">
-                  {LABELS.navigation.desativadas}
-                </option>
-              </select>
+                <span className="text-sm">
+                  {historyValue === "concluidas"
+                    ? LABELS.navigation.concluidas
+                    : historyValue === "desativadas"
+                    ? LABELS.navigation.desativadas
+                    : "Selecionar..."}
+                </span>
+                <span className="text-[10px] opacity-70" aria-hidden="true">
+                  {historyOpenMobile ? "▴" : "▾"}
+                </span>
+              </button>
+              {historyOpenMobile && (
+                <ul
+                  role="listbox"
+                  aria-label="Histórico de tarefas"
+                  className="absolute mt-1 w-full z-50 rounded shadow bg-[var(--cc-bg-alt)] border border-[var(--cc-border)] divide-y divide-[var(--cc-border)] dropdown-anim-enter"
+                >
+                  <li>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={historyValue === ""}
+                      className={`dropdown-item w-full text-left px-3 py-2 text-xs hover:bg-[var(--cc-surface-2)] ${
+                        historyValue === "" ? "active-option" : ""
+                      }`}
+                      onClick={() => {
+                        goHistory("");
+                        closeMobileNav();
+                        setHistoryOpenMobile(false);
+                      }}
+                    >
+                      Início
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={historyValue === "concluidas"}
+                      className={`dropdown-item w-full text-left px-3 py-2 text-xs hover:bg-[var(--cc-surface-2)] ${
+                        historyValue === "concluidas" ? "active-option" : ""
+                      }`}
+                      onClick={() => {
+                        goHistory("concluidas");
+                        closeMobileNav();
+                        setHistoryOpenMobile(false);
+                      }}
+                    >
+                      {LABELS.navigation.concluidas}
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={historyValue === "desativadas"}
+                      className={`dropdown-item w-full text-left px-3 py-2 text-xs hover:bg-[var(--cc-surface-2)] ${
+                        historyValue === "desativadas" ? "active-option" : ""
+                      }`}
+                      onClick={() => {
+                        goHistory("desativadas");
+                        closeMobileNav();
+                        setHistoryOpenMobile(false);
+                      }}
+                    >
+                      {LABELS.navigation.desativadas}
+                    </button>
+                  </li>
+                </ul>
+              )}
             </div>
           </div>
         </div>

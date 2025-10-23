@@ -1,16 +1,20 @@
 import React from "react";
 import { LocalStorageService } from "../../services/storage/LocalStorageService";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { taskController } from "@controllers/TaskController";
 import { LABELS } from "../../constants/strings";
 import { useToast } from "@molecules/toast/ToastContext";
 // Removido reset de seeds por ser redundante com limpeza total
 
 export const Settings: React.FC = () => {
   const { push } = useToast();
+  const navigate = useNavigate();
   function limpar() {
     if (confirm(LABELS.confirm.limparTudo)) {
       LocalStorageService.limpar();
+      taskController.resetSeeds();
       push({ message: LABELS.feedback.toastLimpeza, type: "info" });
+      navigate("/", { replace: true });
     }
   }
 
