@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { APP_NAME, APP_TAGLINE } from "../../branding";
 import { LABELS } from "@constants/strings";
 
@@ -11,7 +11,6 @@ const navItems = [
     first: true,
   },
   { to: "/", label: LABELS.navigation.inicio },
-  { to: "/desativadas", label: LABELS.navigation.desativadas },
   { to: "/config", label: LABELS.navigation.config },
 ];
 
@@ -71,6 +70,23 @@ export const Navbar: React.FC = () => {
     else openMobileNav();
   }
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determinar valor atual do select de histórico
+  const historyValue = location.pathname.startsWith("/historico/desativadas")
+    ? "desativadas"
+    : location.pathname.startsWith("/historico/concluidas")
+    ? "concluidas"
+    : "";
+
+  function onHistoryChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const v = e.target.value;
+    if (v === "concluidas") navigate("/historico/concluidas");
+    else if (v === "desativadas") navigate("/historico/desativadas");
+    else if (v === "") navigate("/");
+  }
+
   return (
     // Tornar a navbar sticky para permanecer visível durante scroll
     <header className="sticky top-0 z-40 navbar shadow">
@@ -112,6 +128,38 @@ export const Navbar: React.FC = () => {
               )}
             </NavLink>
           ))}
+          {/* Select de histórico */}
+          <div className="ml-2 relative">
+            <label className="sr-only" htmlFor="history-select">
+              Histórico
+            </label>
+            <div
+              className={`tab tab-select-wrapper text-sm font-medium flex items-center px-3 py-2 rounded cursor-pointer ${
+                historyValue
+                  ? "!bg-[var(--cc-bg-alt)] !text-[var(--cc-primary)]"
+                  : ""
+              }`}
+            >
+              <select
+                id="history-select"
+                value={historyValue}
+                onChange={onHistoryChange}
+                className="history-select appearance-none bg-transparent pr-4 focus:outline-none text-sm font-medium"
+                aria-label="Histórico de tarefas"
+              >
+                <option value="">Histórico</option>
+                <option value="concluidas">
+                  {LABELS.navigation.concluidas}
+                </option>
+                <option value="desativadas">
+                  {LABELS.navigation.desativadas}
+                </option>
+              </select>
+              <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs opacity-70">
+                ▾
+              </span>
+            </div>
+          </div>
           <button
             onClick={toggleTheme}
             className="ml-2 theme-toggle focus:outline-none focus:ring-0"
@@ -212,6 +260,41 @@ export const Navbar: React.FC = () => {
               )}
             </NavLink>
           ))}
+          {/* Select histórico versão mobile */}
+          <div className="pt-2">
+            <label
+              htmlFor="history-select-mobile"
+              className="text-[10px] uppercase tracking-wide opacity-80 block mb-1"
+            >
+              Histórico
+            </label>
+            <div
+              className={`tab text-sm font-medium px-3 py-2 rounded ${
+                historyValue
+                  ? "!bg-[var(--cc-bg-alt)] !text-[var(--cc-primary)]"
+                  : ""
+              }`}
+            >
+              <select
+                id="history-select-mobile"
+                value={historyValue}
+                onChange={(e) => {
+                  onHistoryChange(e);
+                  closeMobileNav();
+                }}
+                className="history-select-mobile w-fit bg-transparent w-full"
+                aria-label="Histórico de tarefas"
+              >
+                <option value="">Selecionar...</option>
+                <option value="concluidas">
+                  {LABELS.navigation.concluidas}
+                </option>
+                <option value="desativadas">
+                  {LABELS.navigation.desativadas}
+                </option>
+              </select>
+            </div>
+          </div>
         </div>
       )}
     </header>

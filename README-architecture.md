@@ -39,6 +39,23 @@ import { TaskList } from '@organisms';
 - Adicionar testes de render por camada para garantir isolamento.
 - Documentar convenção de nomenclatura (prefixo opcional, evitar sufixo redundante "Component").
 
+## Navegação de Histórico
+
+Agora as páginas de histórico foram consolidadas sob `/historico/*`:
+
+- `/historico/concluidas`
+- `/historico/desativadas`
+
+O acesso foi intencionalmente centralizado em um `<select>` dentro da `Navbar` (rótulo "Histórico") para reduzir poluição de links principais e reforçar que são visões secundárias/consultivas. A rota antiga `/desativadas` continua funcionando via redirect para manter compatibilidade com referências existentes.
+
+Motivações:
+
+1. Diminuir largura da barra principal em mobile.
+2. Agrupar mentalmente estados passados (concluídas / desativadas) fora do fluxo de tarefas ativas.
+3. Facilitar futura adição de novas visões históricas sem proliferar tabs.
+
+Testes adicionados em `src/tests/historyNavigation.test.tsx` validam o redirect e render das páginas.
+
 ## Regras Rápidas
 
 - Evitar que átomos importem moléculas/organismos.
