@@ -4,8 +4,13 @@ import { APP_NAME, APP_TAGLINE } from "../../branding";
 import { LABELS } from "@constants/strings";
 
 const navItems = [
+  {
+    to: "/tarefas/nova",
+    label: LABELS.navigation.nova,
+    highlight: true,
+    first: true,
+  },
   { to: "/", label: LABELS.navigation.inicio },
-  { to: "/tarefas/nova", label: LABELS.navigation.nova },
   { to: "/desativadas", label: LABELS.navigation.desativadas },
   { to: "/config", label: LABELS.navigation.config },
 ];
@@ -59,9 +64,13 @@ export const Navbar: React.FC = () => {
                     isActive
                       ? "!bg-[var(--cc-bg-alt)] !text-[var(--cc-primary)]"
                       : ""
-                  }`}
+                  } ${item.first ? "nav-separator-right" : ""}`}
                 >
-                  {item.label}
+                  {item.highlight ? (
+                    <span className="cc-anim-add-task-text">{item.label}</span>
+                  ) : (
+                    item.label
+                  )}
                 </span>
               )}
             </NavLink>
@@ -123,10 +132,14 @@ export const Navbar: React.FC = () => {
               className={({ isActive }) =>
                 `block px-3 py-2 rounded text-sm font-medium ${
                   isActive ? "navbar-overlay-btn" : "hover:navbar-overlay-btn"
-                }`
+                } ${item.first ? "nav-mobile-after-first" : ""}`
               }
             >
-              {item.label}
+              {item.highlight ? (
+                <span className="cc-anim-add-task-text">{item.label}</span>
+              ) : (
+                item.label
+              )}
             </NavLink>
           ))}
         </div>

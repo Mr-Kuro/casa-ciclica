@@ -60,6 +60,11 @@
   --cc-theme-toggle-bg-hover: rgba(0, 0, 0, 0.28);
   --cc-theme-toggle-text: var(--cc-header-text);
   --cc-theme-toggle-border: rgba(255, 255, 255, 0.3);
+  /* Add-task animation variables (light theme) */
+  --cc-add-task-grad-from: var(--cc-header-text);
+  --cc-add-task-grad-mid: var(--cc-primary);
+  --cc-add-task-grad-to: var(--cc-header-text);
+  --cc-add-task-glow: rgba(255, 255, 255, 0.35);
 }
 html.dark {
   /* Dark Mode – Azul oceano fechado + Van Dyck Brown */
@@ -113,6 +118,11 @@ html.dark {
   --cc-theme-toggle-bg-hover: rgba(255, 255, 255, 0.18);
   --cc-theme-toggle-text: var(--cc-header-text);
   --cc-theme-toggle-border: rgba(255, 255, 255, 0.25);
+  /* Add-task animation variables (dark theme) */
+  --cc-add-task-grad-from: var(--cc-primary);
+  --cc-add-task-grad-mid: var(--cc-header-text);
+  --cc-add-task-grad-to: var(--cc-primary);
+  --cc-add-task-glow: rgba(255, 255, 255, 0.6);
 }
 
 body {
@@ -496,7 +506,7 @@ body {
     color: var(--cc-primary);
     background: var(--cc-surface-0);
     font-weight: 600;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    /* Removed box-shadow for a cleaner, flatter selected state */
   }
   .tab[aria-selected="true"]::after {
     content: "";
@@ -507,6 +517,68 @@ body {
     height: 3px;
     background: var(--cc-primary);
     border-radius: 2px 2px 0 0;
+  }
+  /* Separator after the first (add task) tab for clearer visual grouping */
+  .nav-separator-right {
+    position: relative;
+  }
+  /* Use ::before so underline (::after on active tab) remains untouched */
+  .nav-separator-right::before {
+    content: "";
+    position: absolute;
+    right: -0.25rem; /* slightly overlap gap */
+    top: 12%;
+    height: 76%;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--cc-border) 20%,
+      var(--cc-border) 80%,
+      transparent
+    );
+    opacity: 0.8;
+    pointer-events: none;
+  }
+  html.dark .nav-separator-right::before {
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--cc-container-border) 18%,
+      var(--cc-container-border) 82%,
+      transparent
+    );
+    opacity: 0.65;
+  }
+  /* Mobile vertical menu: add subtle top border after first item to separate */
+  .nav-mobile-after-first {
+    position: relative;
+  }
+  .nav-mobile-after-first::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 0.5rem;
+    right: 0.5rem;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--cc-border) 15%,
+      var(--cc-border) 85%,
+      transparent
+    );
+    opacity: 0.9;
+  }
+  html.dark .nav-mobile-after-first::before {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--cc-container-border) 15%,
+      var(--cc-container-border) 85%,
+      transparent
+    );
+    opacity: 0.55;
   }
   .tab-badge {
     margin-left: 0.5rem;
@@ -848,5 +920,80 @@ body {
     .toast {
       animation: none;
     }
+  }
+}
+
+/* Animação suave infinita para destacar ação de adicionar tarefa */
+@keyframes cc-pulse-glow {
+  0% {
+    filter: brightness(1);
+    text-shadow: 0 0 0px rgba(255, 255, 255, 0);
+  }
+  50% {
+    filter: brightness(1.15);
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
+  }
+  100% {
+    filter: brightness(1);
+    text-shadow: 0 0 0px rgba(255, 255, 255, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cc-anim-add-task {
+    animation: none !important;
+  }
+}
+.cc-anim-add-task {
+  animation: cc-pulse-glow 3.8s ease-in-out infinite;
+  position: relative;
+}
+.cc-anim-add-task::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0.5rem;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 30% 60%,
+    var(--cc-add-task-glow),
+    transparent 70%
+  );
+  opacity: 0.22;
+  mix-blend-mode: screen;
+}
+html.dark .cc-anim-add-task::after {
+  opacity: 0.16;
+}
+/* Versão só texto (sem halo no container) */
+@keyframes cc-text-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.cc-anim-add-task-text {
+  background: linear-gradient(
+    90deg,
+    var(--cc-add-task-grad-from) 0%,
+    var(--cc-add-task-grad-mid) 50%,
+    var(--cc-add-task-grad-to) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: cc-text-shimmer 5.2s ease-in-out infinite;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  filter: drop-shadow(0 0 2px var(--cc-add-task-glow));
+}
+@media (prefers-reduced-motion: reduce) {
+  .cc-anim-add-task-text {
+    animation: none !important;
   }
 }

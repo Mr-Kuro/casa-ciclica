@@ -48,7 +48,7 @@ export const LABELS = {
   },
   navigation: {
     inicio: "Início",
-    nova: "Nova",
+    nova: "Adicionar tarefa", // alterado de "Nova" para texto mais explícito
     novaTarefa: "Nova Tarefa",
     concluidas: "Concluídas",
     desativadas: "Desativadas",
