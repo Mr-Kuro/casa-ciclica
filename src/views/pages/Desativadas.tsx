@@ -1,16 +1,17 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { taskController } from "../../controllers/TaskController";
-import { Task } from "../../models/Task";
 import { Link } from "react-router-dom";
-import { LABELS } from "../../constants/strings";
-import { useToast } from "../components/toast/ToastContext";
+import { taskController } from "@controllers/TaskController";
+import { Task } from "@models/Task";
+import { LABELS } from "@constants/strings";
+import { useToast } from "@molecules/toast/ToastContext";
 
 interface Grupo {
   titulo: string;
   tarefas: Task[];
 }
 
-const DIAS = LABELS.diasSemanaLongo;
+const DIAS_LONGO = LABELS.diasSemanaLongo;
+const DIAS_CURTO = LABELS.diasSemanaCurto;
 
 export const Desativadas: React.FC = () => {
   const [tarefas, setTarefas] = useState<Task[]>(taskController.listar());
@@ -41,7 +42,7 @@ export const Desativadas: React.FC = () => {
     const semanaisGrupos: Grupo[] = Object.keys(semanaisPorDia)
       .sort((a, b) => Number(a) - Number(b))
       .map((key) => ({
-        titulo: `Semanais - ${DIAS[Number(key)]}`,
+        titulo: `Semanais - ${DIAS_LONGO[Number(key)]}`,
         tarefas: semanaisPorDia[Number(key)],
       }));
     const quinzenais = inativas.filter((t) => t.recorrencia === "QUINZENAL");
@@ -113,15 +114,7 @@ export const Desativadas: React.FC = () => {
                   </tr>
                   {!collapsed[grupo.titulo] &&
                     grupo.tarefas.map((t, idx) => {
-                      const dias = [
-                        "Dom",
-                        "Seg",
-                        "Ter",
-                        "Qua",
-                        "Qui",
-                        "Sex",
-                        "Sáb",
-                      ];
+                      // reutiliza array curto centralizado
                       return (
                         <tr
                           key={t.id}
@@ -139,7 +132,7 @@ export const Desativadas: React.FC = () => {
                           <td className="px-3 py-1 text-muted">
                             {t.recorrencia === "SEMANAL" &&
                             typeof t.diaSemana === "number"
-                              ? dias[t.diaSemana]
+                              ? DIAS_CURTO[t.diaSemana]
                               : t.recorrencia === "DIARIA"
                               ? "Diária"
                               : "—"}

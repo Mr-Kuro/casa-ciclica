@@ -47,6 +47,15 @@ export const Footer: React.FC = () => {
             </li>
             <li>
               <Link
+                to="/desativadas"
+                className="hover:underline"
+                style={{ color: "var(--cc-text)" }}
+              >
+                {LABELS.navigation.desativadas}
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/config"
                 className="hover:underline"
                 style={{ color: "var(--cc-text)" }}

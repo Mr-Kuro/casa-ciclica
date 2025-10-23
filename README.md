@@ -99,7 +99,7 @@ Definidas em `src/routes/AppRouter.tsx` usando React Router v6.
 | `*` | `NotFound` | molecule | Fallback para rotas inexistentes |
 
 Notas importantes:
-| Rota `/desativadas` removida (conteúdo agora acessível via toggles de filtros na listagem principal).
+| Rota `/desativadas` reativada para visão agrupada exclusiva de tarefas inativas (além do toggle na listagem principal).
 | `Navbar`, `Footer` e `Quote` migrados para `organisms` e usados diretamente em `App.tsx`.
 | Wildcard `*` usa `NotFound` para evitar redirecionamento silencioso para Home.
 | Cada página delega lógica de domínio para `taskController` e funções utilitárias em `@utils`.
@@ -179,7 +179,12 @@ As tarefas concluídas deixam de ter uma aba própria e podem ser exibidas embut
 
 ## Tarefas Desativadas
 
-Tarefas desativadas agora aparecem (opcionalmente) misturadas à listagem principal quando o toggle "Mostrar inativas" está ativo. Essa mudança elimina a necessidade de página dedicada e unifica o contexto de inspeção/reativação.
+Disponíveis de duas formas:
+
+1. Toggle "Mostrar inativas" na página principal (contexto unificado).
+2. Página `/desativadas` com agrupamento por recorrência e dia da semana, oferecendo ações focadas de reativar ou remover em lote visual.
+
+Motivo da reativação: facilitar auditoria / limpeza periódica de tarefas obsoletas sem poluir a visão diária.
 
 ## Unificação de Fuso Horário
 
