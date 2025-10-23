@@ -922,40 +922,43 @@ body {
     }
   }
 }
-  /* Mobile menu toggle (burger) shares visual language with theme-toggle */
+/* Mobile menu toggle (burger) shares visual language with theme-toggle */
+.menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.65rem;
+  background: var(--cc-theme-toggle-bg);
+  color: var(--cc-theme-toggle-text);
+  border: 1px solid var(--cc-theme-toggle-border);
+  backdrop-filter: blur(6px) saturate(140%);
+  -webkit-backdrop-filter: blur(6px) saturate(140%);
+  transition: background-color 0.25s, color 0.25s, border-color 0.25s,
+    box-shadow 0.25s, transform 0.2s;
+  position: relative;
+}
+.menu-toggle:hover {
+  background: var(--cc-theme-toggle-bg-hover);
+}
+.menu-toggle:active {
+  transform: translateY(1px);
+}
+.menu-toggle:focus-visible {
+  outline: 2px solid var(--cc-focus);
+  outline-offset: 2px;
+}
+.menu-toggle svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke-width: 2.1;
+}
+@media (prefers-reduced-motion: reduce) {
   .menu-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.35rem;
-    height: 2.35rem;
-    border-radius: 0.65rem;
-    background: var(--cc-theme-toggle-bg);
-    color: var(--cc-theme-toggle-text);
-    border: 1px solid var(--cc-theme-toggle-border);
-    backdrop-filter: blur(6px) saturate(140%);
-    -webkit-backdrop-filter: blur(6px) saturate(140%);
-    transition: background-color 0.25s, color 0.25s, border-color 0.25s, box-shadow 0.25s, transform 0.2s;
-    position: relative;
+    transition: none;
   }
-  .menu-toggle:hover {
-    background: var(--cc-theme-toggle-bg-hover);
-  }
-  .menu-toggle:active {
-    transform: translateY(1px);
-  }
-  .menu-toggle:focus-visible {
-    outline: 2px solid var(--cc-focus);
-    outline-offset: 2px;
-  }
-  .menu-toggle svg {
-    width: 1.15rem;
-    height: 1.15rem;
-    stroke-width: 2.1;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .menu-toggle { transition: none; }
-  }
+}
 
 /* Animação suave infinita para destacar ação de adicionar tarefa */
 @keyframes cc-pulse-glow {
