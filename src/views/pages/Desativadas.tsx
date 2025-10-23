@@ -4,6 +4,10 @@ import { taskController } from "@controllers/TaskController";
 import { Task } from "@models/Task";
 import { LABELS } from "@constants/strings";
 import { useToast } from "@molecules/toast/ToastContext";
+import ResponsiveTable, {
+  TableColumn,
+  TableGroup,
+} from "../../components/molecules/ResponsiveTable";
 
 interface Grupo {
   titulo: string;
@@ -56,6 +60,66 @@ export const Desativadas: React.FC = () => {
     return base;
   }, [inativas]);
 
+  const columns: TableColumn<Task>[] = [
+    {
+      key: "titulo",
+      header: LABELS.campos.titulo,
+      render: (t: Task) => (
+        <Link to={`/tarefas/${t.id}`} className="hover:underline font-medium">
+          {t.titulo}
+        </Link>
+      ),
+      className: "font-medium",
+    },
+    {
+      key: "recorrencia",
+      header: LABELS.campos.recorrencia,
+      render: (t: Task) => t.recorrencia,
+    },
+    {
+      key: "diaSemana",
+      header: LABELS.campos.diaSemana,
+      render: (t: Task) => (
+        <span className="text-muted">
+          {t.recorrencia === "SEMANAL" && typeof t.diaSemana === "number"
+            ? DIAS_CURTO[t.diaSemana]
+            : t.recorrencia === "DIARIA"
+            ? "Diária"
+            : "—"}
+        </span>
+      ),
+      hideOnMobile: true,
+    },
+    {
+      key: "proximaData",
+      header: LABELS.campos.proxima,
+      render: (t: Task) => (
+        <span className="text-muted">
+          {t.proximaData ? new Date(t.proximaData).toLocaleDateString() : "—"}
+        </span>
+      ),
+      hideOnMobile: true,
+    },
+    {
+      key: "ultimaConclusao",
+      header: LABELS.campos.ultimaConclusao,
+      render: (t: Task) => (
+        <span className="text-muted">
+          {t.ultimaConclusao
+            ? new Date(t.ultimaConclusao).toLocaleDateString()
+            : "—"}
+        </span>
+      ),
+      hideOnMobile: true,
+    },
+  ];
+
+  const groupsTable: TableGroup<Task>[] = grupos.map((g) => ({
+    id: g.titulo,
+    title: g.titulo,
+    rows: g.tarefas,
+  }));
+
   return (
     <div className="space-y-6 surface p-4 rounded">
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -66,137 +130,48 @@ export const Desativadas: React.FC = () => {
           {LABELS.navigation.voltar}
         </Link>
       </div>
-      {grupos.length === 0 && (
-        <p className="text-sm text-gray-500">
-          {LABELS.estados.nenhumaDesativada}
-        </p>
-      )}
-      {grupos.length > 0 && (
-        <div className="overflow-x-auto surface-alt rounded border p-2">
-          <table className="min-w-full text-xs">
-            <thead className="table-head uppercase text-[10px]">
-              <tr>
-                <th className="px-3 py-2 text-left">{LABELS.campos.titulo}</th>
-                <th className="px-3 py-2 text-left">
-                  {LABELS.campos.recorrencia}
-                </th>
-                <th className="px-3 py-2 text-left">
-                  {LABELS.campos.diaSemana}
-                </th>
-                <th className="px-3 py-2 text-left">{LABELS.campos.proxima}</th>
-                <th className="px-3 py-2 text-left">
-                  {LABELS.campos.ultimaConclusao}
-                </th>
-                <th className="px-3 py-2">{LABELS.campos.acoes}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {grupos.map((grupo) => (
-                <React.Fragment key={grupo.titulo}>
-                  <tr className="surface-accent select-none">
-                    <td colSpan={6} className="px-3 py-2 subtitle">
-                      <button
-                        onClick={() =>
-                          setCollapsed((c) => ({
-                            ...c,
-                            [grupo.titulo]: !c[grupo.titulo],
-                          }))
-                        }
-                        className="mr-2 inline-flex items-center justify-center rounded border px-2 py-0.5 text-[10px] btn-invert"
-                      >
-                        {collapsed[grupo.titulo] ? "+" : "−"}
-                      </button>
-                      {grupo.titulo}{" "}
-                      <span className="ml-2 text-[10px] text-subtle">
-                        {grupo.tarefas.length} itens
-                      </span>
-                    </td>
-                  </tr>
-                  {!collapsed[grupo.titulo] &&
-                    grupo.tarefas.map((t, idx) => {
-                      // reutiliza array curto centralizado
-                      return (
-                        <tr
-                          key={t.id}
-                          className="table-row table-row-zebra row-hover"
-                        >
-                          <td className="px-3 py-1 font-medium">
-                            <Link
-                              to={`/tarefas/${t.id}`}
-                              className="hover:underline"
-                            >
-                              {t.titulo}
-                            </Link>
-                          </td>
-                          <td className="px-3 py-1">{t.recorrencia}</td>
-                          <td className="px-3 py-1 text-muted">
-                            {t.recorrencia === "SEMANAL" &&
-                            typeof t.diaSemana === "number"
-                              ? DIAS_CURTO[t.diaSemana]
-                              : t.recorrencia === "DIARIA"
-                              ? "Diária"
-                              : "—"}
-                          </td>
-                          <td className="px-3 py-1 text-muted">
-                            {t.proximaData
-                              ? new Date(t.proximaData).toLocaleDateString()
-                              : "—"}
-                          </td>
-                          <td className="px-3 py-1 text-muted">
-                            {t.ultimaConclusao
-                              ? new Date(t.ultimaConclusao).toLocaleDateString()
-                              : "—"}
-                          </td>
-                          <td className="px-3 py-1 text-xs space-x-1">
-                            <button
-                              onClick={() => {
-                                taskController.alternarAtiva(t.id);
-                                refresh();
-                                push({
-                                  message: LABELS.feedback.toastTarefaReativada,
-                                  type: "success",
-                                });
-                              }}
-                              className="btn btn-success px-2 py-1 text-[11px]"
-                            >
-                              {LABELS.actions.reativar}
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (confirm("Remover tarefa?")) {
-                                  taskController.remover(t.id);
-                                  refresh();
-                                  push({
-                                    message:
-                                      LABELS.feedback.toastTarefaRemovida,
-                                    type: "info",
-                                  });
-                                }
-                              }}
-                              className="btn btn-danger px-2 py-1 text-[11px]"
-                            >
-                              {LABELS.actions.remover}
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  {!collapsed[grupo.titulo] && grupo.tarefas.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="px-3 py-4 text-center text-subtle"
-                      >
-                        {LABELS.estados.nenhumGrupo}
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <ResponsiveTable
+        columns={columns}
+        groups={groupsTable}
+        getRowKey={(t: Task) => t.id}
+        collapsed={collapsed}
+        onToggleGroup={(id) => setCollapsed((c) => ({ ...c, [id]: !c[id] }))}
+        renderActions={(t: Task) => (
+          <>
+            <button
+              onClick={() => {
+                taskController.alternarAtiva(t.id);
+                refresh();
+                push({
+                  message: LABELS.feedback.toastTarefaReativada,
+                  type: "success",
+                });
+              }}
+              className="btn btn-success px-2 py-1 text-[11px]"
+            >
+              {LABELS.actions.reativar}
+            </button>
+            <button
+              onClick={() => {
+                if (confirm("Remover tarefa?")) {
+                  taskController.remover(t.id);
+                  refresh();
+                  push({
+                    message: LABELS.feedback.toastTarefaRemovida,
+                    type: "info",
+                  });
+                }
+              }}
+              className="btn btn-danger px-2 py-1 text-[11px]"
+            >
+              {LABELS.actions.remover}
+            </button>
+          </>
+        )}
+        emptyMessage={<span>{LABELS.estados.nenhumaDesativada}</span>}
+        mobileCards
+        ariaLabel="Tabela de tarefas desativadas"
+      />
     </div>
   );
 };

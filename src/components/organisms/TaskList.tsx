@@ -18,6 +18,10 @@ import { loadUIPrefs, saveUIPrefs } from "@utils/uiPrefs";
 import { sortTasks, TaskSortKey } from "@utils/sort";
 import { loadSortPrefs, saveSortPrefs } from "@utils/sortStorage";
 import { useToast } from "@molecules/toast/ToastContext"; // alias após migração
+import ResponsiveTable, {
+  TableColumn,
+  TableGroup,
+} from "../molecules/ResponsiveTable";
 
 interface GrupoSemana {
   titulo: string;
@@ -307,908 +311,331 @@ export const TaskList: React.FC<Props> = ({
   }, [filtradas, filtro, sortKey, sortDir]);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const tabelaCarregando = loading || initialLoading;
+  // Common action buttons header kept igual
+  const header = (
+    <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setMostrarInativas((v) => !v)}
+          className="btn-invert px-2 py-1"
+          aria-pressed={mostrarInativas}
+          disabled={inactiveCount === 0}
+        >
+          {mostrarInativas
+            ? LABELS.feedback.ocultarInativas
+            : LABELS.feedback.mostrarInativas}
+          <span className="ml-1 text-[10px] opacity-70">({inactiveCount})</span>
+        </button>
+        {/* Botão atrasadas conforme filtro */}
+        {filtro === "HOJE" && (
+          <button
+            type="button"
+            onClick={() => setMostrarAtrasadas((v) => !v)}
+            className="btn-invert px-2 py-1"
+            aria-pressed={mostrarAtrasadas}
+            disabled={atrasadasSemana.length === 0}
+          >
+            {mostrarAtrasadas
+              ? LABELS.feedback.ocultarAtrasadas
+              : LABELS.feedback.mostrarAtrasadas}
+            <span className="ml-1 text-[10px] opacity-70">
+              ({atrasadasSemana.length})
+            </span>
+          </button>
+        )}
+        {filtro === "SEMANA" && (
+          <button
+            type="button"
+            onClick={() => setMostrarAtrasadas((v) => !v)}
+            className="btn-invert px-2 py-1"
+            aria-pressed={mostrarAtrasadas}
+            disabled={atrasadasSemana.length === 0}
+          >
+            {mostrarAtrasadas
+              ? LABELS.feedback.ocultarAtrasadas
+              : LABELS.feedback.mostrarAtrasadas}
+            <span className="ml-1 text-[10px] opacity-70">
+              ({atrasadasSemana.length})
+            </span>
+          </button>
+        )}
+        {filtro === "QUINZENA" && (
+          <button
+            type="button"
+            onClick={() => setMostrarAtrasadas((v) => !v)}
+            className="btn-invert px-2 py-1"
+            aria-pressed={mostrarAtrasadas}
+            disabled={atrasadasQuinzena.length === 0}
+          >
+            {mostrarAtrasadas
+              ? LABELS.feedback.ocultarAtrasadas
+              : LABELS.feedback.mostrarAtrasadas}
+            <span className="ml-1 text-[10px] opacity-70">
+              ({atrasadasQuinzena.length})
+            </span>
+          </button>
+        )}
+        {filtro === "MES" && (
+          <button
+            type="button"
+            onClick={() => setMostrarAtrasadas((v) => !v)}
+            className="btn-invert px-2 py-1"
+            aria-pressed={mostrarAtrasadas}
+            disabled={atrasadasMes.length === 0}
+          >
+            {mostrarAtrasadas
+              ? LABELS.feedback.ocultarAtrasadas
+              : LABELS.feedback.mostrarAtrasadas}
+            <span className="ml-1 text-[10px] opacity-70">
+              ({atrasadasMes.length})
+            </span>
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => setMostrarConcluidas((v) => !v)}
+          className="btn-invert px-2 py-1"
+          aria-pressed={mostrarConcluidas}
+          disabled={concluidasCount === 0}
+        >
+          {mostrarConcluidas
+            ? LABELS.feedback.ocultarConcluidas
+            : LABELS.feedback.mostrarConcluidas}
+          <span className="ml-1 text-[10px] opacity-70">
+            ({concluidasCount})
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+  // Column definition for ResponsiveTable (both modes)
+  const baseColumns: TableColumn<Task>[] = [
+    {
+      key: "titulo",
+      header: LABELS.campos.titulo,
+      sortable: true,
+      render: (t: Task) => (
+        <a href={`/tarefas/${t.id}`} className="hover:underline font-medium">
+          {t.titulo}
+        </a>
+      ),
+      className: "font-medium",
+    },
+    {
+      key: "recorrencia",
+      header: LABELS.campos.recorrencia,
+      sortable: true,
+      render: (t: Task) => t.recorrencia,
+    },
+  ];
+  if (filtro === "SEMANA" || filtro === "HOJE") {
+    baseColumns.push({
+      key: "diaSemana",
+      header: LABELS.campos.diaSemana,
+      sortable: true,
+      render: (t: Task) => {
+        if (t.recorrencia === "SEMANAL" && typeof t.diaSemana === "number") {
+          const dias = LABELS.diasSemanaCurto;
+          return (
+            <span className="text-xs text-gray-600">{dias[t.diaSemana]}</span>
+          );
+        }
+        return <span className="text-xs text-gray-600">Diária</span>;
+      },
+      hideOnMobile: true,
+    });
+  }
+  baseColumns.push(
+    {
+      key: "proximaData",
+      header: LABELS.campos.proxima,
+      sortable: true,
+      sortKey: "proxima",
+      render: (t: Task) => (
+        <span className="text-xs">
+          {t.proximaData ? new Date(t.proximaData).toLocaleDateString() : "—"}
+        </span>
+      ),
+      hideOnMobile: true,
+    },
+    {
+      key: "ultimaConclusao",
+      header: LABELS.campos.ultima,
+      sortable: true,
+      sortKey: "ultima",
+      render: (t: Task) => (
+        <span className="text-xs">
+          {t.ultimaConclusao
+            ? new Date(t.ultimaConclusao).toLocaleDateString()
+            : "—"}
+        </span>
+      ),
+      hideOnMobile: true,
+    }
+  );
+
+  function rowClass(t: Task) {
+    const concluida = !naoConcluidaHoje(t);
+    if (concluida) return "task-row-completed";
+    if (!t.ativa) return "task-row-inactive";
+    return "";
+  }
+  function rowActions(t: Task) {
+    const concluida = !naoConcluidaHoje(t);
+    const isAtrasada = (() => {
+      if (!mostrarAtrasadas || !t.proximaData || !naoConcluidaHoje(t))
+        return false;
+      if (filtro === "HOJE") {
+        if (
+          (t.recorrencia === "SEMANAL" && semanalAtrasadaHoje(t, hojeRef)) ||
+          (t.recorrencia === "DIARIA" &&
+            new Date(t.proximaData).setHours(0, 0, 0, 0) < hojeMid.getTime())
+        )
+          return true;
+      } else if (filtro === "QUINZENA" && quinzenalAtrasadaAtual(t, hojeRef))
+        return true;
+      else if (filtro === "MES" && mensalAtrasadaAtual(t, hojeRef)) return true;
+      return false;
+    })();
+    const atrasoDias = isAtrasada ? diasAtraso(t.proximaData, hojeRef) : 0;
+    return (
+      <div className="task-actions">
+        {isAtrasada && (
+          <span
+            className="badge-overdue ml-0 mr-2 align-middle"
+            title="Tarefa atrasada"
+          >
+            {LABELS.estados.atrasada}
+            {atrasoDias > 0 && ` (${LABELS.feedback.unidadeDia(atrasoDias)})`}
+          </span>
+        )}
+        {concluida && (
+          <span
+            className="badge-completed ml-0 mr-2 align-middle"
+            title="Tarefa concluída"
+          >
+            {LABELS.estados.jaConcluida}
+          </span>
+        )}
+        <button
+          onClick={() => {
+            if (!t.ativa || concluida) return;
+            taskController.concluirHoje(t.id);
+            onChange();
+            push({
+              message: LABELS.feedback.toastTarefaConcluida,
+              type: "success",
+            });
+          }}
+          disabled={!t.ativa || concluida}
+          className="btn-success btn px-2 py-1 text-[11px]"
+          aria-disabled={!t.ativa || concluida}
+          title={
+            !t.ativa
+              ? "Tarefa desativada"
+              : concluida
+              ? "Já concluída"
+              : "Concluir tarefa"
+          }
+        >
+          {LABELS.actions.concluir}
+        </button>
+        <button
+          onClick={() => {
+            if (concluida) return;
+            taskController.alternarAtiva(t.id);
+            onChange();
+            push({
+              message: t.ativa
+                ? LABELS.feedback.toastTarefaDesativada
+                : LABELS.feedback.toastTarefaReativada,
+              type: t.ativa ? "warning" : "success",
+            });
+          }}
+          disabled={concluida}
+          className={`px-2 py-1 text-[11px] btn ${
+            t.ativa ? "btn-warning" : "btn-success btn-reativar-emphasis"
+          }`}
+          aria-disabled={concluida}
+          title={
+            concluida ? "Já concluída" : t.ativa ? "Desativar" : "Reativar"
+          }
+        >
+          {t.ativa ? LABELS.actions.desativar : LABELS.actions.reativar}
+        </button>
+        <button
+          onClick={() => {
+            if (concluida) return;
+            if (confirm("Remover tarefa?")) {
+              taskController.remover(t.id);
+              onChange();
+              push({
+                message: LABELS.feedback.toastTarefaRemovida,
+                type: "info",
+              });
+            }
+          }}
+          disabled={concluida}
+          className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
+          aria-disabled={concluida}
+          title={concluida ? "Já concluída" : "Remover"}
+        >
+          {LABELS.actions.remover}
+        </button>
+      </div>
+    );
+  }
+
+  const groupsWeek: TableGroup<Task>[] = gruposSemana.map((g) => ({
+    id: g.titulo,
+    title: g.titulo,
+    rows: g.tarefas,
+  }));
+
+  const tableElement =
+    filtro === "SEMANA" ? (
+      <ResponsiveTable
+        columns={baseColumns}
+        groups={groupsWeek}
+        getRowKey={(t: Task) => t.id}
+        collapsed={collapsed}
+        onToggleGroup={(id: string) =>
+          setCollapsed((c) => ({ ...c, [id]: !c[id] }))
+        }
+        getRowClassName={rowClass}
+        renderActions={rowActions}
+        currentSortKey={sortKey}
+        currentSortDir={sortDir}
+        onToggleSort={(k: string) => toggleSort(k as TaskSortKey)}
+        loading={tabelaCarregando}
+        loadingSkeletonRows={5}
+        emptyMessage={<span>{LABELS.estados.nenhumaTarefa}</span>}
+        mobileCards
+        ariaLabel="Tabela semanal de tarefas"
+      />
+    ) : (
+      <ResponsiveTable
+        columns={baseColumns}
+        rows={filtradas}
+        getRowKey={(t: Task) => t.id}
+        getRowClassName={rowClass}
+        renderActions={rowActions}
+        currentSortKey={sortKey}
+        currentSortDir={sortDir}
+        onToggleSort={(k: string) => toggleSort(k as TaskSortKey)}
+        loading={tabelaCarregando}
+        loadingSkeletonRows={6}
+        emptyMessage={<span>{LABELS.estados.nenhumaTarefa}</span>}
+        mobileCards
+        ariaLabel="Tabela de tarefas"
+      />
+    );
+
   return (
     <div className="space-y-8">
-      {/* TODO: Refatorar em subcomponentes menores (Header, WeeklyTable, FlatTable) */}
-      <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setMostrarInativas((v) => !v)}
-            className="btn-invert px-2 py-1"
-            aria-pressed={mostrarInativas}
-            disabled={inactiveCount === 0}
-          >
-            {mostrarInativas
-              ? LABELS.feedback.ocultarInativas
-              : LABELS.feedback.mostrarInativas}
-            <span className="ml-1 text-[10px] opacity-70">
-              ({inactiveCount})
-            </span>
-          </button>
-          {/* Botão atrasadas conforme filtro */}
-          {filtro === "HOJE" && (
-            <button
-              type="button"
-              onClick={() => setMostrarAtrasadas((v) => !v)}
-              className="btn-invert px-2 py-1"
-              aria-pressed={mostrarAtrasadas}
-              disabled={atrasadasSemana.length === 0}
-            >
-              {mostrarAtrasadas
-                ? LABELS.feedback.ocultarAtrasadas
-                : LABELS.feedback.mostrarAtrasadas}
-              <span className="ml-1 text-[10px] opacity-70">
-                ({atrasadasSemana.length})
-              </span>
-            </button>
-          )}
-          {filtro === "SEMANA" && (
-            <button
-              type="button"
-              onClick={() => setMostrarAtrasadas((v) => !v)}
-              className="btn-invert px-2 py-1"
-              aria-pressed={mostrarAtrasadas}
-              disabled={atrasadasSemana.length === 0}
-            >
-              {mostrarAtrasadas
-                ? LABELS.feedback.ocultarAtrasadas
-                : LABELS.feedback.mostrarAtrasadas}
-              <span className="ml-1 text-[10px] opacity-70">
-                ({atrasadasSemana.length})
-              </span>
-            </button>
-          )}
-          {filtro === "QUINZENA" && (
-            <button
-              type="button"
-              onClick={() => setMostrarAtrasadas((v) => !v)}
-              className="btn-invert px-2 py-1"
-              aria-pressed={mostrarAtrasadas}
-              disabled={atrasadasQuinzena.length === 0}
-            >
-              {mostrarAtrasadas
-                ? LABELS.feedback.ocultarAtrasadas
-                : LABELS.feedback.mostrarAtrasadas}
-              <span className="ml-1 text-[10px] opacity-70">
-                ({atrasadasQuinzena.length})
-              </span>
-            </button>
-          )}
-          {filtro === "MES" && (
-            <button
-              type="button"
-              onClick={() => setMostrarAtrasadas((v) => !v)}
-              className="btn-invert px-2 py-1"
-              aria-pressed={mostrarAtrasadas}
-              disabled={atrasadasMes.length === 0}
-            >
-              {mostrarAtrasadas
-                ? LABELS.feedback.ocultarAtrasadas
-                : LABELS.feedback.mostrarAtrasadas}
-              <span className="ml-1 text-[10px] opacity-70">
-                ({atrasadasMes.length})
-              </span>
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setMostrarConcluidas((v) => !v)}
-            className="btn-invert px-2 py-1"
-            aria-pressed={mostrarConcluidas}
-            disabled={concluidasCount === 0}
-          >
-            {mostrarConcluidas
-              ? LABELS.feedback.ocultarConcluidas
-              : LABELS.feedback.mostrarConcluidas}
-            <span className="ml-1 text-[10px] opacity-70">
-              ({concluidasCount})
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {filtro === "SEMANA" ? (
-        <div className="overflow-x-auto border rounded shadow-sm">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-600 task-row-fixed">
-              <tr className="task-row-fixed">
-                <th
-                  className="px-3 py-2 text-left"
-                  aria-sort={
-                    sortKey === "titulo"
-                      ? sortDir === "asc"
-                        ? "ascending"
-                        : "descending"
-                      : "none"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleSort("titulo")}
-                    className="sort-btn inline-flex items-center gap-1"
-                  >
-                    <span>{LABELS.campos.titulo}</span>
-                    {sortKey === "titulo" && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        aria-hidden="true"
-                        className="opacity-70"
-                      >
-                        {sortDir === "asc" ? (
-                          <path d="M5 2 L2 7 H8 Z" fill="currentColor" />
-                        ) : (
-                          <path d="M5 8 L2 3 H8 Z" fill="currentColor" />
-                        )}
-                      </svg>
-                    )}
-                  </button>
-                </th>
-                <th
-                  className="px-3 py-2 text-left"
-                  aria-sort={
-                    sortKey === "recorrencia"
-                      ? sortDir === "asc"
-                        ? "ascending"
-                        : "descending"
-                      : "none"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleSort("recorrencia")}
-                    className="sort-btn inline-flex items-center gap-1"
-                  >
-                    <span>{LABELS.campos.recorrencia}</span>
-                    {sortKey === "recorrencia" && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        aria-hidden="true"
-                        className="opacity-70"
-                      >
-                        {sortDir === "asc" ? (
-                          <path d="M5 2 L2 7 H8 Z" fill="currentColor" />
-                        ) : (
-                          <path d="M5 8 L2 3 H8 Z" fill="currentColor" />
-                        )}
-                      </svg>
-                    )}
-                  </button>
-                </th>
-                <th
-                  className="px-3 py-2 text-left"
-                  aria-sort={
-                    sortKey === "diaSemana"
-                      ? sortDir === "asc"
-                        ? "ascending"
-                        : "descending"
-                      : "none"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleSort("diaSemana")}
-                    className="sort-btn inline-flex items-center gap-1"
-                  >
-                    <span>{LABELS.campos.diaSemana}</span>
-                    {sortKey === "diaSemana" && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        aria-hidden="true"
-                        className="opacity-70"
-                      >
-                        {sortDir === "asc" ? (
-                          <path d="M5 2 L2 7 H8 Z" fill="currentColor" />
-                        ) : (
-                          <path d="M5 8 L2 3 H8 Z" fill="currentColor" />
-                        )}
-                      </svg>
-                    )}
-                  </button>
-                </th>
-                <th
-                  className="px-3 py-2 text-left"
-                  aria-sort={
-                    sortKey === "proxima"
-                      ? sortDir === "asc"
-                        ? "ascending"
-                        : "descending"
-                      : "none"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleSort("proxima")}
-                    className="sort-btn inline-flex items-center gap-1"
-                  >
-                    <span>{LABELS.campos.proxima}</span>
-                    {sortKey === "proxima" && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        aria-hidden="true"
-                        className="opacity-70"
-                      >
-                        {sortDir === "asc" ? (
-                          <path d="M5 2 L2 7 H8 Z" fill="currentColor" />
-                        ) : (
-                          <path d="M5 8 L2 3 H8 Z" fill="currentColor" />
-                        )}
-                      </svg>
-                    )}
-                  </button>
-                </th>
-                <th
-                  className="px-3 py-2 text-left"
-                  aria-sort={
-                    sortKey === "ultima"
-                      ? sortDir === "asc"
-                        ? "ascending"
-                        : "descending"
-                      : "none"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleSort("ultima")}
-                    className="sort-btn inline-flex items-center gap-1"
-                  >
-                    <span>{LABELS.campos.ultima}</span>
-                    {sortKey === "ultima" && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        aria-hidden="true"
-                        className="opacity-70"
-                      >
-                        {sortDir === "asc" ? (
-                          <path d="M5 2 L2 7 H8 Z" fill="currentColor" />
-                        ) : (
-                          <path d="M5 8 L2 3 H8 Z" fill="currentColor" />
-                        )}
-                      </svg>
-                    )}
-                  </button>
-                </th>
-                <th className="px-3 py-2 task-actions-col">
-                  {LABELS.actions.concluir}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tabelaCarregando &&
-                [...Array(5)].map((_, i) => (
-                  <tr key={`sk-week-${i}`} className="task-row-fixed border-t">
-                    <td className="px-3 py-3" colSpan={6}>
-                      <div className="flex flex-col gap-2">
-                        <div className="skeleton h-4 w-1/3" />
-                        <div className="flex gap-4">
-                          <div className="flex-1">
-                            <div className="skeleton h-3 w-2/3 mb-1" />
-                            <div className="skeleton h-3 w-1/2" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="skeleton h-3 w-1/2 mb-1" />
-                            <div className="skeleton h-3 w-2/3" />
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              {!tabelaCarregando &&
-                gruposSemana.map((g) => (
-                  <React.Fragment key={g.titulo}>
-                    <tr className="surface-accent select-none">
-                      <td colSpan={6} className="px-3 py-2 subtitle">
-                        <button
-                          onClick={() =>
-                            setCollapsed((c) => ({
-                              ...c,
-                              [g.titulo]: !c[g.titulo],
-                            }))
-                          }
-                          className="mr-2 inline-flex items-center justify-center rounded border px-2 py-0.5 text-[10px] btn-invert"
-                          aria-label={
-                            collapsed[g.titulo]
-                              ? "Expandir grupo"
-                              : "Colapsar grupo"
-                          }
-                        >
-                          {collapsed[g.titulo] ? "+" : "−"}
-                        </button>
-                        {g.titulo}
-                        <span className="ml-2 text-[10px] text-subtle">
-                          {g.tarefas.length} itens
-                        </span>
-                      </td>
-                    </tr>
-                    {!collapsed[g.titulo] &&
-                      g.tarefas.map((t) => {
-                        const dias = LABELS.diasSemanaCurto;
-                        const isAtrasadaSemana =
-                          mostrarAtrasadas && semanalAtrasadaHoje(t, hojeRef);
-                        const atrasoDias = isAtrasadaSemana
-                          ? diasAtraso(t.proximaData, hojeRef)
-                          : 0;
-                        const concluida = !naoConcluidaHoje(t);
-                        return (
-                          <tr
-                            key={t.id}
-                            className={`border-t task-row-fixed ${
-                              concluida
-                                ? "task-row-completed"
-                                : t.ativa
-                                ? "row-hover"
-                                : "task-row-inactive"
-                            }`}
-                          >
-                            <td className="px-3 py-2 font-medium">
-                              <a
-                                href={`/tarefas/${t.id}`}
-                                className="hover:underline"
-                              >
-                                {t.titulo}
-                              </a>
-                              {isAtrasadaSemana && (
-                                <span
-                                  className="badge-overdue ml-2 align-middle"
-                                  title="Tarefa atrasada"
-                                >
-                                  {LABELS.estados.atrasada}
-                                  {atrasoDias > 0 &&
-                                    ` (${LABELS.feedback.unidadeDia(
-                                      atrasoDias
-                                    )})`}
-                                </span>
-                              )}
-                              {concluida && (
-                                <span
-                                  className="badge-completed ml-2 align-middle"
-                                  title="Tarefa concluída"
-                                >
-                                  {LABELS.estados.jaConcluida}
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-3 py-2">{t.recorrencia}</td>
-                            <td className="px-3 py-2 text-xs text-gray-600">
-                              {t.recorrencia === "SEMANAL" &&
-                              typeof t.diaSemana === "number"
-                                ? dias[t.diaSemana]
-                                : "Diária"}
-                            </td>
-                            <td className="px-3 py-2 text-xs">
-                              {t.proximaData
-                                ? new Date(t.proximaData).toLocaleDateString()
-                                : "—"}
-                            </td>
-                            <td className="px-3 py-2 text-xs">
-                              {t.ultimaConclusao
-                                ? new Date(
-                                    t.ultimaConclusao
-                                  ).toLocaleDateString()
-                                : "—"}
-                            </td>
-                            <td className="px-3 py-2 text-xs task-actions-col">
-                              <div className="task-actions">
-                                <button
-                                  onClick={() => {
-                                    if (!t.ativa || concluida) return;
-                                    taskController.concluirHoje(t.id);
-                                    onChange();
-                                    push({
-                                      message:
-                                        LABELS.feedback.toastTarefaConcluida,
-                                      type: "success",
-                                    });
-                                  }}
-                                  disabled={!t.ativa || concluida}
-                                  className="btn-success btn px-2 py-1 text-[11px]"
-                                  aria-disabled={!t.ativa || concluida}
-                                  title={
-                                    !t.ativa
-                                      ? "Tarefa desativada"
-                                      : concluida
-                                      ? "Já concluída"
-                                      : "Concluir tarefa"
-                                  }
-                                >
-                                  {LABELS.actions.concluir}
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (concluida) return;
-                                    taskController.alternarAtiva(t.id);
-                                    onChange();
-                                    push({
-                                      message: t.ativa
-                                        ? LABELS.feedback.toastTarefaDesativada
-                                        : LABELS.feedback.toastTarefaReativada,
-                                      type: t.ativa ? "warning" : "success",
-                                    });
-                                  }}
-                                  disabled={concluida}
-                                  className={`px-2 py-1 text-[11px] btn ${
-                                    t.ativa
-                                      ? "btn-warning"
-                                      : "btn-success btn-reativar-emphasis"
-                                  }`}
-                                  aria-disabled={concluida}
-                                  title={
-                                    concluida
-                                      ? "Já concluída"
-                                      : t.ativa
-                                      ? "Desativar"
-                                      : "Reativar"
-                                  }
-                                >
-                                  {t.ativa
-                                    ? LABELS.actions.desativar
-                                    : LABELS.actions.reativar}
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (concluida) return;
-                                    if (confirm("Remover tarefa?")) {
-                                      taskController.remover(t.id);
-                                      onChange();
-                                      push({
-                                        message:
-                                          LABELS.feedback.toastTarefaRemovida,
-                                        type: "info",
-                                      });
-                                    }
-                                  }}
-                                  disabled={concluida}
-                                  className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
-                                  aria-disabled={concluida}
-                                  title={concluida ? "Já concluída" : "Remover"}
-                                >
-                                  {LABELS.actions.remover}
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    {!collapsed[g.titulo] &&
-                      g.tarefas.length === 0 &&
-                      !tabelaCarregando && (
-                        <tr className="task-row-fixed">
-                          <td
-                            colSpan={6}
-                            className="px-3 py-6 text-center text-gray-500"
-                          >
-                            {LABELS.estados.nenhumaTarefa}
-                          </td>
-                        </tr>
-                      )}
-                  </React.Fragment>
-                ))}
-              {!tabelaCarregando && gruposSemana.length === 0 && (
-                <tr className="task-row-fixed">
-                  <td
-                    colSpan={6}
-                    className="px-3 py-6 text-center text-gray-500"
-                  >
-                    {LABELS.estados.nenhumaTarefa}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="overflow-x-auto border rounded shadow-sm">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-600 task-row-fixed">
-              <tr className="task-row-fixed">
-                <th
-                  className="px-3 py-2 text-left"
-                  aria-sort={
-                    sortKey === "titulo"
-                      ? sortDir === "asc"
-                        ? "ascending"
-                        : "descending"
-                      : "none"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleSort("titulo")}
-                    className="sort-btn inline-flex items-center gap-1"
-                  >
-                    <span>{LABELS.campos.titulo}</span>
-                    {sortKey === "titulo" && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        aria-hidden="true"
-                        className="opacity-70"
-                      >
-                        {sortDir === "asc" ? (
-                          <path d="M5 2 L2 7 H8 Z" fill="currentColor" />
-                        ) : (
-                          <path d="M5 8 L2 3 H8 Z" fill="currentColor" />
-                        )}
-                      </svg>
-                    )}
-                  </button>
-                </th>
-                <th
-                  className="px-3 py-2 text-left"
-                  aria-sort={
-                    sortKey === "recorrencia"
-                      ? sortDir === "asc"
-                        ? "ascending"
-                        : "descending"
-                      : "none"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleSort("recorrencia")}
-                    className="sort-btn inline-flex items-center gap-1"
-                  >
-                    <span>{LABELS.campos.recorrencia}</span>
-                    {sortKey === "recorrencia" && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        aria-hidden="true"
-                        className="opacity-70"
-                      >
-                        {sortDir === "asc" ? (
-                          <path d="M5 2 L2 7 H8 Z" fill="currentColor" />
-                        ) : (
-                          <path d="M5 8 L2 3 H8 Z" fill="currentColor" />
-                        )}
-                      </svg>
-                    )}
-                  </button>
-                </th>
-                {filtro === "HOJE" && (
-                  <th
-                    className="px-3 py-2 text-left"
-                    aria-sort={
-                      sortKey === "diaSemana"
-                        ? sortDir === "asc"
-                          ? "ascending"
-                          : "descending"
-                        : "none"
-                    }
-                  >
-                    <button
-                      type="button"
-                      onClick={() => toggleSort("diaSemana")}
-                      className="sort-btn inline-flex items-center gap-1"
-                    >
-                      <span>{LABELS.campos.diaSemana}</span>
-                      {sortKey === "diaSemana" && (
-                        <svg
-                          width="10"
-                          height="10"
-                          viewBox="0 0 10 10"
-                          aria-hidden="true"
-                          className="opacity-70"
-                        >
-                          {sortDir === "asc" ? (
-                            <path d="M5 2 L2 7 H8 Z" fill="currentColor" />
-                          ) : (
-                            <path d="M5 8 L2 3 H8 Z" fill="currentColor" />
-                          )}
-                        </svg>
-                      )}
-                    </button>
-                  </th>
-                )}
-                <th
-                  className="px-3 py-2 text-left"
-                  aria-sort={
-                    sortKey === "proxima"
-                      ? sortDir === "asc"
-                        ? "ascending"
-                        : "descending"
-                      : "none"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleSort("proxima")}
-                    className="sort-btn inline-flex items-center gap-1"
-                  >
-                    <span>{LABELS.campos.proxima}</span>
-                    {sortKey === "proxima" && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        aria-hidden="true"
-                        className="opacity-70"
-                      >
-                        {sortDir === "asc" ? (
-                          <path d="M5 2 L2 7 H8 Z" fill="currentColor" />
-                        ) : (
-                          <path d="M5 8 L2 3 H8 Z" fill="currentColor" />
-                        )}
-                      </svg>
-                    )}
-                  </button>
-                </th>
-                <th
-                  className="px-3 py-2 text-left"
-                  aria-sort={
-                    sortKey === "ultima"
-                      ? sortDir === "asc"
-                        ? "ascending"
-                        : "descending"
-                      : "none"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleSort("ultima")}
-                    className="sort-btn inline-flex items-center gap-1"
-                  >
-                    <span>{LABELS.campos.ultima}</span>
-                    {sortKey === "ultima" && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        aria-hidden="true"
-                        className="opacity-70"
-                      >
-                        {sortDir === "asc" ? (
-                          <path d="M5 2 L2 7 H8 Z" fill="currentColor" />
-                        ) : (
-                          <path d="M5 8 L2 3 H8 Z" fill="currentColor" />
-                        )}
-                      </svg>
-                    )}
-                  </button>
-                </th>
-                <th className="px-3 py-2 task-actions-col">
-                  {LABELS.actions.concluir}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tabelaCarregando &&
-                [...Array(6)].map((_, i) => (
-                  <tr key={`sk-flat-${i}`} className="task-row-fixed border-t">
-                    <td className="px-3 py-3">
-                      <div className="skeleton h-4 w-2/3 mb-2" />
-                      <div className="skeleton h-3 w-1/4" />
-                    </td>
-                    <td className="px-3 py-3">
-                      <div className="skeleton h-3 w-14" />
-                    </td>
-                    {filtro === "HOJE" && (
-                      <td className="px-3 py-3">
-                        <div className="skeleton h-3 w-10" />
-                      </td>
-                    )}
-                    <td className="px-3 py-3">
-                      <div className="skeleton h-3 w-16" />
-                    </td>
-                    <td className="px-3 py-3">
-                      <div className="skeleton h-3 w-16" />
-                    </td>
-                    <td className="px-3 py-3">
-                      <div className="skeleton h-6 w-20" />
-                    </td>
-                  </tr>
-                ))}
-              {!tabelaCarregando &&
-                filtradas.map((t) => {
-                  const dias = [
-                    "Dom",
-                    "Seg",
-                    "Ter",
-                    "Qua",
-                    "Qui",
-                    "Sex",
-                    "Sáb",
-                  ];
-                  let isAtrasada = false;
-                  let atrasoDias = 0;
-                  const concluida = !naoConcluidaHoje(t);
-                  if (
-                    mostrarAtrasadas &&
-                    t.proximaData &&
-                    naoConcluidaHoje(t)
-                  ) {
-                    if (
-                      filtro === "HOJE" &&
-                      ((t.recorrencia === "SEMANAL" &&
-                        semanalAtrasadaHoje(t, hojeRef)) ||
-                        (t.recorrencia === "DIARIA" &&
-                          new Date(t.proximaData).setHours(0, 0, 0, 0) <
-                            hojeMid.getTime()))
-                    ) {
-                      isAtrasada = true;
-                    } else if (
-                      filtro === "QUINZENA" &&
-                      quinzenalAtrasadaAtual(t, hojeRef)
-                    ) {
-                      isAtrasada = true;
-                    } else if (
-                      filtro === "MES" &&
-                      mensalAtrasadaAtual(t, hojeRef)
-                    ) {
-                      isAtrasada = true;
-                    }
-                    if (isAtrasada)
-                      atrasoDias = diasAtraso(t.proximaData, hojeRef);
-                  }
-                  return (
-                    <tr
-                      key={t.id}
-                      className={`border-t task-row-fixed ${
-                        concluida
-                          ? "task-row-completed"
-                          : t.ativa
-                          ? "row-hover"
-                          : "task-row-inactive"
-                      }`}
-                    >
-                      <td className="px-3 py-2 font-medium">
-                        <a
-                          href={`/tarefas/${t.id}`}
-                          className="hover:underline"
-                        >
-                          {t.titulo}
-                        </a>
-                        {isAtrasada && (
-                          <span
-                            className="badge-overdue ml-2 align-middle"
-                            title="Tarefa atrasada"
-                          >
-                            {LABELS.estados.atrasada}
-                            {atrasoDias > 0 &&
-                              ` (${LABELS.feedback.unidadeDia(atrasoDias)})`}
-                          </span>
-                        )}
-                        {concluida && (
-                          <span
-                            className="badge-completed ml-2 align-middle"
-                            title="Tarefa concluída"
-                          >
-                            {LABELS.estados.jaConcluida}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2">
-                        <span className="inline-flex items-center gap-1">
-                          {t.recorrencia}
-                        </span>
-                      </td>
-                      {filtro === "HOJE" && (
-                        <td className="px-3 py-2 text-xs text-gray-600">
-                          {t.recorrencia === "SEMANAL" &&
-                          typeof t.diaSemana === "number"
-                            ? dias[t.diaSemana]
-                            : t.recorrencia === "DIARIA"
-                            ? "Diária"
-                            : "—"}
-                        </td>
-                      )}
-                      <td className="px-3 py-2 text-xs">
-                        {t.proximaData
-                          ? new Date(t.proximaData).toLocaleDateString()
-                          : "—"}
-                      </td>
-                      <td className="px-3 py-2 text-xs">
-                        {t.ultimaConclusao
-                          ? new Date(t.ultimaConclusao).toLocaleDateString()
-                          : "—"}
-                      </td>
-                      <td className="px-3 py-2 text-xs task-actions-col">
-                        <div className="task-actions">
-                          <button
-                            onClick={() => {
-                              if (!t.ativa || concluida) return;
-                              taskController.concluirHoje(t.id);
-                              onChange();
-                              push({
-                                message: LABELS.feedback.toastTarefaConcluida,
-                                type: "success",
-                              });
-                            }}
-                            disabled={!t.ativa || concluida}
-                            className="btn-success btn px-2 py-1 text-[11px]"
-                            aria-disabled={!t.ativa || concluida}
-                            title={
-                              !t.ativa
-                                ? "Tarefa desativada"
-                                : concluida
-                                ? "Já concluída"
-                                : "Concluir tarefa"
-                            }
-                          >
-                            {LABELS.actions.concluir}
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (concluida) return;
-                              taskController.alternarAtiva(t.id);
-                              onChange();
-                              push({
-                                message: t.ativa
-                                  ? LABELS.feedback.toastTarefaDesativada
-                                  : LABELS.feedback.toastTarefaReativada,
-                                type: t.ativa ? "warning" : "success",
-                              });
-                            }}
-                            disabled={concluida}
-                            className={`px-2 py-1 text-[11px] btn ${
-                              t.ativa
-                                ? "btn-warning"
-                                : "btn-success btn-reativar-emphasis"
-                            }`}
-                            aria-disabled={concluida}
-                            title={
-                              concluida
-                                ? "Já concluída"
-                                : t.ativa
-                                ? "Desativar"
-                                : "Reativar"
-                            }
-                          >
-                            {t.ativa
-                              ? LABELS.actions.desativar
-                              : LABELS.actions.reativar}
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (concluida) return;
-                              if (confirm("Remover tarefa?")) {
-                                taskController.remover(t.id);
-                                onChange();
-                                push({
-                                  message: LABELS.feedback.toastTarefaRemovida,
-                                  type: "info",
-                                });
-                              }
-                            }}
-                            disabled={concluida}
-                            className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
-                            aria-disabled={concluida}
-                            title={concluida ? "Já concluída" : "Remover"}
-                          >
-                            {LABELS.actions.remover}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              {!tabelaCarregando && filtradas.length === 0 && (
-                <tr className="task-row-fixed">
-                  <td
-                    colSpan={filtro === "HOJE" ? 6 : 5}
-                    className="px-3 py-6 text-center text-gray-500"
-                  >
-                    {LABELS.estados.nenhumaTarefa}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {header}
+      {tableElement}
     </div>
   );
 };
