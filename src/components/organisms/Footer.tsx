@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { APP_NAME } from "../../branding";
+import { APP_NAME, AUTHOR_NAME, AUTHOR_LINK, TECH_STACK } from "../../branding";
 import { LABELS } from "@constants/strings";
 
 export const Footer: React.FC = () => {
@@ -13,7 +13,7 @@ export const Footer: React.FC = () => {
         borderColor: "var(--cc-border)",
       }}
     >
-      <div className="mx-auto max-w-7xl px-4 py-10 grid gap-8 md:grid-cols-4 text-sm">
+      <div className="mx-auto max-w-7xl px-4 py-10 grid gap-8 md:grid-cols-5 text-sm">
         <div className="space-y-2">
           <h4 className="font-semibold" style={{ color: "var(--cc-text)" }}>
             Aplicação
@@ -67,6 +67,16 @@ export const Footer: React.FC = () => {
         </div>
         <div className="space-y-2">
           <h4 className="font-semibold" style={{ color: "var(--cc-text)" }}>
+            Tecnologias
+          </h4>
+          <ul className="space-y-1 text-xs">
+            {TECH_STACK.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="space-y-2">
+          <h4 className="font-semibold" style={{ color: "var(--cc-text)" }}>
             Status
           </h4>
           <ul className="space-y-1 text-xs">
@@ -79,7 +89,19 @@ export const Footer: React.FC = () => {
           <h4 className="font-semibold" style={{ color: "var(--cc-text)" }}>
             Créditos
           </h4>
-          <p className="text-xs">Feito com React + Tailwind + Vite.</p>
+          <p className="text-xs leading-relaxed">
+            Desenvolvido por {" "}
+            <a
+              href={AUTHOR_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:no-underline"
+              style={{ color: "var(--cc-link)" }}
+            >
+              {AUTHOR_NAME}
+            </a>
+          </p>
+          <p className="text-xs">Feito com foco em simplicidade incremental.</p>
           <p className="text-xs">
             &copy; {new Date().getFullYear()} {APP_NAME}
           </p>
