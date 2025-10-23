@@ -922,6 +922,40 @@ body {
     }
   }
 }
+  /* Mobile menu toggle (burger) shares visual language with theme-toggle */
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 0.65rem;
+    background: var(--cc-theme-toggle-bg);
+    color: var(--cc-theme-toggle-text);
+    border: 1px solid var(--cc-theme-toggle-border);
+    backdrop-filter: blur(6px) saturate(140%);
+    -webkit-backdrop-filter: blur(6px) saturate(140%);
+    transition: background-color 0.25s, color 0.25s, border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+    position: relative;
+  }
+  .menu-toggle:hover {
+    background: var(--cc-theme-toggle-bg-hover);
+  }
+  .menu-toggle:active {
+    transform: translateY(1px);
+  }
+  .menu-toggle:focus-visible {
+    outline: 2px solid var(--cc-focus);
+    outline-offset: 2px;
+  }
+  .menu-toggle svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    stroke-width: 2.1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .menu-toggle { transition: none; }
+  }
 
 /* Animação suave infinita para destacar ação de adicionar tarefa */
 @keyframes cc-pulse-glow {
@@ -995,5 +1029,63 @@ html.dark .cc-anim-add-task::after {
 @media (prefers-reduced-motion: reduce) {
   .cc-anim-add-task-text {
     animation: none !important;
+  }
+}
+
+/* Mobile nav enter/exit animations */
+@keyframes cc-nav-mobile-enter {
+  0% {
+    transform: translateY(-6px) scale(0.98);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(2px) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes cc-nav-mobile-exit {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-6px) scale(0.96);
+    opacity: 0;
+  }
+}
+.nav-mobile-base {
+  will-change: transform, opacity;
+}
+.nav-mobile-enter {
+  animation: cc-nav-mobile-enter 0.18s ease-out forwards;
+}
+.nav-mobile-exit {
+  animation: cc-nav-mobile-exit 0.18s ease-in forwards;
+}
+/* Positioned overlay for mobile navigation (prevents layout shift) */
+.nav-mobile-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%; /* directly below header */
+  z-index: 30; /* below header (z-40) but above content */
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.25),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--cc-border);
+}
+@supports (backdrop-filter: blur(4px)) {
+  .nav-mobile-overlay {
+    backdrop-filter: blur(4px) saturate(140%);
+    -webkit-backdrop-filter: blur(4px) saturate(140%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-mobile-enter,
+  .nav-mobile-exit {
+    animation: none;
   }
 }

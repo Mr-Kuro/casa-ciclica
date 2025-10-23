@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { APP_NAME, APP_TAGLINE } from "../../branding";
 import { LABELS } from "@constants/strings";
@@ -16,7 +16,13 @@ const navItems = [
 ];
 
 export const Navbar: React.FC = () => {
+  // Logical open state (for ARIA / button label)
   const [open, setOpen] = useState(false);
+  // Keeps mobile nav mounted during exit animation to avoid abrupt removal
+  const [showMobileNav, setShowMobileNav] = useState(false);
+  // Current animation class (enter/exit)
+  const [animClass, setAnimClass] = useState<string>("");
+  const exitTimerRef = useRef<number | null>(null);
   const [dark, setDark] = useState<boolean>(
     () =>
       document.documentElement.classList.contains("dark") ||
@@ -35,8 +41,39 @@ export const Navbar: React.FC = () => {
     setDark(next);
   }
 
+  function openMobileNav() {
+    // Cancel any pending exit cleanup
+    if (exitTimerRef.current) {
+      window.clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = null;
+    }
+    setShowMobileNav(true);
+    // Next frame to ensure element is mounted before animation
+    requestAnimationFrame(() => {
+      setOpen(true);
+      setAnimClass("nav-mobile-enter");
+    });
+  }
+
+  function closeMobileNav() {
+    setOpen(false);
+    setAnimClass("nav-mobile-exit");
+    // Unmount after exit animation duration (~180ms)
+    exitTimerRef.current = window.setTimeout(() => {
+      setShowMobileNav(false);
+      setAnimClass("");
+      exitTimerRef.current = null;
+    }, 190);
+  }
+
+  function toggleMobileNav() {
+    if (open) closeMobileNav();
+    else openMobileNav();
+  }
+
   return (
-    <header className="relative z-30 navbar shadow">
+    // Tornar a navbar sticky para permanecer visível durante scroll
+    <header className="sticky top-0 z-40 navbar shadow">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
           <span className="inline-flex h-9 w-9 items-center justify-center rounded bg-white/10 backdrop-blur text-xs font-semibold">
@@ -112,23 +149,56 @@ export const Navbar: React.FC = () => {
             {dark ? "☀️" : "🌙"}
           </button>
           <button
-            onClick={() => setOpen((o) => !o)}
-            className="px-3 py-2 rounded text-sm font-medium navbar-overlay-btn"
+            onClick={toggleMobileNav}
+            className="menu-toggle focus:outline-none focus:ring-0"
             aria-label={
               open ? LABELS.navigation.fechar : LABELS.navigation.menu
             }
+            aria-pressed={open}
           >
-            {open ? LABELS.navigation.fechar : LABELS.navigation.menu}
+            {open ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <line x1="5" y1="5" x2="19" y2="19" />
+                <line x1="19" y1="5" x2="5" y2="19" />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="15" y2="18" />
+              </svg>
+            )}
+            <span className="sr-only">
+              {open ? LABELS.navigation.fechar : LABELS.navigation.menu}
+            </span>
           </button>
         </div>
       </div>
-      {open && (
-        <div className="md:hidden navbar-vertical px-4 py-2 space-y-1">
+      {showMobileNav && (
+        <div
+          className={
+            "md:hidden navbar-vertical px-4 py-2 space-y-1 nav-mobile-base nav-mobile-overlay " +
+            animClass
+          }
+          aria-hidden={!open}
+        >
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
-              onClick={() => setOpen(false)}
+              onClick={() => closeMobileNav()}
               className={({ isActive }) =>
                 `block px-3 py-2 rounded text-sm font-medium ${
                   isActive ? "navbar-overlay-btn" : "hover:navbar-overlay-btn"
