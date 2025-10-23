@@ -15,17 +15,23 @@ export const Footer: React.FC = () => {
     >
       <div className="mx-auto max-w-7xl px-4 py-10 grid gap-8 md:grid-cols-5 text-sm">
         <div className="space-y-2">
-          <h4 className="font-semibold" style={{ color: "var(--cc-text)" }}>
+          <h2
+            className="font-semibold text-sm"
+            style={{ color: "var(--cc-text)" }}
+          >
             Aplicação
-          </h4>
+          </h2>
           <p className="text-xs leading-relaxed">
             Gerenciador de tarefas domésticas recorrentes para rotina da casa.
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="font-semibold" style={{ color: "var(--cc-text)" }}>
+          <h3
+            className="font-semibold text-sm"
+            style={{ color: "var(--cc-text)" }}
+          >
             Navegação
-          </h4>
+          </h3>
           <ul className="space-y-1">
             <li>
               <Link
@@ -66,9 +72,12 @@ export const Footer: React.FC = () => {
           </ul>
         </div>
         <div className="space-y-2">
-          <h4 className="font-semibold" style={{ color: "var(--cc-text)" }}>
+          <h3
+            className="font-semibold text-sm"
+            style={{ color: "var(--cc-text)" }}
+          >
             Tecnologias
-          </h4>
+          </h3>
           <ul className="space-y-1 text-xs">
             {TECH_STACK.map((item) => (
               <li key={item}>{item}</li>
@@ -76,9 +85,12 @@ export const Footer: React.FC = () => {
           </ul>
         </div>
         <div className="space-y-2">
-          <h4 className="font-semibold" style={{ color: "var(--cc-text)" }}>
+          <h3
+            className="font-semibold text-sm"
+            style={{ color: "var(--cc-text)" }}
+          >
             Status
-          </h4>
+          </h3>
           <ul className="space-y-1 text-xs">
             <li>{LABELS.feedback.persistencia}</li>
             <li>{LABELS.feedback.seedsDinamicos}</li>
@@ -86,11 +98,14 @@ export const Footer: React.FC = () => {
           </ul>
         </div>
         <div className="space-y-2">
-          <h4 className="font-semibold" style={{ color: "var(--cc-text)" }}>
+          <h3
+            className="font-semibold text-sm"
+            style={{ color: "var(--cc-text)" }}
+          >
             Créditos
-          </h4>
+          </h3>
           <p className="text-xs leading-relaxed">
-            Desenvolvido por {" "}
+            Desenvolvido por{" "}
             <a
               href={AUTHOR_LINK}
               target="_blank"

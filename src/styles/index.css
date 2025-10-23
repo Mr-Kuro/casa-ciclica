@@ -15,7 +15,8 @@
   /* Borda específica para containers (um tom ligeiramente mais contrastado) */
   --cc-container-border: #d2c5b6;
   --cc-text: #4a3b30; /* marrom mais marcado */
-  --cc-muted: #7c6a5b; /* texto secundário */
+  /* Ajuste de contraste: escurecido leve para AA em tamanhos menores */
+  --cc-muted: #6a5747; /* texto secundário (antes #7c6a5b) */
   --cc-btn-bg: #d6a869;
   --cc-btn-hover: #c08d49;
   --cc-gradient-from: #c08d49;
@@ -40,7 +41,7 @@
   --cc-table-head-text: #4a3b30;
   --cc-surface-hover: #e7d3bc;
   --cc-row-hover: #dfa45c; /* hover clarinho para linhas (light) */
-  --cc-text-subtle: #8d7c6d;
+  --cc-text-subtle: #7d6959; /* antes #8d7c6d - melhora contraste em bg-alt */
   --cc-table-row-bg: var(--cc-bg-alt);
   --cc-table-row-alt-bg: #f9f4ec;
   --cc-table-group-bg: var(--cc-surface-2);
@@ -131,6 +132,26 @@ body {
 }
 
 @layer components {
+  /* Skip link (pular para conteúdo principal) */
+  .skip-link {
+    position: absolute;
+    top: -100px;
+    left: 0;
+    background: var(--cc-primary);
+    color: var(--cc-header-text);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 0 0 0.5rem 0.5rem;
+    z-index: 1000;
+    transition: top 0.25s ease, background-color 0.25s ease;
+  }
+  .skip-link:focus {
+    top: 0;
+    outline: 2px solid var(--cc-focus);
+    outline-offset: 2px;
+  }
   .surface {
     background: var(--cc-surface-1);
     border: 1px solid var(--cc-container-border);

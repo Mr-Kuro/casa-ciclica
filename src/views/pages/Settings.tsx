@@ -28,10 +28,19 @@ export const Settings: React.FC = () => {
       <div className="surface-accent rounded p-4 space-y-2">
         <h2 className="font-semibold">{LABELS.campos.config}</h2>
         <div className="flex flex-col gap-3">
-          <button onClick={limpar} className="btn btn-danger">
+          <button
+            type="button"
+            onClick={limpar}
+            className="btn btn-danger"
+            aria-describedby="config-warn-reset"
+            aria-label="Deletar todos os dados e recriar seeds"
+          >
             DELETAR dados
           </button>
-          <p className="text-xs text-subtle leading-snug max-w-prose">
+          <p
+            id="config-warn-reset"
+            className="text-xs text-subtle leading-snug max-w-prose"
+          >
             Ação irreversível: remove todas as tarefas salvas no navegador e
             recria automaticamente o conjunto inicial padrão (seeds) quando a
             aplicação iniciar novamente. Use somente se quiser começar do zero.

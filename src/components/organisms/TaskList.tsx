@@ -321,6 +321,11 @@ export const TaskList: React.FC<Props> = ({
           className="btn-invert px-2 py-1"
           aria-pressed={mostrarInativas}
           disabled={inactiveCount === 0}
+          aria-label={
+            mostrarInativas
+              ? "Ocultar tarefas inativas"
+              : `Mostrar tarefas inativas (${inactiveCount})`
+          }
         >
           {mostrarInativas
             ? LABELS.feedback.ocultarInativas
@@ -335,6 +340,11 @@ export const TaskList: React.FC<Props> = ({
             className="btn-invert px-2 py-1"
             aria-pressed={mostrarAtrasadas}
             disabled={atrasadasSemana.length === 0}
+            aria-label={
+              mostrarAtrasadas
+                ? "Ocultar tarefas atrasadas"
+                : `Mostrar tarefas atrasadas (${atrasadasSemana.length})`
+            }
           >
             {mostrarAtrasadas
               ? LABELS.feedback.ocultarAtrasadas
@@ -398,6 +408,11 @@ export const TaskList: React.FC<Props> = ({
           className="btn-invert px-2 py-1"
           aria-pressed={mostrarConcluidas}
           disabled={concluidasCount === 0}
+          aria-label={
+            mostrarConcluidas
+              ? "Ocultar tarefas já concluídas"
+              : `Mostrar tarefas já concluídas (${concluidasCount})`
+          }
         >
           {mostrarConcluidas
             ? LABELS.feedback.ocultarConcluidas
@@ -526,6 +541,7 @@ export const TaskList: React.FC<Props> = ({
     return (
       <div className="task-actions">
         <button
+          type="button"
           onClick={() => {
             if (!t.ativa || concluida) return;
             taskController.concluirHoje(t.id);
@@ -538,6 +554,13 @@ export const TaskList: React.FC<Props> = ({
           disabled={!t.ativa || concluida}
           className="btn-success btn px-2 py-1 text-[11px]"
           aria-disabled={!t.ativa || concluida}
+          aria-label={
+            concluida
+              ? `Tarefa '${t.titulo}' já concluída hoje`
+              : !t.ativa
+              ? `Tarefa '${t.titulo}' desativada`
+              : `Concluir tarefa '${t.titulo}'`
+          }
           title={
             !t.ativa
               ? "Tarefa desativada"
@@ -549,6 +572,7 @@ export const TaskList: React.FC<Props> = ({
           {LABELS.actions.concluir}
         </button>
         <button
+          type="button"
           onClick={() => {
             if (concluida) return;
             taskController.alternarAtiva(t.id);
@@ -565,6 +589,13 @@ export const TaskList: React.FC<Props> = ({
             t.ativa ? "btn-warning" : "btn-success btn-reativar-emphasis"
           }`}
           aria-disabled={concluida}
+          aria-label={
+            concluida
+              ? `Tarefa '${t.titulo}' já concluída`
+              : t.ativa
+              ? `Desativar tarefa '${t.titulo}'`
+              : `Reativar tarefa '${t.titulo}'`
+          }
           title={
             concluida ? "Já concluída" : t.ativa ? "Desativar" : "Reativar"
           }
@@ -572,6 +603,7 @@ export const TaskList: React.FC<Props> = ({
           {t.ativa ? LABELS.actions.desativar : LABELS.actions.reativar}
         </button>
         <button
+          type="button"
           onClick={() => {
             if (concluida) return;
             if (confirm("Remover tarefa?")) {
@@ -586,6 +618,11 @@ export const TaskList: React.FC<Props> = ({
           disabled={concluida}
           className="btn px-2 py-1 text-[11px] bg-red-600 hover:bg-red-700"
           aria-disabled={concluida}
+          aria-label={
+            concluida
+              ? `Tarefa '${t.titulo}' já concluída`
+              : `Remover tarefa '${t.titulo}'`
+          }
           title={concluida ? "Já concluída" : "Remover"}
         >
           {LABELS.actions.remover}

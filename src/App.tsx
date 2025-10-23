@@ -27,10 +27,19 @@ export const App: React.FC = () => {
   return (
     <ToastProvider>
       <BrowserRouter>
+        {/* Link de pular conteúdo para acessibilidade */}
+        <a href="#conteudo-principal" className="skip-link">
+          Pular para conteúdo principal
+        </a>
         <div className="page">
           <Navbar />
           <Quote />
-          <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-6 mt-2">
+          <main
+            id="conteudo-principal"
+            role="main"
+            aria-label="Conteúdo principal"
+            className="flex-1 mx-auto w-full max-w-7xl px-4 py-6 mt-2"
+          >
             <AppRouter />
           </main>
           <Footer />

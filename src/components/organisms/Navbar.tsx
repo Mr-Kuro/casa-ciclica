@@ -88,14 +88,26 @@ export const Navbar: React.FC = () => {
   const [historyOpenMobile, setHistoryOpenMobile] = useState(false);
   const historyBtnRef = useRef<HTMLButtonElement | null>(null);
   const historyMenuRef = useRef<HTMLUListElement | null>(null);
+  const historyOptionRefs = useRef<HTMLButtonElement[]>([]);
+  // Focus management index
+  const [historyFocusIndex, setHistoryFocusIndex] = useState<number>(-1);
   function goHistory(value: string) {
     if (value === "concluidas") navigate("/historico/concluidas");
     else if (value === "desativadas") navigate("/historico/desativadas");
     else navigate("/");
     setHistoryOpen(false);
+    // After navigation, restore focus to trigger button for continuity
+    requestAnimationFrame(() => historyBtnRef.current?.focus());
   }
   function toggleHistory() {
-    setHistoryOpen((o) => !o);
+    setHistoryOpen((o) => {
+      const next = !o;
+      if (next) {
+        // Reset focus index when opening
+        setHistoryFocusIndex(-1);
+      }
+      return next;
+    });
   }
   function toggleHistoryMobile() {
     setHistoryOpenMobile((o) => !o);
@@ -110,6 +122,52 @@ export const Navbar: React.FC = () => {
         }
         if (historyOpenMobile) {
           setHistoryOpenMobile(false);
+        }
+        return;
+      }
+      // Desktop dropdown only keyboard navigation
+      if (historyOpen && historyMenuRef.current) {
+        const options = historyOptionRefs.current;
+        if (!options.length) return;
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          setHistoryFocusIndex((prev) => {
+            const next = prev < options.length - 1 ? prev + 1 : 0;
+            options[next]?.focus();
+            return next;
+          });
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          setHistoryFocusIndex((prev) => {
+            const next = prev > 0 ? prev - 1 : options.length - 1;
+            options[next]?.focus();
+            return next;
+          });
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          options[0]?.focus();
+          setHistoryFocusIndex(0);
+        } else if (e.key === "End") {
+          e.preventDefault();
+          const last = options.length - 1;
+          options[last]?.focus();
+          setHistoryFocusIndex(last);
+        } else if (e.key === "Enter" || e.key === " ") {
+          // Space or Enter activates focused option
+          if (historyFocusIndex >= 0 && historyFocusIndex < options.length) {
+            e.preventDefault();
+            options[historyFocusIndex]?.click();
+          }
+        } else if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+          // Typeahead: jump to first option starting with typed letter
+          const lower = e.key.toLowerCase();
+          const idx = options.findIndex((btn) =>
+            btn.textContent?.trim().toLowerCase().startsWith(lower)
+          );
+          if (idx >= 0) {
+            options[idx]?.focus();
+            setHistoryFocusIndex(idx);
+          }
         }
       }
     }
@@ -196,6 +254,7 @@ export const Navbar: React.FC = () => {
               aria-haspopup="listbox"
               aria-expanded={historyOpen}
               aria-controls="history-menu"
+              aria-label="Abrir menu de histórico"
               onClick={toggleHistory}
             >
               <span>
@@ -222,10 +281,14 @@ export const Navbar: React.FC = () => {
                     type="button"
                     role="option"
                     aria-selected={historyValue === ""}
+                    aria-label="Ir para página inicial"
                     className={`dropdown-item w-full text-left px-3 py-2 text-xs hover:bg-[var(--cc-surface-2)] ${
                       historyValue === "" ? "active-option" : ""
                     }`}
                     onClick={() => goHistory("")}
+                    ref={(el) => {
+                      if (el) historyOptionRefs.current[0] = el;
+                    }}
                   >
                     Início
                   </button>
@@ -235,10 +298,14 @@ export const Navbar: React.FC = () => {
                     type="button"
                     role="option"
                     aria-selected={historyValue === "concluidas"}
+                    aria-label="Ver histórico de tarefas concluídas"
                     className={`dropdown-item w-full text-left px-3 py-2 text-xs hover:bg-[var(--cc-surface-2)] ${
                       historyValue === "concluidas" ? "active-option" : ""
                     }`}
                     onClick={() => goHistory("concluidas")}
+                    ref={(el) => {
+                      if (el) historyOptionRefs.current[1] = el;
+                    }}
                   >
                     {LABELS.navigation.concluidas}
                   </button>
@@ -248,10 +315,14 @@ export const Navbar: React.FC = () => {
                     type="button"
                     role="option"
                     aria-selected={historyValue === "desativadas"}
+                    aria-label="Ver histórico de tarefas desativadas"
                     className={`dropdown-item w-full text-left px-3 py-2 text-xs hover:bg-[var(--cc-surface-2)] ${
                       historyValue === "desativadas" ? "active-option" : ""
                     }`}
                     onClick={() => goHistory("desativadas")}
+                    ref={(el) => {
+                      if (el) historyOptionRefs.current[2] = el;
+                    }}
                   >
                     {LABELS.navigation.desativadas}
                   </button>
