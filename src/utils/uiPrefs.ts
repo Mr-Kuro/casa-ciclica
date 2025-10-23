@@ -2,6 +2,7 @@ export interface UIPrefs {
   mostrarInativas?: boolean;
   mostrarAtrasadas?: boolean;
   mostrarConcluidas?: boolean;
+  selectedFilter?: "HOJE" | "SEMANA" | "QUINZENA" | "MES";
 }
 
 const KEY = "uiPrefs";

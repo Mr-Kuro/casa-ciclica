@@ -4,6 +4,7 @@ import { Task } from "@models/Task";
 import { TaskList } from "@organisms/TaskList";
 import { Filters } from "@molecules/Filters";
 import { LABELS } from "@constants/strings";
+import { loadUIPrefs, saveUIPrefs } from "@utils/uiPrefs";
 import { useTaskCounts } from "@hooks/useTaskCounts";
 import { Link } from "react-router-dom";
 
@@ -16,8 +17,15 @@ export const HomeTemplate: React.FC<HomeTemplateProps> = ({
 }) => {
   const [tarefas, setTarefas] = useState<Task[]>(taskController.listar());
   const [filtro, setFiltro] = useState<"HOJE" | "SEMANA" | "QUINZENA" | "MES">(
-    initialFiltro
+    () => {
+      const prefs = loadUIPrefs();
+      return prefs.selectedFilter || initialFiltro;
+    }
   );
+  // Persist filter changes
+  useEffect(() => {
+    saveUIPrefs({ selectedFilter: filtro });
+  }, [filtro]);
 
   function refresh() {
     setTarefas(taskController.listar());

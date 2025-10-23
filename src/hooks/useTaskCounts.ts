@@ -16,7 +16,8 @@ export function computeCounts(
   tarefas: Task[],
   today: Date = new Date()
 ): TaskCounts {
-  const countHoje = tarefas.filter((t) => {
+  const ativos = tarefas.filter((t) => t.ativa);
+  const countHoje = ativos.filter((t) => {
     if (t.recorrencia === "SEMANAL")
       return (
         t.diaSemana !== undefined &&
@@ -27,18 +28,18 @@ export function computeCounts(
     return false;
   }).length;
   // Semana: todas semanais (não concluidas hoje) + diárias não concluídas hoje
-  const countSemana = tarefas.filter((t) => {
+  const countSemana = ativos.filter((t) => {
     if (t.recorrencia === "SEMANAL") return naoConcluidaHoje(t as any);
     if (t.recorrencia === "DIARIA") return naoConcluidaHoje(t as any);
     return false;
   }).length;
-  const countQuinzena = tarefas.filter(
+  const countQuinzena = ativos.filter(
     (t) =>
       t.recorrencia === "QUINZENAL" &&
       dentroDaQuinzenaAtual(t.proximaData) &&
       naoConcluidaHoje(t as any)
   ).length;
-  const countMes = tarefas.filter(
+  const countMes = ativos.filter(
     (t) =>
       t.recorrencia === "MENSAL" &&
       dentroDoMesAtual(t.proximaData) &&

@@ -135,6 +135,17 @@ Para garantir que a arquitetura antiga (`views/components`) não volte inadverti
 
 Integre o script em pipelines CI antes do build para manter a disciplina arquitetural.
 
+## Preferências de UI Persistidas
+
+As seguintes chaves são salvas em `localStorage` dentro do objeto `uiPrefs`:
+
+- `mostrarInativas`: boolean
+- `mostrarAtrasadas`: boolean
+- `mostrarConcluidas`: boolean
+- `selectedFilter`: string (`"HOJE" | "SEMANA" | "QUINZENA" | "MES"`) — aba/filtro ativo na listagem principal, restaurado em novos carregamentos.
+
+Utilidades em `@utils/uiPrefs` fazem merge incremental dos patches evitando sobrescrever outras flags.
+
 ## Licença & Uso Acadêmico
 
 Este projeto é distribuído sob uma licença proprietária. Uso comercial, distribuição pública e demonstrações hospedadas não são permitidos sem autorização escrita.
@@ -176,6 +187,10 @@ Helpers principais em `src/utils/recurrence.ts`:
 ## Tarefas Concluídas Integradas
 
 As tarefas concluídas deixam de ter uma aba própria e podem ser exibidas embutidas nas listagens através de um toggle. Quando visíveis, aparecem misturadas às demais mantendo ordenação aplicada e com um badge "Já concluída". As ações de concluir, desativar ou remover ficam desabilitadas nesse estado para evitar modificações acidentais.
+
+### Contagem de Pendentes
+
+Os badges de quantidade (abas HOJE / SEMANA / QUINZENA / MÊS) ignoram tarefas inativas. Somente tarefas `ativa === true` são consideradas como pendentes. Isso evita inflar números quando existe um grande histórico desativado.
 
 ## Tarefas Desativadas
 
