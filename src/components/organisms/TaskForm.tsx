@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Recurrence } from "../../types";
-import { taskController } from "../../controllers/TaskController";
-import { Task } from "../../models/Task";
-import { LABELS } from "../../constants/strings";
-import { useToast } from "./toast/ToastContext";
+import { Recurrence } from "../../types"; // usar caminho relativo até definirmos alias @types
+import { taskController } from "@controllers/TaskController";
+import { Task } from "@models/Task";
+import { LABELS } from "@constants/strings";
+import { useToast } from "@molecules/toast/ToastContext"; // migrado para moléculas
 
 interface Props {
   onCreate(task: Task): void;
@@ -20,7 +20,6 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
     e.preventDefault();
     if (!titulo.trim()) return;
     if (recorrencia === Recurrence.SEMANAL && typeof diaSemana !== "number") {
-      // validação simples: exige seleção de dia
       push({ message: "Selecione o dia da semana.", type: "warning" });
       return;
     }
@@ -66,7 +65,7 @@ export const TaskForm: React.FC<Props> = ({ onCreate }) => {
           value={recorrencia}
           onChange={(e) => setRecorrencia(e.target.value as Recurrence)}
         >
-          {Object.values(Recurrence).map((r) => (
+          {(Object.values(Recurrence) as Recurrence[]).map((r: Recurrence) => (
             <option key={r} value={r}>
               {r}
             </option>

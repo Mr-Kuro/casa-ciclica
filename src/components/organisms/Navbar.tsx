@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { APP_NAME, APP_TAGLINE } from "../../branding";
-import { LABELS } from "../../constants/strings";
+import { LABELS } from "@constants/strings";
 
 const navItems = [
   { to: "/", label: LABELS.navigation.inicio },
   { to: "/tarefas/nova", label: LABELS.navigation.nova },
-  { to: "/desativadas", label: LABELS.navigation.desativadas },
   { to: "/config", label: LABELS.navigation.config },
 ];
 
@@ -18,7 +17,6 @@ export const Navbar: React.FC = () => {
       localStorage.getItem("cc_theme") === "dark"
   );
   useEffect(() => {
-    // Caso classe tenha sido aplicada pelo script inline antes do React
     const isDark = document.documentElement.classList.contains("dark");
     setDark(isDark);
   }, []);

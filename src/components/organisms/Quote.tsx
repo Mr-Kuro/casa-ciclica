@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { LABELS } from "../../constants/strings";
+import { LABELS } from "@constants/strings";
 import phrases from "../../data/phrases.json";
-import { Skeleton } from "./Skeleton";
-import { useFontReady } from "../../hooks/useFontReady";
+import { Skeleton } from "@atoms/Skeleton";
+import { useFontReady } from "@hooks/useFontReady";
 
 interface QuoteData {
   content: string;
@@ -34,8 +34,8 @@ export const Quote: React.FC = () => {
         try {
           const cached = JSON.parse(raw) as { idx: number; ts: number };
           const age = Date.now() - cached.ts;
-          if (age < 86400000 && phrases[cached.idx]) {
-            const p = phrases[cached.idx] as PhraseJson;
+          if (age < 86400000 && (phrases as PhraseJson[])[cached.idx]) {
+            const p = (phrases as PhraseJson[])[cached.idx];
             setQuote({ content: p.quote, author: p.author.trim() });
             setLastTs(cached.ts);
             return;
@@ -46,11 +46,11 @@ export const Quote: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const idx = Math.floor(Math.random() * (phrases as PhraseJson[]).length);
-      const p = (phrases as PhraseJson[])[idx];
+      const list = phrases as PhraseJson[];
+      const idx = Math.floor(Math.random() * list.length);
+      const p = list[idx];
       if (!p) throw new Error("Lista vazia");
-      const q = { content: p.quote, author: p.author.trim() };
-      setQuote(q);
+      setQuote({ content: p.quote, author: p.author.trim() });
       const ts = Date.now();
       setLastTs(ts);
       localStorage.setItem(KEY, JSON.stringify({ idx, ts }));
@@ -59,7 +59,6 @@ export const Quote: React.FC = () => {
     } finally {
       setLoading(false);
     }
-    // sempre que for força atualização renovar imagem também
     loadImage(force);
   }
 
@@ -71,7 +70,7 @@ export const Quote: React.FC = () => {
       if (!cached.url) return null;
       const age = Date.now() - cached.ts;
       if (anyAge) return cached.url;
-      if (age < 86400000) return cached.url; // válido por 24h
+      if (age < 86400000) return cached.url;
       return null;
     } catch {
       return null;
@@ -114,7 +113,7 @@ export const Quote: React.FC = () => {
         setImageLoading(false);
       };
       img.src = url;
-    } catch (e) {
+    } catch {
       const fallback = getCachedImage(true);
       if (fallback) {
         setImageUrl(fallback);
@@ -128,7 +127,6 @@ export const Quote: React.FC = () => {
 
   useEffect(() => {
     load();
-    // se veio do cache registrar timestamp
     const raw = localStorage.getItem("quoteCacheLocal");
     if (raw) {
       try {
@@ -158,8 +156,8 @@ export const Quote: React.FC = () => {
             )}
             {showQuote && (
               <p className="quote-text leading-relaxed text-center">
-                “{quote.content}”{" "}
-                <span className="motivation-author">— {quote.author}</span>
+                “{quote!.content}”{" "}
+                <span className="motivation-author">— {quote!.author}</span>
               </p>
             )}
             {!loading && quote == null && error && fontReady && (

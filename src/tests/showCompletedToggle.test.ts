@@ -1,11 +1,7 @@
+import { describe, it, expect } from "vitest";
 import { naoConcluidaHoje } from "../utils/recurrence";
 import { Task } from "../models/Task";
 import { Recurrence } from "../types";
-
-// Declarações mínimas caso types de Jest não estejam carregados (evita erros de TS)
-declare const describe: any;
-declare const it: any;
-declare const expect: any;
 
 // Este teste valida expectativa básica da função auxiliar naoConcluidaHoje e a lógica
 // de exibição condicional de concluídas (simulada em nível de filtragem).

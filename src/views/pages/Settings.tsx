@@ -2,7 +2,7 @@ import React from "react";
 import { LocalStorageService } from "../../services/storage/LocalStorageService";
 import { Link } from "react-router-dom";
 import { LABELS } from "../../constants/strings";
-import { useToast } from "../components/toast/ToastContext";
+import { useToast } from "@molecules/toast/ToastContext";
 // Removido reset de seeds por ser redundante com limpeza total
 
 export const Settings: React.FC = () => {

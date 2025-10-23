@@ -1,10 +1,11 @@
 import React from "react";
 import { AppRouter } from "./routes/AppRouter";
 import { BrowserRouter } from "react-router-dom";
-import { Navbar } from "./views/components/Navbar";
-import { Footer } from "./views/components/Footer";
-import { Quote } from "./views/components/Quote";
+import { Navbar } from "@organisms/Navbar";
+import { Footer } from "@organisms/Footer";
+import { Quote } from "@organisms/Quote";
 import { injectTestMassGlobal } from "./data/testMass";
+import { ToastProvider } from "@molecules/toast/ToastContext";
 
 declare global {
   interface Window {
@@ -24,15 +25,17 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <BrowserRouter>
-      <div className="page">
-        <Navbar />
-        <Quote />
-        <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-6 mt-2">
-          <AppRouter />
-        </main>
-        <Footer />
-      </div>
-    </BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
+        <div className="page">
+          <Navbar />
+          <Quote />
+          <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-6 mt-2">
+            <AppRouter />
+          </main>
+          <Footer />
+        </div>
+      </BrowserRouter>
+    </ToastProvider>
   );
 };

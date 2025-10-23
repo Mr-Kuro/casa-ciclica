@@ -1,9 +1,9 @@
 import React from "react";
-import { Task } from "../../models/Task";
+import { Task } from "@models/Task";
 import { Link } from "react-router-dom";
-import { taskController } from "../../controllers/TaskController";
-import { devidoHoje, naoConcluidaHoje } from "../../utils/recurrence";
-import { LABELS } from "../../constants/strings";
+import { taskController } from "@controllers/TaskController"; // agora usando alias
+import { devidoHoje, naoConcluidaHoje } from "@utils/recurrence";
+import { LABELS } from "@constants/strings";
 
 interface Props {
   task: Task;

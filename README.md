@@ -46,21 +46,94 @@ npm run build
 
 Após o build, a pasta `dist` será publicada automaticamente. O arquivo `vercel.json` garante fallback de rotas SPA.
 
-## Estrutura
+## Estrutura (Atual - Atomic Design em progresso)
+
+Migramos de uma estrutura MVC + `views/components` para camadas atômicas:
 
 ```text
 src/
-  models/
-  controllers/
-  services/storage/
-  views/components/
-  views/pages/
-  routes/
-  utils/
-  types/
-  styles/
-  tests/
+  components/
+    atoms/        # Elementos básicos (ex: Skeleton)
+    molecules/    # Combina átomos (ex: TaskItem, Filters)
+    organisms/    # Combina moléculas/fluxo de dados (TaskList, TaskForm, Quote)
+    templates/    # Layout de página agregando organismos (HomeTemplate)
+  controllers/    # Lógica de domínio (TaskController)
+  models/         # Entidades (Task)
+  utils/          # Funções puras (recurrence, overdue, sort, etc.)
+  hooks/          # Hooks derivados (useTaskCounts, useFontReady)
+  constants/      # Strings e labels (LABELS)
+  data/           # Seeds e dados estáticos (phrases.json, seed.ts)
+  routes/         # Composição de rotas (AppRouter)
+  styles/         # CSS global / Tailwind entry
+  tests/          # Vitest specs (inclui guardas de dependência)
+  types/          # Tipos e enums (Recurrence)
 ```
+
+Aliases configurados em `tsconfig.json` e `vite.config.ts`:
+
+```text
+@atoms, @molecules, @organisms, @templates, @utils, @hooks, @models,
+@services, @routes, @constants, @controllers
+```
+
+Páginas especializadas para tarefas concluídas e desativadas foram removidas. A visualização agora ocorre via toggles integrados na listagem principal (`TaskList`). Isso reduz duplicação de lógica e simplifica manutenção.
+
+Testes de guarda (`dependencyGuards.test.ts`) verificam que:
+
+- Átomos não importam moléculas/organismos/templates.
+- Moléculas não importam organismos/templates.
+
+Próximos passos planejados: mover `ToastContext` para uma camada adequada (provavelmente `molecules` ou `organisms`) e introduzir templates adicionais conforme novas páginas.
+Migrado: `ToastContext` agora está em `components/molecules/toast/ToastContext.tsx` com alias `@molecules/toast/ToastContext` para facilitar reutilização sem acoplamento a páginas. O provider deve envolver a árvore em nível alto (ex: `App.tsx`).
+
+## Rotas da Aplicação
+
+Definidas em `src/routes/AppRouter.tsx` usando React Router v6.
+
+| Caminho | Componente | Camada | Descrição |
+| ------- | ---------- | ------ | --------- |
+| `/` | `Home` (usa `HomeTemplate`) | template + organisms | Página principal com filtros e lista de tarefas |
+| `/tarefas/nova` | `NovaTarefa` | view + organism (`TaskForm`) | Criação de novas tarefas |
+| `/tarefas/:id` | `TaskDetail` | view + analytics utils | Detalhes, edição, mudança de recorrência |
+| `/config` | `Settings` | view + services | Ações administrativas (limpar dados) |
+| `*` | `NotFound` | molecule | Fallback para rotas inexistentes |
+
+Notas importantes:
+| Rota `/desativadas` removida (conteúdo agora acessível via toggles de filtros na listagem principal).
+| `Navbar`, `Footer` e `Quote` migrados para `organisms` e usados diretamente em `App.tsx`.
+| Wildcard `*` usa `NotFound` para evitar redirecionamento silencioso para Home.
+| Cada página delega lógica de domínio para `taskController` e funções utilitárias em `@utils`.
+
+Convenções: Views (`src/views/pages`) atuam como wrappers leves e podem ser substituídas por templates; organisms não importam templates (testes de guarda); navegação principal é declarativa em `Navbar`.
+
+### Melhorias futuras sugeridas
+
+- Lazy loading (dynamic import) para rotas menos acessadas (`Settings`, `TaskDetail`).
+- Migrar `NovaTarefa`, `Settings`, `TaskDetail` para templates dedicados para consistência.
+- Teste adicional garantindo que templates não importem views.
+- Adicionar breadcrumb simples em `TaskDetail`.
+
+### Convenções
+
+- Views (`src/views/pages`) atuam como wrappers leves; podem ser gradualmente substituídas por templates.
+- Organisms não importam templates (verificado por testes de guarda).
+- Navegação principal é declarativa em `Navbar` (array `navItems`). Evitamos duplicar rotas no `Footer` com itens que não existem mais.
+
+### Próximas melhorias sugeridas
+
+- Lazy loading (dynamic import) para rotas menos acessadas (`Settings`, `TaskDetail`).
+- Migrar `NovaTarefa`, `Settings`, `TaskDetail` para templates dedicados para consistência.
+- Teste adicional garantindo que templates não importem views.
+- Adicionar breadcrumb simples em `TaskDetail`.
+
+## Verificação de Arquivos Órfãos
+
+Para garantir que a arquitetura antiga (`views/components`) não volte inadvertidamente:
+
+- Script: `npm run check:orphans` executa `scripts/check-orphans.mjs` que falha se encontrar referências ao caminho legado.
+- Teste: `dependencyGuards.test.ts` inclui caso "no legacy views/components references remain".
+
+Integre o script em pipelines CI antes do build para manter a disciplina arquitetural.
 
 ## Licença & Uso Acadêmico
 
@@ -104,21 +177,9 @@ Helpers principais em `src/utils/recurrence.ts`:
 
 As tarefas concluídas deixam de ter uma aba própria e podem ser exibidas embutidas nas listagens através de um toggle. Quando visíveis, aparecem misturadas às demais mantendo ordenação aplicada e com um badge "Já concluída". As ações de concluir, desativar ou remover ficam desabilitadas nesse estado para evitar modificações acidentais.
 
-## Aba Desativadas
+## Tarefas Desativadas
 
-A aba `/desativadas` lista todas as tarefas com `ativa = false`, agrupadas de forma idêntica à aba Concluídas (Diárias, Semanais por dia da semana, Quinzenais, Mensais). Objetivo: servir de "estacionamento" para tarefas pausadas sem perder histórico.
-
-Colunas: título, recorrência, dia da semana (quando aplicável), próxima data, última conclusão e ações.
-
-Ações disponíveis:
-
-- Reativar: alterna `ativa` para `true` imediatamente.
-- Remover: exclui definitivamente a tarefa.
-
-Notas:
-
-- Tarefas desativadas não podem ser concluídas enquanto inativas (botão de concluir não aparece aqui).
-- Permanecem com seus dados (`ultimaConclusao`, `proximaData`) congelados até reativação, quando então voltam a aparecer nos filtros normais conforme regras de visibilidade.
+Tarefas desativadas agora aparecem (opcionalmente) misturadas à listagem principal quando o toggle "Mostrar inativas" está ativo. Essa mudança elimina a necessidade de página dedicada e unifica o contexto de inspeção/reativação.
 
 ## Unificação de Fuso Horário
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { APP_NAME } from "../../branding";
-import { LABELS } from "../../constants/strings";
+import { LABELS } from "@constants/strings";
 
 export const Footer: React.FC = () => {
   return (
@@ -43,15 +43,6 @@ export const Footer: React.FC = () => {
                 style={{ color: "var(--cc-text)" }}
               >
                 {LABELS.navigation.novaTarefa}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/desativadas"
-                className="hover:underline"
-                style={{ color: "var(--cc-text)" }}
-              >
-                {LABELS.navigation.desativadas}
               </Link>
             </li>
             <li>

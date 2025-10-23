@@ -1,8 +1,8 @@
 import React from "react";
-import { TaskForm } from "../components/TaskForm";
-import { taskController } from "../../controllers/TaskController";
+import { TaskForm } from "@organisms/TaskForm";
+import { taskController } from "@controllers/TaskController";
 import { Link } from "react-router-dom";
-import { LABELS } from "../../constants/strings";
+import { LABELS } from "@constants/strings";
 
 export const NovaTarefa: React.FC = () => {
   function handleCreate() {

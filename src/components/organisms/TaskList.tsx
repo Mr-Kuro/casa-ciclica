@@ -1,34 +1,32 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { taskController } from "../../controllers/TaskController";
-import { Task } from "../../models/Task";
+import { taskController } from "@controllers/TaskController"; // usando alias @controllers
+import { Task } from "@models/Task";
 import {
   dentroDaQuinzenaAtual,
   dentroDoMesAtual,
   mesmoDiaSemanaHoje,
   naoConcluidaHoje,
-} from "../../utils/recurrence";
-import { LABELS } from "../../constants/strings";
+} from "@utils/recurrence";
+import { LABELS } from "@constants/strings";
 import {
   semanalAtrasadaHoje,
   quinzenalAtrasadaAtual,
   mensalAtrasadaAtual,
   diasAtraso,
-} from "../../utils/overdue";
-import { loadUIPrefs, saveUIPrefs } from "../../utils/uiPrefs";
-import { sortTasks, TaskSortKey } from "../../utils/sort";
-import { loadSortPrefs, saveSortPrefs } from "../../utils/sortStorage";
-import { useToast } from "./toast/ToastContext";
+} from "@utils/overdue";
+import { loadUIPrefs, saveUIPrefs } from "@utils/uiPrefs";
+import { sortTasks, TaskSortKey } from "@utils/sort";
+import { loadSortPrefs, saveSortPrefs } from "@utils/sortStorage";
+import { useToast } from "@molecules/toast/ToastContext"; // alias após migração
 
 interface GrupoSemana {
   titulo: string;
   tarefas: Task[];
 }
-
 interface Props {
   tarefas: Task[];
   onChange(): void;
   filtro?: "HOJE" | "SEMANA" | "QUINZENA" | "MES";
-  /** Se verdadeiro, mostra skeleton da tabela enquanto dados externos chegam */
   loading?: boolean;
 }
 
@@ -42,13 +40,11 @@ export const TaskList: React.FC<Props> = ({
   const [mostrarInativas, setMostrarInativas] = useState(false);
   const [sortKey, setSortKey] = useState<TaskSortKey>("titulo");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  // Carregamento inicial curto para evitar flash de layout enquanto calcula memos
   const [initialLoading, setInitialLoading] = useState(true);
   useEffect(() => {
     const id = setTimeout(() => setInitialLoading(false), 120);
     return () => clearTimeout(id);
   }, []);
-
   useEffect(() => {
     const prefs = loadSortPrefs();
     if (prefs) {
@@ -62,7 +58,6 @@ export const TaskList: React.FC<Props> = ({
       setSortDir(prefs.dir);
     }
   }, []);
-
   function toggleSort(key: TaskSortKey) {
     setSortKey((prev) => {
       if (prev === key) {
@@ -73,30 +68,24 @@ export const TaskList: React.FC<Props> = ({
         });
         return prev;
       } else {
-        const nextKey = key;
         const nextDir: "asc" = "asc";
         setSortDir(nextDir);
-        saveSortPrefs({ key: nextKey, dir: nextDir });
-        return nextKey;
+        saveSortPrefs({ key, dir: nextDir });
+        return key;
       }
     });
   }
-  // Sem uso direto de Date aqui; filtros já baseados em helpers.
   const [mostrarAtrasadas, setMostrarAtrasadas] = useState(false);
   const [mostrarConcluidas, setMostrarConcluidas] = useState(false);
   const hojeRef = useMemo(() => new Date(), []);
-  // Carregar preferências persistidas de UI
   useEffect(() => {
     const prefs = loadUIPrefs();
-    if (typeof prefs.mostrarInativas === "boolean") {
+    if (typeof prefs.mostrarInativas === "boolean")
       setMostrarInativas(prefs.mostrarInativas);
-    }
-    if (typeof prefs.mostrarAtrasadas === "boolean") {
+    if (typeof prefs.mostrarAtrasadas === "boolean")
       setMostrarAtrasadas(prefs.mostrarAtrasadas);
-    }
-    if (typeof prefs.mostrarConcluidas === "boolean") {
+    if (typeof prefs.mostrarConcluidas === "boolean")
       setMostrarConcluidas(prefs.mostrarConcluidas);
-    }
   }, []);
   useEffect(() => {
     saveUIPrefs({ mostrarInativas });
@@ -107,7 +96,6 @@ export const TaskList: React.FC<Props> = ({
   useEffect(() => {
     saveUIPrefs({ mostrarConcluidas });
   }, [mostrarConcluidas]);
-  // Datas normalizadas para comparação (início do dia / período)
   const hojeMid = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -117,11 +105,13 @@ export const TaskList: React.FC<Props> = ({
     () => new Date(hojeMid.getFullYear(), hojeMid.getMonth(), 1),
     [hojeMid]
   );
-  const inicioQuinzena = useMemo(() => {
-    return hojeMid.getDate() <= 15
-      ? new Date(hojeMid.getFullYear(), hojeMid.getMonth(), 1)
-      : new Date(hojeMid.getFullYear(), hojeMid.getMonth(), 16);
-  }, [hojeMid]);
+  const inicioQuinzena = useMemo(
+    () =>
+      hojeMid.getDate() <= 15
+        ? new Date(hojeMid.getFullYear(), hojeMid.getMonth(), 1)
+        : new Date(hojeMid.getFullYear(), hojeMid.getMonth(), 16),
+    [hojeMid]
+  );
   const atrasadasSemana = useMemo(
     () =>
       tarefas.filter(
@@ -141,35 +131,93 @@ export const TaskList: React.FC<Props> = ({
     () => tarefas.filter((t) => mensalAtrasadaAtual(t, hojeRef)),
     [tarefas, hojeRef]
   );
-  const inactiveCount = useMemo(() => {
-    return tarefas.filter((t) => {
-      if (t.ativa) return false;
-
-      if (filtro === "HOJE") {
-        if (t.recorrencia === "SEMANAL") {
-          const mesmoDia = mesmoDiaSemanaHoje(t.diaSemana);
-          const naoConcluida = naoConcluidaHoje(t);
-          if (mesmoDia) return naoConcluida;
-          return (
-            mostrarAtrasadas && semanalAtrasadaHoje(t, hojeRef) && naoConcluida
-          );
+  const inactiveCount = useMemo(
+    () =>
+      tarefas.filter((t) => {
+        if (t.ativa) return false;
+        if (filtro === "HOJE") {
+          if (t.recorrencia === "SEMANAL") {
+            const mesmoDia = mesmoDiaSemanaHoje(t.diaSemana);
+            const naoConcluida = naoConcluidaHoje(t);
+            if (mesmoDia) return naoConcluida;
+            return (
+              mostrarAtrasadas &&
+              semanalAtrasadaHoje(t, hojeRef) &&
+              naoConcluida
+            );
+          }
+          if (t.recorrencia === "DIARIA") return naoConcluidaHoje(t);
+          return false;
         }
-        if (t.recorrencia === "DIARIA") {
-          return naoConcluidaHoje(t);
+        if (filtro === "SEMANA") {
+          if (t.recorrencia === "SEMANAL" || t.recorrencia === "DIARIA")
+            return naoConcluidaHoje(t);
+          return false;
         }
+        if (filtro === "QUINZENA") {
+          if (t.recorrencia !== "QUINZENAL") return false;
+          if (!naoConcluidaHoje(t)) return false;
+          if (mostrarAtrasadas) {
+            if (dentroDaQuinzenaAtual(t.proximaData)) return true;
+            if (t.proximaData) {
+              const d = new Date(t.proximaData);
+              d.setHours(0, 0, 0, 0);
+              if (d < inicioQuinzena) return true;
+            }
+            return false;
+          }
+          return dentroDaQuinzenaAtual(t.proximaData);
+        }
+        if (filtro === "MES") {
+          if (t.recorrencia !== "MENSAL") return false;
+          if (!naoConcluidaHoje(t)) return false;
+          if (mostrarAtrasadas) {
+            if (dentroDoMesAtual(t.proximaData)) return true;
+            if (t.proximaData) {
+              const d = new Date(t.proximaData);
+              d.setHours(0, 0, 0, 0);
+              if (d < inicioMes) return true;
+            }
+            return false;
+          }
+          return dentroDoMesAtual(t.proximaData);
+        }
+        return true;
+      }).length,
+    [tarefas, filtro, mostrarAtrasadas, hojeRef, inicioQuinzena, inicioMes]
+  );
+  const filtradasBase = tarefas.filter((t) => {
+    if (!mostrarInativas && !t.ativa) return false;
+    const estaConcluida = !naoConcluidaHoje(t);
+    if (!mostrarConcluidas && estaConcluida) return false;
+    if (filtro === "HOJE") {
+      if (t.recorrencia === "SEMANAL") {
+        const mesmoDia = mesmoDiaSemanaHoje(t.diaSemana);
+        const naoConcluida = naoConcluidaHoje(t);
+        if (mesmoDia)
+          return naoConcluida || (mostrarConcluidas && !naoConcluida);
+        if (mostrarAtrasadas && semanalAtrasadaHoje(t, hojeRef) && naoConcluida)
+          return true;
         return false;
       }
-
-      if (filtro === "SEMANA") {
-        if (t.recorrencia === "SEMANAL" || t.recorrencia === "DIARIA") {
-          return naoConcluidaHoje(t);
-        }
-        return false;
+      if (t.recorrencia === "DIARIA") {
+        const naoConcluida = naoConcluidaHoje(t);
+        return naoConcluida || (mostrarConcluidas && !naoConcluida);
       }
-
-      if (filtro === "QUINZENA") {
-        if (t.recorrencia !== "QUINZENAL") return false;
-        if (!naoConcluidaHoje(t)) return false;
+      return false;
+    }
+    if (filtro === "SEMANA") {
+      if (t.recorrencia === "SEMANAL" || t.recorrencia === "DIARIA") {
+        const naoConcluida = naoConcluidaHoje(t);
+        return naoConcluida || (mostrarConcluidas && !naoConcluida);
+      }
+      return false;
+    }
+    if (filtro === "QUINZENA") {
+      if (t.recorrencia === "QUINZENAL") {
+        const naoConcluida = naoConcluidaHoje(t);
+        if (!naoConcluida && !mostrarConcluidas) return false;
+        if (!naoConcluida && mostrarConcluidas) return true;
         if (mostrarAtrasadas) {
           if (dentroDaQuinzenaAtual(t.proximaData)) return true;
           if (t.proximaData) {
@@ -181,10 +229,13 @@ export const TaskList: React.FC<Props> = ({
         }
         return dentroDaQuinzenaAtual(t.proximaData);
       }
-
-      if (filtro === "MES") {
-        if (t.recorrencia !== "MENSAL") return false;
-        if (!naoConcluidaHoje(t)) return false;
+      return false;
+    }
+    if (filtro === "MES") {
+      if (t.recorrencia === "MENSAL") {
+        const naoConcluida = naoConcluidaHoje(t);
+        if (!naoConcluida && !mostrarConcluidas) return false;
+        if (!naoConcluida && mostrarConcluidas) return true;
         if (mostrarAtrasadas) {
           if (dentroDoMesAtual(t.proximaData)) return true;
           if (t.proximaData) {
@@ -196,125 +247,38 @@ export const TaskList: React.FC<Props> = ({
         }
         return dentroDoMesAtual(t.proximaData);
       }
-
-      return true;
-    }).length;
-  }, [tarefas, filtro, mostrarAtrasadas, hojeRef, inicioQuinzena, inicioMes]);
-  const filtradasBase = tarefas.filter((t) => {
-    // Oculta tarefas inativas das listagens normais (a menos que toggle)
-    if (!mostrarInativas && !t.ativa) return false;
-    // Concluídas são mantidas somente se toggle ativo
-    const estaConcluida = !naoConcluidaHoje(t);
-    if (!mostrarConcluidas && estaConcluida) return false;
-    if (filtro === "HOJE") {
-      // Base: semanais do dia e diárias não concluídas hoje.
-      // Extra: semanais atrasadas de dias anteriores quando toggle ativo.
-      if (t.recorrencia === "SEMANAL") {
-        const mesmoDia = mesmoDiaSemanaHoje(t.diaSemana);
-        const naoConcluida = naoConcluidaHoje(t);
-        if (mesmoDia) {
-          return naoConcluida || (mostrarConcluidas && !naoConcluida);
-        }
-        if (
-          mostrarAtrasadas &&
-          semanalAtrasadaHoje(t, hojeRef) &&
-          naoConcluida
-        ) {
-          return true;
-        }
-        return false;
-      }
-      if (t.recorrencia === "DIARIA") {
-        const naoConcluida = naoConcluidaHoje(t);
-        return naoConcluida || (mostrarConcluidas && !naoConcluida);
-      }
-      return false; // manter exclusão de outras recorrências
-    }
-    if (filtro === "SEMANA") {
-      if (t.recorrencia === "SEMANAL" || t.recorrencia === "DIARIA") {
-        const naoConcluida = naoConcluidaHoje(t);
-        return naoConcluida || (mostrarConcluidas && !naoConcluida);
-      }
       return false;
     }
-    if (filtro === "QUINZENA") {
-      // Somente tarefas quinzenais não concluídas desta quinzena
-      if (t.recorrencia === "QUINZENAL") {
-        const naoConcluida = naoConcluidaHoje(t);
-        if (!naoConcluida && !mostrarConcluidas) return false;
-        // Se estiver concluída hoje e toggle ativo, inclui independentemente da próxima data
-        if (!naoConcluida && mostrarConcluidas) return true;
-        // Se toggle ativo incluir também atrasadas de quinzenas anteriores
-        if (mostrarAtrasadas) {
-          if (dentroDaQuinzenaAtual(t.proximaData)) return true;
-          if (t.proximaData) {
-            const d = new Date(t.proximaData);
-            d.setHours(0, 0, 0, 0);
-            // atrasada se antes do início da quinzena atual
-            if (d < inicioQuinzena) return true;
-          }
-          return false;
-        }
-        return dentroDaQuinzenaAtual(t.proximaData);
-      }
-      return false;
-    }
-    if (filtro === "MES") {
-      // Somente tarefas mensais não concluídas deste mês
-      if (t.recorrencia === "MENSAL") {
-        const naoConcluida = naoConcluidaHoje(t);
-        if (!naoConcluida && !mostrarConcluidas) return false;
-        if (!naoConcluida && mostrarConcluidas) return true; // inclui concluída independente da próxima data
-        if (mostrarAtrasadas) {
-          if (dentroDoMesAtual(t.proximaData)) return true;
-          if (t.proximaData) {
-            const d = new Date(t.proximaData);
-            d.setHours(0, 0, 0, 0);
-            if (d < inicioMes) return true; // mês anterior pendente
-          }
-          return false;
-        }
-        return dentroDoMesAtual(t.proximaData);
-      }
-      return false;
-    }
-    return true; // fallback se filtros expandirem no futuro (ainda respeita ativa)
+    return true;
   });
-
-  // Contagem contextual de tarefas concluídas hoje conforme filtro ativo e outros toggles.
-  const concluidasCount = useMemo(() => {
-    return tarefas.filter((t) => {
-      const concluida = !naoConcluidaHoje(t);
-      if (!concluida) return false;
-      // Respeita ocultação de inativas se não estiver mostrando inativas
-      if (!mostrarInativas && !t.ativa) return false;
-      if (filtro === "HOJE") {
-        if (t.recorrencia === "SEMANAL") return mesmoDiaSemanaHoje(t.diaSemana);
-        if (t.recorrencia === "DIARIA") return true;
+  const concluidasCount = useMemo(
+    () =>
+      tarefas.filter((t) => {
+        const concluida = !naoConcluidaHoje(t);
+        if (!concluida) return false;
+        if (!mostrarInativas && !t.ativa) return false;
+        if (filtro === "HOJE") {
+          if (t.recorrencia === "SEMANAL")
+            return mesmoDiaSemanaHoje(t.diaSemana);
+          if (t.recorrencia === "DIARIA") return true;
+          return false;
+        }
+        if (filtro === "SEMANA")
+          return t.recorrencia === "SEMANAL" || t.recorrencia === "DIARIA";
+        if (filtro === "QUINZENA") return t.recorrencia === "QUINZENAL";
+        if (filtro === "MES") return t.recorrencia === "MENSAL";
         return false;
-      }
-      if (filtro === "SEMANA") {
-        return t.recorrencia === "SEMANAL" || t.recorrencia === "DIARIA";
-      }
-      if (filtro === "QUINZENA") {
-        return t.recorrencia === "QUINZENAL";
-      }
-      if (filtro === "MES") {
-        return t.recorrencia === "MENSAL";
-      }
-      return false;
-    }).length;
-  }, [tarefas, filtro, mostrarInativas]);
-
+      }).length,
+    [tarefas, filtro, mostrarInativas]
+  );
   const ocultadas = !mostrarInativas ? inactiveCount : 0;
-
-  // aplicar ordenação nas listagens não SEMANA (listagem plana)
-  const filtradas = useMemo(() => {
-    if (filtro === "SEMANA") return filtradasBase; // ordenação por grupo separada
-    return sortTasks(filtradasBase, sortKey, sortDir);
-  }, [filtradasBase, filtro, sortKey, sortDir]);
-
-  // Agrupamento de semana (diárias + semanais por dia) quando filtro === SEMANA
+  const filtradas = useMemo(
+    () =>
+      filtro === "SEMANA"
+        ? filtradasBase
+        : sortTasks(filtradasBase, sortKey, sortDir),
+    [filtradasBase, filtro, sortKey, sortDir]
+  );
   const gruposSemana: GrupoSemana[] = useMemo(() => {
     if (filtro !== "SEMANA") return [];
     const diarias = filtradas.filter((t) => t.recorrencia === "DIARIA");
@@ -335,21 +299,17 @@ export const TaskList: React.FC<Props> = ({
     const resultado: GrupoSemana[] = [];
     if (diarias.length) resultado.push({ titulo: "Diárias", tarefas: diarias });
     resultado.push(...gruposDia);
-    // Ordenação interna por título se toggle ativo
-    // Ordenação interna dos grupos usando sortKey quando chave for aplicável
     const keyForGroup = sortKey;
     return resultado.map((g) => ({
       titulo: g.titulo,
       tarefas: sortTasks(g.tarefas, keyForGroup, sortDir),
     }));
-    return resultado;
   }, [filtradas, filtro, sortKey, sortDir]);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-
   const tabelaCarregando = loading || initialLoading;
-
   return (
     <div className="space-y-8">
+      {/* TODO: Refatorar em subcomponentes menores (Header, WeeklyTable, FlatTable) */}
       <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
         <div className="flex items-center gap-3">
           <button
@@ -366,6 +326,7 @@ export const TaskList: React.FC<Props> = ({
               ({inactiveCount})
             </span>
           </button>
+          {/* Botão atrasadas conforme filtro */}
           {filtro === "HOJE" && (
             <button
               type="button"
@@ -445,8 +406,8 @@ export const TaskList: React.FC<Props> = ({
             </span>
           </button>
         </div>
-        {/* Sem botão dedicado; ordenação agora por cabeçalhos */}
       </div>
+
       {filtro === "SEMANA" ? (
         <div className="overflow-x-auto border rounded shadow-sm">
           <table className="min-w-full text-sm">
@@ -664,7 +625,7 @@ export const TaskList: React.FC<Props> = ({
                         >
                           {collapsed[g.titulo] ? "+" : "−"}
                         </button>
-                        {g.titulo}{" "}
+                        {g.titulo}
                         <span className="ml-2 text-[10px] text-subtle">
                           {g.tarefas.length} itens
                         </span>
@@ -1028,7 +989,6 @@ export const TaskList: React.FC<Props> = ({
                 [...Array(6)].map((_, i) => (
                   <tr key={`sk-flat-${i}`} className="task-row-fixed border-t">
                     <td className="px-3 py-3">
-                      {" "}
                       <div className="skeleton h-4 w-2/3 mb-2" />
                       <div className="skeleton h-3 w-1/4" />
                     </td>
@@ -1249,7 +1209,6 @@ export const TaskList: React.FC<Props> = ({
           </table>
         </div>
       )}
-      {/* Lista secundária de concluídas removida: concluídas aparecem integradas */}
     </div>
   );
 };
