@@ -15,7 +15,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "VITE_ENV=prod vite build",
+    "build:dev": "VITE_ENV=dev vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "check:orphans": "node scripts/check-orphans.mjs"
