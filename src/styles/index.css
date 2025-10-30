@@ -396,6 +396,75 @@ body {
     background: var(--cc-bg-alt);
     border: 1px solid var(--cc-border);
   }
+  /* ResponsiveTable mobile card variantes */
+  .mobile-card {
+    background: var(--cc-surface-1);
+    border: 1px solid var(--cc-container-border);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.12),
+      0 1px 3px 1px rgba(0, 0, 0, 0.08);
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+  }
+  html.dark .mobile-card {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.6), 0 1px 3px 1px rgba(0, 0, 0, 0.5);
+  }
+  .mobile-card:hover {
+    background: var(--cc-surface-2);
+  }
+  .mobile-group-btn {
+    background: var(--cc-surface-1);
+    color: var(--cc-text);
+    border: 1px solid var(--cc-container-border);
+    transition: background-color 0.2s ease, color 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .mobile-group-btn:hover {
+    background: var(--cc-surface-2);
+    color: var(--cc-primary);
+  }
+  .mobile-group-btn[aria-expanded="false"] {
+    opacity: 0.85;
+  }
+  .mobile-card-skeleton {
+    background: var(--cc-surface-1);
+    border: 1px solid var(--cc-container-border);
+  }
+  .text-mobile-value {
+    color: var(--cc-muted);
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.65rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.35rem;
+    background: var(--cc-surface-1);
+    color: var(--cc-text-subtle);
+    border: 1px solid var(--cc-container-border);
+    line-height: 1;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge-success {
+    background: rgba(47, 125, 66, 0.12);
+    color: var(--cc-success);
+    border: 1px solid rgba(47, 125, 66, 0.3);
+  }
+  html.dark .badge-success {
+    background: rgba(47, 174, 122, 0.14);
+    border-color: rgba(47, 174, 122, 0.35);
+    color: var(--cc-success);
+  }
+  .badge-warning {
+    background: rgba(182, 117, 0, 0.12);
+    color: var(--cc-warning);
+    border: 1px solid rgba(182, 117, 0, 0.3);
+  }
+  html.dark .badge-warning {
+    background: rgba(214, 168, 105, 0.16);
+    border-color: rgba(214, 168, 105, 0.35);
+    color: var(--cc-warning);
+  }
   .btn {
     display: inline-flex;
     align-items: center;

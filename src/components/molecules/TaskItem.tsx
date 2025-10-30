@@ -39,24 +39,24 @@ export const TaskItem: React.FC<Props> = ({ task, onChange }) => {
           </Link>
         </h3>
         <div className="flex items-center gap-1">
-          <span className="text-xs px-2 py-1 rounded bg-gray-100 flex gap-1 items-center">
+          <span className="badge">
             <span>{task.recorrencia}</span>
             {typeof task.diaSemana === "number" &&
               task.recorrencia === "SEMANAL" && (
-                <span className="text-[10px] text-gray-600">
+                <span className="text-[10px] opacity-80">
                   ({dias[task.diaSemana]})
                 </span>
               )}
           </span>
           {jaConcluidaHoje && (
-            <span className="text-[10px] px-2 py-1 rounded bg-green-100 text-green-700 font-semibold">
+            <span className="badge badge-success font-semibold">
               {LABELS.estados.jaConcluida}
             </span>
           )}
         </div>
       </div>
       {task.descricao && (
-        <p className="text-xs text-gray-600">{task.descricao}</p>
+        <p className="text-xs text-subtle">{task.descricao}</p>
       )}
       <div className="flex gap-2 flex-wrap">
         <button

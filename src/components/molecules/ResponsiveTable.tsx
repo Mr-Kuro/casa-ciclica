@@ -84,7 +84,7 @@ export function ResponsiveTable<T>(props: ResponsiveTableProps<T>) {
               {[...Array(loadingSkeletonRows)].map((_, i) => (
                 <div
                   key={`sk-mobile-${i}`}
-                  className="animate-pulse rounded border p-3 bg-gray-50"
+                  className="animate-pulse rounded border p-3 mobile-card-skeleton"
                 >
                   <div className="h-4 w-2/3 bg-gray-200 rounded mb-2" />
                   <div className="h-3 w-1/2 bg-gray-200 rounded" />
@@ -99,7 +99,7 @@ export function ResponsiveTable<T>(props: ResponsiveTableProps<T>) {
                 <button
                   type="button"
                   onClick={() => onToggleGroup?.(g.id)}
-                  className="flex w-full items-center justify-between rounded border px-3 py-2 text-xs font-semibold bg-gray-100"
+                  className="flex w-full items-center justify-between rounded border px-3 py-2 text-xs font-semibold mobile-group-btn"
                   aria-expanded={!collapsed[g.id]}
                 >
                   <span>{g.title}</span>
@@ -513,7 +513,7 @@ function MobileCard<T>({
 }: MobileCardProps<T>) {
   return (
     <div
-      className={`rounded border p-3 bg-white shadow-sm ${
+      className={`rounded border p-3 mobile-card ${
         getRowClassName?.(row) || ""
       }`}
     >
@@ -523,7 +523,7 @@ function MobileCard<T>({
           .map((c) => (
             <div key={c.key} className="flex justify-between gap-2">
               <span className="font-medium">{c.mobileLabel || c.header}</span>
-              <span className="text-right text-gray-700">
+              <span className="text-right text-mobile-value">
                 {c.render ? c.render(row) : (row as any)[c.key]}
               </span>
             </div>
