@@ -77,6 +77,8 @@ export const AdSlot = ({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const dinamicAttributes = isDev ? { "data-adtest": "on" } : {};
+
   return (
     <div
       className={`ad-slot mx-auto my-2 ${
@@ -84,12 +86,12 @@ export const AdSlot = ({
       } ${className}`.trim()}
     >
       <ins
+        {...dinamicAttributes}
         className="adsbygoogle block"
         style={style || { display: "block" }}
         data-ad-client={adSenseClient}
         data-ad-slot={adSlot}
         data-ad-format={format}
-        data-adtest={isDev ? "on" : undefined}
         data-full-width-responsive={responsive ? "true" : "false"}
         data-testid="adsense"
       />

@@ -14,10 +14,10 @@
   "homepage": "https://github.com/Mr-Kuro/casa-ciclica#readme",
   "license": "UNLICENSED",
   "scripts": {
-    "dev": "vite",
+    "dev": "VITE_ENV=dev vite",
     "build": "VITE_ENV=prod vite build",
     "build:dev": "VITE_ENV=dev vite build",
-    "preview": "vite preview",
+    "preview": "ENV_VITE_ENV=prod vite preview",
     "test": "vitest run",
     "check:orphans": "node scripts/check-orphans.mjs"
   },

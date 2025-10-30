@@ -46,6 +46,14 @@ npm run build
 
 Após o build, a pasta `dist` será publicada automaticamente. O arquivo `vercel.json` garante fallback de rotas SPA.
 
+### Arquivo `ads.txt`
+
+Para que o arquivo `ads.txt` seja incluído no build e disponibilizado na raiz do deploy (exigência do Google AdSense), ele deve estar dentro da pasta `public/` na raiz do projeto. O Vite copia todo o conteúdo de `public` para `dist` mantendo a mesma estrutura. Se `ads.txt` estiver fora de `public`, ele não será emitido no build.
+
+Local atual: `public/ads.txt` → após `npm run build` ficará em `dist/ads.txt`.
+
+Se alterar o conteúdo, basta rodar um novo build; não é necessário configurar plugins adicionais.
+
 ## Estrutura (Atual - Atomic Design em progresso)
 
 Migramos de uma estrutura MVC + `views/components` para camadas atômicas:
