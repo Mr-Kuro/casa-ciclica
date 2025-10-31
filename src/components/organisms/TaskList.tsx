@@ -579,8 +579,8 @@ export const TaskList: React.FC<Props> = ({
             onChange();
             push({
               message: t.ativa
-                ? LABELS.feedback.toastTarefaDesativada
-                : LABELS.feedback.toastTarefaReativada,
+                ? LABELS.feedback.toastTarefaReativada
+                : LABELS.feedback.toastTarefaDesativada,
               type: t.ativa ? "warning" : "success",
             });
           }}
