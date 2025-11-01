@@ -8,13 +8,11 @@ import { loadUIPrefs, saveUIPrefs } from "@utils/uiPrefs";
 import { useTaskCounts } from "@hooks/useTaskCounts";
 import { Link } from "react-router-dom";
 
-export interface HomeTemplateProps {
+export interface HomeProps {
   initialFiltro?: "HOJE" | "SEMANA" | "QUINZENA" | "MES";
 }
 
-export const HomeTemplate: React.FC<HomeTemplateProps> = ({
-  initialFiltro = "HOJE",
-}) => {
+export const Home: React.FC<HomeProps> = ({ initialFiltro = "HOJE" }) => {
   const [tarefas, setTarefas] = useState<Task[]>(taskController.listar());
   const [filtro, setFiltro] = useState<"HOJE" | "SEMANA" | "QUINZENA" | "MES">(
     () => {

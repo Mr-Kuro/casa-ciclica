@@ -7,7 +7,7 @@ import { useToast } from "@molecules/toast/ToastContext";
 import ResponsiveTable, {
   TableColumn,
   TableGroup,
-} from "../../components/molecules/ResponsiveTable";
+} from "../components/molecules/ResponsiveTable";
 
 interface Grupo {
   titulo: string;

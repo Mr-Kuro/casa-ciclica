@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { taskController } from "../../controllers/TaskController";
-import { calcularProximaData } from "../../utils/recurrence";
-import { Recurrence } from "../../types";
-import { LABELS } from "../../constants/strings";
+import { taskController } from "../controllers/TaskController";
+import { calcularProximaData } from "../utils/recurrence";
+import { Recurrence } from "../types";
+import { LABELS } from "../constants/strings";
 import {
   diasDesdeCriacao,
   diasDesdeUltimaConclusao,
   diasAteProxima,
   descricaoRecorrencia,
   statusRecorrencia,
-} from "../../utils/analytics";
+} from "../utils/analytics";
 
 export const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

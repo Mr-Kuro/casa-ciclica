@@ -1,11 +1,13 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { Home } from "../views/pages/Home";
-import { TaskDetail } from "../views/pages/TaskDetail";
-import { Settings } from "../views/pages/Settings";
-import { NovaTarefa } from "../views/pages/NovaTarefa";
-import { Desativadas } from "../views/pages/Desativadas";
-import { Concluidas } from "../views/pages/Concluidas";
+import {
+  Home,
+  TaskDetail,
+  Settings,
+  NovaTarefa,
+  Desativadas,
+  Concluidas,
+} from "../pages";
 
 // Nova estrutura de histórico: /historico/concluidas e /historico/desativadas
 // Mantemos redirect da rota antiga /desativadas para /historico/desativadas

@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { timeAgo } from "../../utils/timeAgo";
-import { taskController } from "../../controllers/TaskController";
-import { Task } from "../../models/Task";
+import { timeAgo } from "../utils/timeAgo";
+import { taskController } from "../controllers/TaskController";
+import { Task } from "../models/Task";
 import { Link } from "react-router-dom";
-import { naoConcluidaHoje } from "../../utils/recurrence";
-import { LABELS } from "../../constants/strings";
+import { naoConcluidaHoje } from "../utils/recurrence";
+import { LABELS } from "../constants/strings";
 import ResponsiveTable, {
   TableColumn,
   TableGroup,
-} from "../../components/molecules/ResponsiveTable";
+} from "../components/molecules/ResponsiveTable";
 
 interface Grupo {
   titulo: string;

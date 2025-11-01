@@ -1,8 +1,8 @@
 import React from "react";
-import { LocalStorageService } from "../../services/storage/LocalStorageService";
+import { LocalStorageService } from "../services/storage/LocalStorageService";
 import { Link, useNavigate } from "react-router-dom";
 import { taskController } from "@controllers/TaskController";
-import { LABELS } from "../../constants/strings";
+import { LABELS } from "../constants/strings";
 import { useToast } from "@molecules/toast/ToastContext";
 // Removido reset de seeds por ser redundante com limpeza total
 
